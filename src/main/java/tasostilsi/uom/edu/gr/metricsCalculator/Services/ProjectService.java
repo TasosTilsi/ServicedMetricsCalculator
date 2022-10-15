@@ -4,9 +4,9 @@ import ch.qos.logback.classic.Logger;
 import infrastructure.Project;
 import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class ProjectService implements IProjectService {
 
     private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ProjectService.class);
@@ -16,14 +16,9 @@ public class ProjectService implements IProjectService {
 
     public Project getProject() {
         LOGGER.info("Reply: " + JSONSerializer.serializeObject(this.project));
+        LOGGER.info("You must post a project url first");
         return this.project;
     }
-
-    /*public Project setProject(Project project) {
-        this.project = project;
-        LOGGER.info("Reply: " + JSONSerializer.serializeObject(this.project));
-        return this.project;
-    }*/
 
     public Project setProject(String url) {
         this.project = new Project(url);

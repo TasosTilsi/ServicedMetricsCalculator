@@ -17,9 +17,9 @@ public class ProjectController {
 
     private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ProjectController.class);
 
+    @Autowired
     private final ProjectService projectService;
 
-    @Autowired
     public ProjectController(ProjectService projectService) {
         this.projectService = projectService;
     }
