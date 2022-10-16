@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers;
 
+import ch.qos.logback.classic.Logger;
 import data.Globals;
 import db.InsertToDB;
 import infrastructure.Project;
@@ -16,6 +17,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.slf4j.LoggerFactory;
+import tasostilsi.uom.edu.gr.metricsCalculator.Services.ProjectService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -24,6 +27,8 @@ import java.io.IOException;
 import java.util.*;
 
 public class GitUtils {
+
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(GitUtils.class);
 
     private static GitUtils instance;
 
@@ -43,7 +48,7 @@ public class GitUtils {
      * @param project         the project we are referring to
      * @param currentRevision the current revision we are analysing
      */
-    public static void insertData(Project project, Revision currentRevision) {
+    public void insertData(Project project, Revision currentRevision) {
         if (Globals.getJavaFiles().isEmpty())
             InsertToDB.insertEmpty(project, currentRevision);
         else {
@@ -59,7 +64,7 @@ public class GitUtils {
      * @param existingCommitIds the list containing the existing commits
      * @return the result of the subtraction
      */
-    public static List<String> findDifferenceInCommitIds(List<String> receivedCommitIds, List<String> existingCommitIds) {
+    public List<String> findDifferenceInCommitIds(List<String> receivedCommitIds, List<String> existingCommitIds) {
         List<String> diffCommitIds = new ArrayList<>(receivedCommitIds);
         if (Objects.nonNull(existingCommitIds))
             diffCommitIds.removeAll(existingCommitIds);
@@ -67,43 +72,11 @@ public class GitUtils {
     }
 
     /**
-     * Deletes source code (if exists) before the analysis
-     * procedure.
-     *
-     * @param file the directory that the repository will be cloned
-     */
-    public static void deleteSourceCode(File file) throws NullPointerException {
-        if (file.isDirectory()) {
-            /* If directory is empty, then delete it */
-            if (Objects.requireNonNull(file.list()).length == 0)
-                file.delete();
-            else {
-                /* List all the directory contents */
-                String[] files = file.list();
-
-                for (String temp : files) {
-                    /* Construct the file structure */
-                    File fileDelete = new File(file, temp);
-                    /* Recursive delete */
-                    deleteSourceCode(fileDelete);
-                }
-
-                /* Check the directory again, if empty then delete it */
-                if (Objects.requireNonNull(file.list()).length == 0)
-                    file.delete();
-            }
-        } else {
-            /* If file, then delete it */
-            file.delete();
-        }
-    }
-
-    /**
      * Gets all commit ids for a specific git repo.
      *
      * @param git the git object
      */
-    public static List<String> getCommitIds(Git git) {
+    public List<String> getCommitIds(Git git) {
         List<String> commitIds = new ArrayList<>();
         try {
             String treeName = getHeadName(git.getRepository());
@@ -114,7 +87,7 @@ public class GitUtils {
         return commitIds;
     }
 
-    public static String getHeadName(Repository repo) {
+    private String getHeadName(Repository repo) {
         String result = null;
         try {
             ObjectId id = repo.resolve(Constants.HEAD);
@@ -130,7 +103,7 @@ public class GitUtils {
      *
      * @param git the git object
      */
-    public static PrincipalResponseEntity[] getResponseEntitiesAtCommit(Git git, String sha) {
+    public PrincipalResponseEntity[] getResponseEntitiesAtCommit(Git git, String sha) {
         RevCommit headCommit;
         try {
             headCommit = git.getRepository().parseCommit(ObjectId.fromString(sha));
@@ -175,7 +148,14 @@ public class GitUtils {
      * @param project the project we are referring to
      * @return a git object
      */
-    public static Git cloneRepository(Project project, String accessToken) {
+    public Git cloneRepository(Project project, String accessToken) {
+
+        try {
+            Utils.getInstance().deleteSourceCode(new File(project.getClonePath()));
+        } catch (Exception ignored) {
+            LOGGER.warn(ignored.toString());
+        }
+
         try {
             if (Objects.isNull(accessToken))
                 return Git.cloneRepository()
@@ -202,11 +182,11 @@ public class GitUtils {
      * @param currentRevision the revision we are checking out to
      * @param git             a git object
      */
-    public static void checkout(Project project, String accessToken, Revision currentRevision, Git git) throws GitAPIException {
+    public void checkout(Project project, String accessToken, Revision currentRevision, Git git) throws GitAPIException {
         try {
             git.checkout().setCreateBranch(true).setName("version" + currentRevision.getRevisionCount()).setStartPoint(currentRevision.getSha()).call();
         } catch (CheckoutConflictException e) {
-            deleteSourceCode(new File(project.getClonePath()));
+            Utils.getInstance().deleteSourceCode(new File(project.getClonePath()));
             cloneRepository(project, accessToken);
             git.checkout().setCreateBranch(true).setName("version" + currentRevision.getRevisionCount()).setStartPoint(currentRevision.getSha()).call();
         }

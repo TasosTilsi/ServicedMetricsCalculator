@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers;
 
+import ch.qos.logback.classic.Logger;
 import data.Globals;
 import infrastructure.Project;
 import infrastructure.Revision;
@@ -7,12 +8,16 @@ import infrastructure.interest.JavaFile;
 import infrastructure.newcode.DiffEntry;
 import infrastructure.newcode.PrincipalResponseEntity;
 import metricsCalculator.calculator.MetricsCalculator;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Utils {
+
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(Utils.class);
 
     private static Utils instance;
 
@@ -31,7 +36,7 @@ public class Utils {
      *
      * @param diffEntries the modified java files (new, modified, deleted)
      */
-    public static Set<JavaFile> removeDeletedFiles(Revision currentRevision, Set<DiffEntry> diffEntries) {
+    public Set<JavaFile> removeDeletedFiles(Revision currentRevision, Set<DiffEntry> diffEntries) {
         Set<JavaFile> deletedFiles = ConcurrentHashMap.newKeySet();
         diffEntries
                 .forEach(diffEntry -> {
@@ -47,7 +52,7 @@ public class Utils {
      * @param filePath the file path
      * @return the java file (JavaFile) whose path matches the given one
      */
-    public static JavaFile getAlreadyDefinedFile(String filePath) {
+    public JavaFile getAlreadyDefinedFile(String filePath) {
         for (JavaFile jf : Globals.getJavaFiles())
             if (jf.getPath().equals(filePath))
                 return jf;
@@ -61,7 +66,7 @@ public class Utils {
      * @param currentRevision the revision we are analysing
      * @param entity          the entity with the list containing the diff entries received.
      */
-    public static void setMetrics(Project project, Revision currentRevision, PrincipalResponseEntity entity) {
+    public void setMetrics(Project project, Revision currentRevision, PrincipalResponseEntity entity) {
         if (!entity.getDeleteDiffEntries().isEmpty())
             removeDeletedFiles(currentRevision, entity.getDeleteDiffEntries());
         if (!entity.getAddDiffEntries().isEmpty())
@@ -83,7 +88,7 @@ public class Utils {
      *
      * @param project the project we are referring to
      */
-    public static void setMetrics(Project project, Revision currentRevision) {
+    public void setMetrics(Project project, Revision currentRevision) {
         MetricsCalculator mc = new MetricsCalculator(new metricsCalculator.infrastructure.entities.Project(project.getClonePath()));
         int resultCode = mc.start();
         if (resultCode == -1)
@@ -124,7 +129,7 @@ public class Utils {
      * @param currentRevision the revision we are analysing
      * @param jfs             the list of java files
      */
-    public static void setMetrics(Project project, Revision currentRevision, Set<String> jfs) {
+    public void setMetrics(Project project, Revision currentRevision, Set<String> jfs) {
         if (jfs.isEmpty())
             return;
         MetricsCalculator mc = new MetricsCalculator(new metricsCalculator.infrastructure.entities.Project(project.getClonePath()));
@@ -170,7 +175,7 @@ public class Utils {
      * @param calcEntries entries taken from MetricsCalculator's results
      * @param jf          the java file we are registering metrics to
      */
-    public static void registerMetrics(String[] calcEntries, JavaFile jf, List<String> classNames) {
+    private void registerMetrics(String[] calcEntries, JavaFile jf, List<String> classNames) {
         jf.getQualityMetrics().setClassesNum(Integer.parseInt(calcEntries[1]));
         jf.getQualityMetrics().setWMC(Double.parseDouble(calcEntries[2]));
         jf.getQualityMetrics().setDIT(Integer.parseInt(calcEntries[3]));
@@ -186,5 +191,37 @@ public class Utils {
         jf.getQualityMetrics().setSIZE2(Integer.parseInt(calcEntries[13]));
         for (String className : classNames)
             jf.addClassName(className);
+    }
+
+    /**
+     * Deletes source code (if exists) before the analysis
+     * procedure.
+     *
+     * @param file the directory that the repository will be cloned
+     */
+    public void deleteSourceCode(File file) throws NullPointerException {
+        if (file.isDirectory()) {
+            /* If directory is empty, then delete it */
+            if (Objects.requireNonNull(file.list()).length == 0)
+                file.delete();
+            else {
+                /* List all the directory contents */
+                String[] files = file.list();
+
+                for (String temp : files) {
+                    /* Construct the file structure */
+                    File fileDelete = new File(file, temp);
+                    /* Recursive delete */
+                    deleteSourceCode(fileDelete);
+                }
+
+                /* Check the directory again, if empty then delete it */
+                if (Objects.requireNonNull(file.list()).length == 0)
+                    file.delete();
+            }
+        } else {
+            /* If file, then delete it */
+            file.delete();
+        }
     }
 }

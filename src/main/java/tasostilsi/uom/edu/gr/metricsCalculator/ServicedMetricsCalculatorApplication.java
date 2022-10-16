@@ -13,15 +13,15 @@ import java.net.InetAddress;
 
 @SpringBootApplication
 @RestController
-public class MetricsCalculatorApplication {
+public class ServicedMetricsCalculatorApplication {
 
     @Autowired
     Environment environment;
 
-    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(MetricsCalculatorApplication.class);
+    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ServicedMetricsCalculatorApplication.class);
 
     public static void main(String[] args) {
-        SpringApplication.run(MetricsCalculatorApplication.class, args);
+        SpringApplication.run(ServicedMetricsCalculatorApplication.class, args);
     }
 
     @GetMapping

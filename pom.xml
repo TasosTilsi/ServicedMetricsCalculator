@@ -116,7 +116,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
-                            <mainClass>tasostilsi.uom.edu.gr.metricsCalculator.MetricsCalculatorApplication</mainClass>
+                            <mainClass>tasostilsi.uom.edu.gr.metricsCalculator.ServicedMetricsCalculatorApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.ProjectService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 @RestController
 @RequestMapping(path = "api/v1/project")
 public class ProjectController {
@@ -40,7 +43,7 @@ public class ProjectController {
     @PostMapping(
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
     )
-    public ResponseEntity<Project> setProject(@RequestParam("url") String url) {
+    public ResponseEntity<Project> setProject(@Valid @NotNull @RequestParam("url") String url) {
         Project returnValue = projectService.setProject(url);
         LOGGER.info("HttpRequest: setProject");
         return new ResponseEntity<>(returnValue, HttpStatus.OK);
