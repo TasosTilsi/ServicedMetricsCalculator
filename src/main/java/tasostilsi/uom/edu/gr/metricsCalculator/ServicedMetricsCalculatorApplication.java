@@ -34,7 +34,7 @@ public class ServicedMetricsCalculatorApplication {
 
         LOGGER.info(url);
 
-        String hello = "<!DOCTYPE html>\n" +
+        return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "  <head>\n" +
                 "    <meta http-equiv=\"refresh\" content=\"1; url='" + url + "'\" />\n" +
@@ -43,7 +43,6 @@ public class ServicedMetricsCalculatorApplication {
                 "    <p>Please follow <a href=" + url + ">this link</a> if the auto redirector won't work properly.</p>\n" +
                 "  </body>\n" +
                 "</html>";
-        return hello;
     }
 
 }

@@ -23,11 +23,11 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    /*@ExceptionHandler(value = {MissingServletRequestParameterException.class})
-    public ResponseEntity<Object> handleBadRequestException(MissingServletRequestParameterException ex, WebRequest request) {
+    @ExceptionHandler(value = {NullPointerException.class})
+    public ResponseEntity<Object> handleBadRequestException(NullPointerException ex, WebRequest request) {
         ErrorMessage errorMessage = new ErrorMessage(ex, request);
         LOGGER.error(JSONSerializer.serializeObject(errorMessage));
         return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.BAD_REQUEST);
-    }*/
+    }
 
 }

@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 public class ErrorMessage {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private Date timestamp;
     private String message;
     private String cause;

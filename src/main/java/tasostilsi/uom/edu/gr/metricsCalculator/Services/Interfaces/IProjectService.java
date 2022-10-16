@@ -1,4 +1,4 @@
-package tasostilsi.uom.edu.gr.metricsCalculator.Services;
+package tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces;
 
 import infrastructure.Project;
 
