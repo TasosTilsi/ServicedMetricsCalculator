@@ -14,35 +14,34 @@ import java.net.InetAddress;
 @SpringBootApplication
 @RestController
 public class ServicedMetricsCalculatorApplication {
-
-    @Autowired
-    Environment environment;
-
-    private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ServicedMetricsCalculatorApplication.class);
-
-    public static void main(String[] args) {
-        SpringApplication.run(ServicedMetricsCalculatorApplication.class, args);
-    }
-
-    @GetMapping
-    public String welcomePage() {
-        LOGGER.info("you called hello (/) get method");
-
-        String host = InetAddress.getLoopbackAddress().getHostAddress();
-        String port = environment.getProperty("local.server.port");
-        String url = "http://" + host + ":" + port + "/api/docs/swagger-ui/index.html";
-
-        LOGGER.info(url);
-
-        return "<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "  <head>\n" +
-                "    <meta http-equiv=\"refresh\" content=\"1; url='" + url + "'\" />\n" +
-                "  </head>\n" +
-                "  <body>\n" +
-                "    <p>Please follow <a href=" + url + ">this link</a> if the auto redirector won't work properly.</p>\n" +
-                "  </body>\n" +
-                "</html>";
-    }
-
+	
+	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ServicedMetricsCalculatorApplication.class);
+	@Autowired
+	Environment environment;
+	
+	public static void main(String[] args) {
+		SpringApplication.run(ServicedMetricsCalculatorApplication.class, args);
+	}
+	
+	@GetMapping
+	public String welcomePage() {
+		LOGGER.info("you called hello (/) get method");
+		
+		String host = InetAddress.getLoopbackAddress().getHostAddress();
+		String port = environment.getProperty("local.server.port");
+		String url = "http://" + host + ":" + port + "/api/docs/swagger-ui/index.html";
+		
+		LOGGER.info(url);
+		
+		return "<!DOCTYPE html>\n" +
+				"<html>\n" +
+				"  <head>\n" +
+				"    <meta http-equiv=\"refresh\" content=\"1; url='" + url + "'\" />\n" +
+				"  </head>\n" +
+				"  <body>\n" +
+				"    <p>Please follow <a href=" + url + ">this link</a> if the auto redirector won't work properly.</p>\n" +
+				"  </body>\n" +
+				"</html>";
+	}
+	
 }

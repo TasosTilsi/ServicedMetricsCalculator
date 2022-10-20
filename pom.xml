@@ -40,12 +40,12 @@
             <artifactId>jackson-dataformat-xml</artifactId>
         </dependency>
 
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.github.javaparser</groupId>-->
-        <!--            <artifactId>javaparser-symbol-solver-core</artifactId>-->
-        <!--            <version>3.24.4</version>-->
-        <!--        </dependency>-->
+                <!-- https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core -->
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-symbol-solver-core</artifactId>
+            <version>3.24.7</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
@@ -78,13 +78,6 @@
             <version>1.6.11</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-war-plugin</artifactId>
-            <version>3.3.2</version>
-            <type>maven-plugin</type>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -108,32 +101,6 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>war-assembly.xml</descriptor>
-                    </descriptors>
-                    <finalName>${project.name}-${project.version}</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <archive>
-                        <manifest>
-                            <mainClass>tasostilsi.uom.edu.gr.metricsCalculator.ServicedMetricsCalculatorApplication</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
