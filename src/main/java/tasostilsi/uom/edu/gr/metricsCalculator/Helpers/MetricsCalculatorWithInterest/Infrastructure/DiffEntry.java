@@ -7,6 +7,7 @@ public class DiffEntry {
 	private String oldFilePath;
 	private String newFilePath;
 	private String changeType;
+	
 	public DiffEntry(String oldFilePath, String newFilePath, String changeType) {
 		this.oldFilePath = oldFilePath;
 		this.newFilePath = newFilePath;

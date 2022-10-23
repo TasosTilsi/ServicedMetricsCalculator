@@ -1,8 +1,8 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.Kappa;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.TDInterest;
 
 import java.util.HashSet;
@@ -23,6 +23,9 @@ public class CalculatedJavaFile {
 		this.path = path;
 		this.qualityMetrics = new QualityMetrics();
 		this.classes = classes;
+//		this.classes.forEach(c -> {
+//			classesNames.add(c.getQualifiedName());
+//		});
 		this.interest = new TDInterest(this);
 	}
 	

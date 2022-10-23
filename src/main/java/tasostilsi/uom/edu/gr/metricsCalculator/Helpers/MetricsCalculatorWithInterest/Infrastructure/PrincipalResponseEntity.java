@@ -11,6 +11,7 @@ public class PrincipalResponseEntity {
 	private Set<DiffEntry> modifyDiffEntries;
 	private Set<DiffEntry> deleteDiffEntries;
 	private Set<DiffEntry> renameDiffEntries;
+	
 	public PrincipalResponseEntity(String sha, Integer commitTime, Set<DiffEntry> addDiffEntries, Set<DiffEntry> modifyDiffEntries, Set<DiffEntry> renameDiffEntries, Set<DiffEntry> deleteDiffEntries) {
 		this.sha = sha;
 		this.commitTime = commitTime;
