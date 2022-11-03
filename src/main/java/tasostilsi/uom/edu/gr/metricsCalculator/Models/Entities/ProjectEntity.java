@@ -1,6 +1,7 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -9,8 +10,8 @@ import java.util.Set;
 @Table(name = "project")
 public class ProjectEntity {
 	
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "project_id", nullable = false)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false)
 	private Long id;
 	@Id
 	@Column(name = "url", nullable = false)

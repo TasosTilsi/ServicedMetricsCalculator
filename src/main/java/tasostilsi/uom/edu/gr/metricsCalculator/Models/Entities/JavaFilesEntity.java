@@ -29,6 +29,6 @@ public class JavaFilesEntity {
 	private final Set<ClassesEntity> classesEntities = new java.util.LinkedHashSet<>();
 	
 	@OneToOne
-	@JoinColumn(name = "td_interest")
+	@JoinColumn(name = "kappa")
 	private KappaEntity kappaEntity;
 }
