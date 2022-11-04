@@ -10,6 +10,10 @@ public class QualityMetricsEntity {
 	@Column(name = "id", nullable = false)
 	private Long id;
 	
+	@OneToOne
+	@JoinColumn(name = "revision_entity_id")
+	private RevisionEntity revisionEntity;
+	
 	@Column(name = "classesNum")
 	private Integer classesNum;
 	
@@ -39,6 +43,14 @@ public class QualityMetricsEntity {
 	private Integer SIZE2;
 	@Column(name = "oldSIZE1")
 	private Integer oldSIZE1;
+	
+	public RevisionEntity getRevisionEntity() {
+		return revisionEntity;
+	}
+	
+	public void setRevisionEntity(RevisionEntity revisionEntity) {
+		this.revisionEntity = revisionEntity;
+	}
 	
 	public Long getId() {
 		return id;

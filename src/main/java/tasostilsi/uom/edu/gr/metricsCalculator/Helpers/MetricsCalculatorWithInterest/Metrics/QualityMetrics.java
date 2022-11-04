@@ -20,7 +20,6 @@ public class QualityMetrics {
 	private Double CBO;
 	private Integer SIZE1;
 	private Integer SIZE2;
-	
 	private Integer oldSIZE1;
 	
 	public QualityMetrics() {

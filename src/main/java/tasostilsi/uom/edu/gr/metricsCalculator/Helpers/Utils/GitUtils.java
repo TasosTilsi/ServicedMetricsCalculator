@@ -40,21 +40,6 @@ public class GitUtils {
 	}
 	
 	/**
-	 * Inserts the data of the first revision (in list).
-	 *
-	 * @param project         the project we are referring to
-	 * @param currentRevision the current revision we are analysing
-	 */
-//	public void insertData(Project project, Revision currentRevision) {
-//		if (Globals.getJavaFiles().isEmpty())
-//			InsertToDB.insertEmpty(project, currentRevision);
-//		else {
-//			Globals.getJavaFiles().forEach(jf -> InsertToDB.insertFileToDatabase(project, jf, currentRevision));
-//			Globals.getJavaFiles().forEach(jf -> InsertToDB.insertMetricsToDatabase(project, jf, currentRevision));
-//		}
-//	}
-	
-	/**
 	 * Performs a set subtraction between the received commits and the existing ones (in database).
 	 *
 	 * @param receivedCommitIds the list containing the received commits

@@ -32,6 +32,21 @@ public class Utils {
 	}
 	
 	/**
+	 * Inserts the data of the first revision (in list).
+	 *
+	 * @param project         the project we are referring to
+	 * @param currentRevision the current revision we are analysing
+	 */
+	public void insertData(Project project, Revision currentRevision) {
+		if (Globals.getJavaFiles().isEmpty()) {
+//			InsertToDB.insertEmpty(project, currentRevision);  //connection to db need here
+		} else {
+//			Globals.getJavaFiles().forEach(jf -> InsertToDB.insertFileToDatabase(project, jf, currentRevision)); //connection to db need here
+//			Globals.getJavaFiles().forEach(jf -> InsertToDB.insertMetricsToDatabase(project, jf, currentRevision));  //connection to db need here
+		}
+	}
+	
+	/**
 	 * Removes those files that are marked as 'DELETED' (new code's call)
 	 *
 	 * @param diffEntries the modified java files (new, modified, deleted)
