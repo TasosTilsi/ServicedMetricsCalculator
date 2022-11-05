@@ -1,7 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 
 import javax.persistence.*;
 import java.util.Set;

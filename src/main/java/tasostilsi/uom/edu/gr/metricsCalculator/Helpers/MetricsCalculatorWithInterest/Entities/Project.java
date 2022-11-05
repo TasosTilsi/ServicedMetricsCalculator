@@ -1,5 +1,7 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.File;
 import java.util.Objects;
 import java.util.Set;
@@ -7,10 +9,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Project {
 	
+	@JsonProperty("id")
+	private Long id;
+	@JsonProperty("url")
 	private String url;
+	@JsonProperty("owner")
 	private String owner;
+	@JsonProperty("repo")
 	private String repo;
+	@JsonProperty("clonePath")
 	private String clonePath;
+	@JsonProperty("javaFiles")
 	private Set<CalculatedJavaFile> javaFiles;
 	
 	public Project() {
@@ -120,5 +129,13 @@ public class Project {
 	
 	public void setJavaFiles(Set<CalculatedJavaFile> javaFiles) {
 		this.javaFiles = javaFiles;
+	}
+	
+	public Long getId() {
+		return id;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

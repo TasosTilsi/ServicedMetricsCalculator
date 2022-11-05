@@ -1,11 +1,10 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics;
 
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.QualityMetricsEntity;
 
 import java.util.Objects;
 
-public class QualityMetrics extends QualityMetricsEntity {
+public class QualityMetrics {
 	
 	private Revision revision;
 	private Integer classesNum;

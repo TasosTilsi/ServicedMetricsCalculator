@@ -1,11 +1,10 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.ClassesEntity;
 
 import java.util.Objects;
 
-public class CalculatedClass extends ClassesEntity {
+public class CalculatedClass {
 	
 	
 	private String qualifiedName;

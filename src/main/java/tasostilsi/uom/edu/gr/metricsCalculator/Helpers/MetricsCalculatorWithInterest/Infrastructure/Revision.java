@@ -1,10 +1,8 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure;
 
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.RevisionEntity;
-
 import java.util.Objects;
 
-public class Revision extends RevisionEntity {
+public class Revision {
 	private String sha;
 	private Integer revisionCount;
 	

@@ -5,7 +5,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "revision")
-public class RevisionEntity{
+public class RevisionEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", nullable = false, updatable = false)
