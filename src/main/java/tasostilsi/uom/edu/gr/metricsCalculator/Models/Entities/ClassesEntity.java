@@ -2,7 +2,6 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
 
 import javax.persistence.*;
 
@@ -12,7 +11,7 @@ public class ClassesEntity {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "classes_id", nullable = false)
+	@Column(name = "classes_id", nullable = false, updatable = false)
 	private Long id;
 	
 	@Column(name = "name", nullable = false)
@@ -22,7 +21,6 @@ public class ClassesEntity {
 	@JoinColumn(name = "java_file_id")
 	@JsonIgnore
 	private JavaFilesEntity javaFilesEntity;
-	
 	
 	@OneToOne
 	@JoinColumn(name = "quality_metrics_entity_id")
@@ -35,6 +33,5 @@ public class ClassesEntity {
 	public void setQualityMetricsEntity(QualityMetricsEntity qualityMetricsEntity) {
 		this.qualityMetricsEntity = qualityMetricsEntity;
 	}
-	
 	
 }

@@ -2,8 +2,9 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInt
 
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.KappaEntity;
 
-public class Kappa {
+public class Kappa extends KappaEntity {
 	
 	private final CalculatedJavaFile javaFile;
 	private Double value;

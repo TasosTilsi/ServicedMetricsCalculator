@@ -1,18 +1,16 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Services;
 
 import ch.qos.logback.classic.Logger;
-import jdk.jshell.execution.Util;
 import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.GitUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.JavaFilesEntity;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.ProjectEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
@@ -33,22 +31,20 @@ public class AnalysisService implements IAnalysisService {
 	}
 	
 	@Override
-	public void startNewAnalysis(String gitUrl) throws Exception{
+	public void startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
 		
-		String accessToken = null;
-		project = new Project(gitUrl);
-		LOGGER.info("Project : " + JSONSerializer.serializeObject(project));
+		String accessToken = newAnalysisDTO.getAccessToken();
+		project = new Project(newAnalysisDTO.getGitUrl());
 		
 		ProjectEntity projectEntity = new ProjectEntity();
-		projectEntity.setId(Math.abs(new Random().nextLong()));
-		projectEntity.setClonePath(project.getClonePath());
 		projectEntity.setGitUrl(project.getUrl());
-		projectEntity.setRepo(project.getRepo());
 		projectEntity.setOwner(project.getOwner());
-		Set<JavaFilesEntity> javaFilesEntities = new HashSet<>();
-//		javaFilesEntities.addAll(project.getJavaFiles());
+		projectEntity.setRepo(project.getRepo());
+		projectEntity.setClonePath(project.getClonePath());
 		
-		LOGGER.debug("Cloning repository from: " + project.getRepo() + " into " + project.getClonePath());
+		LOGGER.info("Project : " + JSONSerializer.serializeObject(project));
+		
+		LOGGER.info("Cloning repository from: " + project.getRepo() + " into " + project.getClonePath());
 		Git git = GitUtils.getInstance().cloneRepository(project, accessToken);
 		
 		List<String> diffCommitIds = new ArrayList<>();
@@ -65,7 +61,7 @@ public class AnalysisService implements IAnalysisService {
 		Optional<ProjectEntity> existsInDb;
 		Revision currentRevision = new Revision("", 0);
 		
-		existsInDb = projectRepository.findById(projectEntity.getGitUrl());
+		existsInDb = projectRepository.findByUrl(project.getUrl());
 		if (existsInDb.isPresent()) {
 			LOGGER.error("EXISTS IN DB");
 			/*List<String> existingCommitIds = getExistingCommitIds(project); // db connection to getExistingCommitIds

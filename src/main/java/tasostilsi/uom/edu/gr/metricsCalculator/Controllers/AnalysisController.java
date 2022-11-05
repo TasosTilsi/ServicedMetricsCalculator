@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.AnalysisService;
 
 @RestController
@@ -18,8 +19,8 @@ public class AnalysisController {
 	private AnalysisService analysisService;
 	
 	@PostMapping
-	public ResponseEntity<String> makeNewAnalysis(@RequestBody String gitUrl) {
-		analysisService.startNewAnalysis(gitUrl);
-		return new ResponseEntity<>("New Analysis for " + gitUrl + " has started", HttpStatus.OK);
+	public ResponseEntity<String> makeNewAnalysis(@RequestBody NewAnalysisDTO newAnalysisDTO) throws Exception {
+		analysisService.startNewAnalysis(newAnalysisDTO);
+		return new ResponseEntity<>("New Analysis for " + newAnalysisDTO.getGitUrl() + " has started with " + newAnalysisDTO.getAccessToken() + " access token", HttpStatus.OK);
 	}
 }

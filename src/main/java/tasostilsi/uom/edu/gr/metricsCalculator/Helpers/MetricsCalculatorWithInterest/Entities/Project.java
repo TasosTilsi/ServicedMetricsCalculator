@@ -13,6 +13,10 @@ public class Project {
 	private String clonePath;
 	private Set<CalculatedJavaFile> javaFiles;
 	
+	public Project() {
+	
+	}
+	
 	public Project(String url, String clonePath) {
 		this.url = url;
 		this.owner = getRepositoryOwner();

@@ -10,12 +10,13 @@ import java.util.Set;
 @Table(name = "project")
 public class ProjectEntity {
 	
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
-	private Long id;
 	@Id
-	@Column(name = "url", nullable = false)
-	private String gitUrl;
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "id", nullable = false, updatable = false)
+	private Long id;
+	
+	@Column(name = "url", nullable = false, unique = true)
+	private String url;
 	@Column(name = "owner", nullable = false)
 	private String owner;
 	@Column(name = "repo", nullable = false)
@@ -36,11 +37,11 @@ public class ProjectEntity {
 	}
 	
 	public String getGitUrl() {
-		return gitUrl;
+		return url;
 	}
 	
-	public void setGitUrl(String gitUrl) {
-		this.gitUrl = gitUrl;
+	public void setGitUrl(String url) {
+		this.url = url;
 	}
 	
 	public String getOwner() {

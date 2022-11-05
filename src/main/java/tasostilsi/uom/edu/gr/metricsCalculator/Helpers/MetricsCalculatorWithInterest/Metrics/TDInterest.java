@@ -2,10 +2,11 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInt
 
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.TDInterestEntity;
 
 import java.util.*;
 
-public class TDInterest {
+public class TDInterest extends TDInterestEntity {
 	
 	private final Double HOURLY_WAGE = 39.44;
 	private final CalculatedJavaFile javaFile;

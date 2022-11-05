@@ -25,7 +25,6 @@ public class ProjectService implements IProjectService {
 	}
 	
 	
-	
 	public Project getProject() {
 		LOGGER.info("Reply: " + JSONSerializer.serializeObject(this.project));
 		
