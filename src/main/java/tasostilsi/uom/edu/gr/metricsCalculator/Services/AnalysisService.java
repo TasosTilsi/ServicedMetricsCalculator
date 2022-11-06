@@ -17,6 +17,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsReposi
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AnalysisService implements IAnalysisService {
@@ -63,14 +64,16 @@ public class AnalysisService implements IAnalysisService {
 		existsInDb = projectRepository.findByUrl(project.getUrl());
 		if (existsInDb.isPresent()) {
 			LOGGER.info("EXISTS IN DB");
-			Long projectId = projectRepository.findIdByUrl(project.getUrl()).orElseThrow();
-			List<String> existingCommitIds = javaFilesRepository.findDistinctRevisionShaByProjectId(projectId);// db connection to getExistingCommitIds
+//			Long projectId = projectRepository.findByUrl(project.getUrl()).orElseThrow().getId();
+			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
+			List<String> existingCommitIds = javaFilesRepository.findDistinctRevisionShaByProjectId(projectId).stream().map(file -> file.getK().getRevision().getSha()).collect(Collectors.toList());// db connection to getExistingCommitIds
+			// db connection to getExistingCommitIds
 			diffCommitIds = GitUtils.getInstance().findDifferenceInCommitIds(commitIds, existingCommitIds);
 			if (!diffCommitIds.isEmpty()) {
-//				String revisionSha = javaFilesRepository.findLastRevisionShaByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
-//				Integer revisionCount = javaFilesRepository.findLastRevisionCountByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
+//				String revisionSha = javaFilesRepository.findDistinctRevisionShaByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
+//				Integer revisionCount = javaFilesRepository.findDistinctRevisionCountByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
 //				currentRevision.setSha(revisionSha); // db connection for getLastRevision
-//				currentRevision.setRevisionCount(revisionCount); // db connection for getLastRevision
+//				currentRevision.setCount(revisionCount); // db connection for getLastRevision
 			} else {
 				throw new Exception("ERROR_TO_BE_DESCRIBED_HERE");
 			}
@@ -79,9 +82,9 @@ public class AnalysisService implements IAnalysisService {
 		if (!existsInDb.isPresent() || new HashSet<>(diffCommitIds).containsAll(commitIds)) {
 			start = 1;
 			Objects.requireNonNull(currentRevision).setSha(Objects.requireNonNull(commitIds.get(0)));
-			Objects.requireNonNull(currentRevision).setRevisionCount(currentRevision.getRevisionCount() + 1);
+			Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1);
 			GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
-			System.out.printf("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getRevisionCount());
+			System.out.printf("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getCount());
 			Utils.getInstance().setMetrics(project, currentRevision);
 			System.out.println("Calculated metrics for all files from first commit!");
 //			InsertToDB.insertProjectToDatabase(project); //connection to db need here
@@ -94,9 +97,9 @@ public class AnalysisService implements IAnalysisService {
 		
 		for (int i = start; i < commitIds.size(); ++i) {
 			Objects.requireNonNull(currentRevision).setSha(commitIds.get(i));
-			currentRevision.setRevisionCount(currentRevision.getRevisionCount() + 1);
+			currentRevision.setCount(currentRevision.getCount() + 1);
 			GitUtils.getInstance().checkout(Objects.requireNonNull(project), accessToken, Objects.requireNonNull(currentRevision), Objects.requireNonNull(git));
-			System.out.printf("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getRevisionCount());
+			System.out.printf("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getCount());
 			try {
 //				PrincipalResponseEntity[] responseEntities = getResponseEntitiesAtCommit(git, currentRevision.getSha());
 //				if (Objects.isNull(responseEntities) || responseEntities.length == 0) {
@@ -111,7 +114,7 @@ public class AnalysisService implements IAnalysisService {
 			} catch (Exception ignored) {
 			}
 		}
-		System.out.printf("Finished analysing %d revisions.\n", Objects.requireNonNull(currentRevision).getRevisionCount());
+		System.out.printf("Finished analysing %d revisions.\n", Objects.requireNonNull(currentRevision).getCount());
 		
 	}
 }

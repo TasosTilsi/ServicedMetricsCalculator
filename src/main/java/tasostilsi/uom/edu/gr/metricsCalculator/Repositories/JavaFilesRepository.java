@@ -5,15 +5,16 @@ import org.springframework.stereotype.Repository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface JavaFilesRepository extends JpaRepository<CalculatedJavaFile, Long> {
 	
-	List<String> findDistinctRevisionShaByProjectId(Long project_id);
+	List<CalculatedJavaFile> findDistinctRevisionShaByProjectId(Long project_id);
 	
-//	Optional<String> findLastRevisionShaByProjectIdOrderByRevisionCountDesc(Long project_id);
-	
-//	Optional<Integer> findLastRevisionCountByProjectIdOrderByRevisionCountDesc(Long project_id);
+	List<CalculatedJavaFile> findDistinctRevisionCountByProjectId(Long project_id);
+
+//	Optional<CalculatedJavaFile> findDistinctRevisionShaByProjectIdOrderByRevisionCountDesc(Long project_id);
+
+//	Optional<CalculatedJavaFile> findDistinctRevisionCountByProjectIdOrderByRevisionCountDesc(Long project_id);
 	
 }

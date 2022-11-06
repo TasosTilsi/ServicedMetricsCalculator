@@ -30,4 +30,44 @@ public class ProjectService implements IProjectService {
 		
 		return projects;
 	}
+	
+	@Override
+	public List<Project> getProjectsByOwner(String owner) {
+		List<Project> projects = projectRepository.findByOwner(owner);
+		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
+		
+		return projects;
+	}
+	
+	@Override
+	public List<Project> getProjectsByRepo(String repo) {
+		List<Project> projects = projectRepository.findByRepo(repo);
+		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
+		
+		return projects;
+	}
+	
+	@Override
+	public Project getProjectById(Long id) {
+		Project project = projectRepository.findById(id).orElseThrow();
+		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+		
+		return project;
+	}
+	
+	@Override
+	public Project getProjectByUrl(String url) {
+		Project project = projectRepository.findByUrl(url).orElseThrow();
+		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+		
+		return project;
+	}
+	
+	@Override
+	public Project getProjectByOwnerAndRepo(String owner, String repo) {
+		Project project = projectRepository.findByOwnerAndRepo(owner, repo).orElseThrow();
+		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+		
+		return project;
+	}
 }

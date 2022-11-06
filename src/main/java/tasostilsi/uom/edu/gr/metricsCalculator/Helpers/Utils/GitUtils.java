@@ -166,11 +166,11 @@ public class GitUtils {
 	 */
 	public void checkout(Project project, String accessToken, Revision currentRevision, Git git) throws GitAPIException {
 		try {
-			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getRevisionCount()).setStartPoint(currentRevision.getSha()).call();
+			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getCount()).setStartPoint(currentRevision.getSha()).call();
 		} catch (CheckoutConflictException e) {
 			Utils.getInstance().deleteSourceCode(new File(project.getClonePath()));
 			cloneRepository(project, accessToken);
-			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getRevisionCount()).setStartPoint(currentRevision.getSha()).call();
+			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getCount()).setStartPoint(currentRevision.getSha()).call();
 		}
 	}
 	

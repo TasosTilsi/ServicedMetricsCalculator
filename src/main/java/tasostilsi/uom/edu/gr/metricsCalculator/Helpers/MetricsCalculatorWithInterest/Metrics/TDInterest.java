@@ -12,26 +12,11 @@ import java.util.*;
 
 @Data
 @NoArgsConstructor
-//@Entity
-//@Table(
-//		name = "td_interest",
-//		uniqueConstraints = {
-//				@UniqueConstraint(
-//						name = "td_interest_java_file_id_unique",
-//						columnNames = "java_file_id"
-//				)
-//		}
-//)
 @Embeddable
 public class TDInterest {
 	
 	@Transient
 	private static final Double HOURLY_WAGE = 40.00;
-
-//	@Id
-//	@GeneratedValue(strategy = GenerationType.AUTO)
-//	@Column(name = "id", nullable = false, updatable = false)
-//	private Long id;
 	
 	@Transient
 	private CalculatedJavaFile javaFile;

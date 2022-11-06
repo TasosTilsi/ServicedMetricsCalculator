@@ -10,16 +10,9 @@ import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
-@AttributeOverrides({
-		@AttributeOverride(name = "value", column = @Column(name = "kappa_value"))
-})
+@AttributeOverride(name = "value", column = @Column(name = "kappa_value"))
 @Embeddable
 public class Kappa {
-
-//	@Id
-//	@GeneratedValue(strategy = GenerationType.AUTO)
-//	@Column(name = "id", nullable = false, updatable = false)
-//	private Long id;
 	
 	@Transient
 	private CalculatedJavaFile javaFile;
@@ -43,7 +36,7 @@ public class Kappa {
 	}
 	
 	public void update(Integer oldLOC) {
-		this.setValue((this.getValue() * (getRevision().getRevisionCount() - 1) + (Math.abs(javaFile.getQualityMetrics().getSIZE1() - oldLOC))) / getRevision().getRevisionCount());
+		this.setValue((this.getValue() * (getRevision().getCount() - 1) + (Math.abs(javaFile.getQualityMetrics().getSIZE1() - oldLOC))) / getRevision().getCount());
 	}
 	
 	public Double getValue() {
