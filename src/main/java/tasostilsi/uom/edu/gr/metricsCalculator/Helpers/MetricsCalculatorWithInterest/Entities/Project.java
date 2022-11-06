@@ -1,30 +1,40 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.persistence.*;
 import java.io.File;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "project")
 public class Project {
 	
-	@JsonProperty("id")
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "id", nullable = false, updatable = false)
 	private Long id;
-	@JsonProperty("url")
+	
+	@Column(name = "url", nullable = false, unique = true)
 	private String url;
-	@JsonProperty("owner")
+	@Column(name = "owner", nullable = false)
 	private String owner;
-	@JsonProperty("repo")
+	@Column(name = "repo", nullable = false)
 	private String repo;
-	@JsonProperty("clonePath")
+	@Column(name = "path", nullable = false)
 	private String clonePath;
-	@JsonProperty("javaFiles")
+	@OneToMany(mappedBy = "project")
+	@JsonIgnore
 	private Set<CalculatedJavaFile> javaFiles;
-	
-	public Project() {
-	
-	}
 	
 	public Project(String url, String clonePath) {
 		this.url = url;

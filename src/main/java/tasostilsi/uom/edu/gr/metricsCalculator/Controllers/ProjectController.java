@@ -13,6 +13,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Services.ProjectService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/project")
@@ -32,24 +33,14 @@ public class ProjectController {
 	@GetMapping(
 			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
 	)
-	public ResponseEntity<Project> getProject() {
-		returnValue = service.getProject();
+	public ResponseEntity<List<Project>> getProjects() {
+		List<Project> returnedList = service.getProjects();
 		LOGGER.info("HttpRequest: getProject");
-		if (returnValue == null) {
+		if (returnedList == null) {
 			LOGGER.error("Project Entity is null! You must post a project url first!");
 			throw new NullPointerException("Project Entity is null! You must post a project url first!");
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		
-		return new ResponseEntity<>(returnValue, HttpStatus.OK);
-	}
-	
-	@PostMapping(
-			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
-	)
-	public ResponseEntity<Project> setProject(@Valid @NotNull @RequestParam("url") String url) {
-		returnValue = service.setProject(url);
-		LOGGER.info("HttpRequest: setProject");
-		return new ResponseEntity<>(returnValue, HttpStatus.OK);
+		return new ResponseEntity<>(returnedList, HttpStatus.OK);
 	}
 }

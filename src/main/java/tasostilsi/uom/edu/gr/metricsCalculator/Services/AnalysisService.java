@@ -11,8 +11,9 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.GitUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.ProjectEntity;
+import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.JavaFilesRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
+import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
 import java.util.*;
@@ -23,11 +24,15 @@ public class AnalysisService implements IAnalysisService {
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(AnalysisService.class);
 	
 	private final ProjectRepository projectRepository;
+	private final QualityMetricsRepository metricsRepository;
+	private final JavaFilesRepository javaFilesRepository;
 	private Project project;
 	
 	@Autowired
-	public AnalysisService(ProjectRepository projectRepository) {
+	public AnalysisService(ProjectRepository projectRepository, QualityMetricsRepository metricsRepository, JavaFilesRepository javaFilesRepository) {
 		this.projectRepository = projectRepository;
+		this.metricsRepository = metricsRepository;
+		this.javaFilesRepository = javaFilesRepository;
 	}
 	
 	@Override
@@ -35,12 +40,6 @@ public class AnalysisService implements IAnalysisService {
 		
 		String accessToken = newAnalysisDTO.getAccessToken();
 		project = new Project(newAnalysisDTO.getGitUrl());
-		
-		ProjectEntity projectEntity = new ProjectEntity();
-		projectEntity.setGitUrl(project.getUrl());
-		projectEntity.setOwner(project.getOwner());
-		projectEntity.setRepo(project.getRepo());
-		projectEntity.setClonePath(project.getClonePath());
 		
 		LOGGER.info("Project : " + JSONSerializer.serializeObject(project));
 		
@@ -58,18 +57,23 @@ public class AnalysisService implements IAnalysisService {
 		}
 		
 		int start = 0;
-		Optional<ProjectEntity> existsInDb;
+		Optional<Project> existsInDb;
 		Revision currentRevision = new Revision("", 0);
 		
 		existsInDb = projectRepository.findByUrl(project.getUrl());
 		if (existsInDb.isPresent()) {
-			LOGGER.error("EXISTS IN DB");
-			/*List<String> existingCommitIds = getExistingCommitIds(project); // db connection to getExistingCommitIds
+			LOGGER.info("EXISTS IN DB");
+			Long projectId = projectRepository.findIdByUrl(project.getUrl()).orElseThrow();
+			List<String> existingCommitIds = javaFilesRepository.findDistinctRevisionShaByProjectId(projectId);// db connection to getExistingCommitIds
 			diffCommitIds = GitUtils.getInstance().findDifferenceInCommitIds(commitIds, existingCommitIds);
-			if (!diffCommitIds.isEmpty())
-				currentRevision = getLastRevision(project); // db connection for getLastRevision
-			else
-				throw new Exception("ERROR_TO_BE_DESCRIBED_HERE");*/
+			if (!diffCommitIds.isEmpty()) {
+//				String revisionSha = javaFilesRepository.findLastRevisionShaByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
+//				Integer revisionCount = javaFilesRepository.findLastRevisionCountByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
+//				currentRevision.setSha(revisionSha); // db connection for getLastRevision
+//				currentRevision.setRevisionCount(revisionCount); // db connection for getLastRevision
+			} else {
+				throw new Exception("ERROR_TO_BE_DESCRIBED_HERE");
+			}
 		}
 		
 		if (!existsInDb.isPresent() || new HashSet<>(diffCommitIds).containsAll(commitIds)) {
@@ -81,7 +85,7 @@ public class AnalysisService implements IAnalysisService {
 			Utils.getInstance().setMetrics(project, currentRevision);
 			System.out.println("Calculated metrics for all files from first commit!");
 //			InsertToDB.insertProjectToDatabase(project); //connection to db need here
-			projectRepository.save(projectEntity);
+			projectRepository.save(project);
 			Utils.getInstance().insertData(project, currentRevision);
 		} else {
 //			retrieveJavaFiles(project);  //connection to db need here

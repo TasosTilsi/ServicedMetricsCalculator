@@ -1,13 +1,33 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.KappaEntity;
 
-public class Kappa extends KappaEntity {
+import javax.persistence.*;
+
+
+@Data
+@NoArgsConstructor
+@AttributeOverrides({
+		@AttributeOverride(name = "value", column = @Column(name = "kappa_value"))
+})
+@Embeddable
+public class Kappa {
+
+//	@Id
+//	@GeneratedValue(strategy = GenerationType.AUTO)
+//	@Column(name = "id", nullable = false, updatable = false)
+//	private Long id;
 	
-	private final CalculatedJavaFile javaFile;
+	@Transient
+	private CalculatedJavaFile javaFile;
+	
+	@Column(name = "kappa_value", nullable = false)
 	private Double value;
+	
+	@Embedded
 	private Revision revision;
 	
 	public Kappa(Revision revision, CalculatedJavaFile javaFile) {

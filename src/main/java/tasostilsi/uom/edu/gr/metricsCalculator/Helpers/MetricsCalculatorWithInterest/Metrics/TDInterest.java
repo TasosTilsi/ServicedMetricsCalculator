@@ -1,18 +1,54 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 import java.util.*;
 
+@Data
+@NoArgsConstructor
+//@Entity
+//@Table(
+//		name = "td_interest",
+//		uniqueConstraints = {
+//				@UniqueConstraint(
+//						name = "td_interest_java_file_id_unique",
+//						columnNames = "java_file_id"
+//				)
+//		}
+//)
+@Embeddable
 public class TDInterest {
 	
-	private final Double HOURLY_WAGE = 39.44;
-	private final CalculatedJavaFile javaFile;
+	@Transient
+	private static final Double HOURLY_WAGE = 40.00;
+
+//	@Id
+//	@GeneratedValue(strategy = GenerationType.AUTO)
+//	@Column(name = "id", nullable = false, updatable = false)
+//	private Long id;
+	
+	@Transient
+	private CalculatedJavaFile javaFile;
+	
+	@Column(name = "interestInEuros")
 	private Double interestInEuros;
+	
+	@Column(name = "interestInHours")
 	private Double interestInHours;
+	
+	@Column(name = "interestInAvgLOC")
 	private Double interestInAvgLOC;
+	
+	@Column(name = "avgInterestPerLOC")
 	private Double avgInterestPerLOC;
+	
+	@Column(name = "sumInterestPerLOC")
 	private Double sumInterestPerLOC;
 	
 	public TDInterest(CalculatedJavaFile javaFile) {
@@ -66,7 +102,7 @@ public class TDInterest {
 		
 		this.setInterestInHours(this.getInterestInAvgLOC() / 25);
 		
-		this.setInterestInEuros(this.getInterestInHours() * this.HOURLY_WAGE);
+		this.setInterestInEuros(this.getInterestInHours() * HOURLY_WAGE);
 
 //            System.out.println("File: " + CalculatedJavaFile.this.path + " | Interest: " + this.getInterestInEuros());
 //            System.out.println("Kappa: " + CalculatedJavaFile.this.getK().getValue());

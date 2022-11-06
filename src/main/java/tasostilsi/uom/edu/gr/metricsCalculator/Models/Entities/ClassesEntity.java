@@ -2,11 +2,15 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "classes")
+@Getter
+@Setter
+//@Entity
+//@Table(name = "classes")
 public class ClassesEntity {
 	
 	@Id
@@ -25,13 +29,5 @@ public class ClassesEntity {
 	@OneToOne
 	@JoinColumn(name = "quality_metrics_entity_id")
 	private QualityMetricsEntity qualityMetricsEntity;
-	
-	public QualityMetricsEntity getQualityMetricsEntity() {
-		return qualityMetricsEntity;
-	}
-	
-	public void setQualityMetricsEntity(QualityMetricsEntity qualityMetricsEntity) {
-		this.qualityMetricsEntity = qualityMetricsEntity;
-	}
 	
 }

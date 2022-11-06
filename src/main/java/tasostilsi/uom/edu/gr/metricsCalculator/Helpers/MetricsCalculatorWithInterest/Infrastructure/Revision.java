@@ -1,9 +1,30 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure;
 
+import lombok.Data;
+
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import java.util.Objects;
 
+@Embeddable
+@Data
+@AttributeOverrides({
+		@AttributeOverride(name = "sha", column = @Column(name = "revision_sha")),
+		@AttributeOverride(name = "revisionCount", column = @Column(name = "revision_count"))
+})
 public class Revision {
+
+//	@Id
+//	@GeneratedValue(strategy = GenerationType.AUTO)
+//	@Column(name = "id", nullable = false, updatable = false)
+//	private Long id;
+	
+	@Column(name = "sha")
 	private String sha;
+	
+	@Column(name = "revisionCount")
 	private Integer revisionCount;
 	
 	public Revision() {

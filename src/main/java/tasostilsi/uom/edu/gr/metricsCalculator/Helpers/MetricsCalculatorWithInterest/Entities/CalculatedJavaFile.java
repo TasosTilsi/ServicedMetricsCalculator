@@ -1,23 +1,59 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.NoArgsConstructor;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.Kappa;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.TDInterest;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+@NoArgsConstructor
+@Entity
+@Table(
+		name = "java_files",
+		uniqueConstraints = {
+				@UniqueConstraint(
+						name = "java_files_project_id_unique",
+						columnNames = "project_id"
+				)
+		}
+)
 public class CalculatedJavaFile {
 	
-	private final TDInterest interest;
-	private String path;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "id", nullable = false, updatable = false)
+	private Long id;
+	
+	@ManyToOne
+	@JoinColumn(name = "project_id")
+	@JsonIgnore
+	private Project project;
+	
+	@Embedded
+	private TDInterest interest;
+	
+	@OneToMany(mappedBy = "javaFile")
+	@JsonIgnore
 	private Set<CalculatedClass> classes;
+	
+	@Transient
 	private Set<String> classesNames;
+	
+	@Transient
 	private QualityMetrics qualityMetrics;
+	
+	@Embedded
 	private Kappa k;
+	
+	@Column(name = "path", nullable = false)
+	private String path;
 	
 	public CalculatedJavaFile(String path, Set<CalculatedClass> classes) {
 		this.path = path;
@@ -124,32 +160,8 @@ public class CalculatedJavaFile {
 		this.getInterest().calculate();
 	}
 	
-	public Double getInterestInEuros() {
-		return this.getInterest().getInterestInEuros();
-	}
-	
-	public Double getInterestInHours() {
-		return this.getInterest().getInterestInHours();
-	}
-	
-	public Double getInterestInAvgLoc() {
-		return this.getInterest().getInterestInAvgLOC();
-	}
-	
-	public Double getSumInterestPerLoc() {
-		return this.getInterest().getSumInterestPerLOC();
-	}
-	
-	public Double getAvgInterestPerLoc() {
-		return this.getInterest().getAvgInterestPerLOC();
-	}
-	
 	public TDInterest getInterest() {
 		return this.interest;
-	}
-	
-	public Double getKappaValue() {
-		return this.getK().getValue();
 	}
 	
 	public Kappa getK() {
