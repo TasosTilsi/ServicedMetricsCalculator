@@ -11,7 +11,7 @@ https://github.com/dimizisis/interest_calculator
 Development environment dependencies used
 -
 - Apache Maven 3.8.6  
-- JDK 1.8
+- JDK 11
 - Everything else you will get it from pom.xml
 
 Build the project
@@ -25,4 +25,3 @@ If you want to build without running the tests:
 If you want to build a war file run the following:
     
     mvn package
-
