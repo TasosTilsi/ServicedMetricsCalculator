@@ -48,7 +48,7 @@ public class Project {
 		this.url = url;
 		this.owner = getRepositoryOwner();
 		this.repo = getRepositoryName();
-		this.clonePath = File.pathSeparator + "tmp" + File.pathSeparator + getRepositoryOwner() + File.pathSeparator + getRepositoryName();
+		this.clonePath = File.separatorChar + "tmp" + File.separatorChar + getRepositoryOwner() + File.separatorChar + getRepositoryName();
 		this.javaFiles = ConcurrentHashMap.newKeySet();
 	}
 	

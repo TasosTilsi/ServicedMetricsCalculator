@@ -1,8 +1,11 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 
 import java.util.List;
@@ -24,4 +27,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 	
 	@Query("select p.id from Project p where p.owner = ?1 and p.repo = ?2")
 	Optional<Long> getIdByOwnerAndRepo(String owner, String repo);
+	
+	@Query("select p.clonePath from Project p where p.url = ?1")
+	Optional<String> getProjectPathByUrl(String url);
+	
+	@Transactional
+	@Modifying
+	@Query("update Project p set p.javaFiles = ?1 where p.url = ?2")
+	int initializeProjectAnalysis(CalculatedJavaFile javaFiles, String url);
+	
+	
 }

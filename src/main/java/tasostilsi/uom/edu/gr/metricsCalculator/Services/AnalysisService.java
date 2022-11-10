@@ -6,7 +6,11 @@ import org.eclipse.jgit.api.Git;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedClass;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.GitUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
@@ -17,7 +21,6 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsReposi
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class AnalysisService implements IAnalysisService {
@@ -62,18 +65,23 @@ public class AnalysisService implements IAnalysisService {
 		Revision currentRevision = new Revision("", 0);
 		
 		existsInDb = projectRepository.findByUrl(project.getUrl());
+		
+		
 		if (existsInDb.isPresent()) {
 			LOGGER.info("EXISTS IN DB");
-//			Long projectId = projectRepository.findByUrl(project.getUrl()).orElseThrow().getId();
+			
+			/***********************************
+			 //			List<String> existingCommitIds = javaFilesRepository.findDistinctRevisionShaByProjectId(projectId).stream().map(file -> file.getK().getRevision().getSha()).collect(Collectors.toList());// db connection to getExistingCommitIds
+			 ***********************************/
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
-			List<String> existingCommitIds = javaFilesRepository.findDistinctRevisionShaByProjectId(projectId).stream().map(file -> file.getK().getRevision().getSha()).collect(Collectors.toList());// db connection to getExistingCommitIds
+			
+			List<String> existingCommitIds = javaFilesRepository.getDistinctRevisionShaByProjectId(projectId);  // db connection to getExistingCommitIds
 			// db connection to getExistingCommitIds
 			diffCommitIds = GitUtils.getInstance().findDifferenceInCommitIds(commitIds, existingCommitIds);
 			if (!diffCommitIds.isEmpty()) {
-//				String revisionSha = javaFilesRepository.findDistinctRevisionShaByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
-//				Integer revisionCount = javaFilesRepository.findDistinctRevisionCountByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
-//				currentRevision.setSha(revisionSha); // db connection for getLastRevision
-//				currentRevision.setCount(revisionCount); // db connection for getLastRevision
+				Revision revisionFromDb = javaFilesRepository.getRevisionByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
+				currentRevision.setSha(revisionFromDb.getSha()); // db connection for getLastRevision
+				currentRevision.setCount(revisionFromDb.getCount()); // db connection for getLastRevision
 			} else {
 				throw new Exception("ERROR_TO_BE_DESCRIBED_HERE");
 			}
@@ -84,14 +92,13 @@ public class AnalysisService implements IAnalysisService {
 			Objects.requireNonNull(currentRevision).setSha(Objects.requireNonNull(commitIds.get(0)));
 			Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1);
 			GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
-			System.out.printf("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getCount());
+			LOGGER.info("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getCount());
 			Utils.getInstance().setMetrics(project, currentRevision);
-			System.out.println("Calculated metrics for all files from first commit!");
-//			InsertToDB.insertProjectToDatabase(project); //connection to db need here
+			LOGGER.info("Calculated metrics for all files from first commit!");
 			projectRepository.save(project);
-			Utils.getInstance().insertData(project, currentRevision);
 		} else {
-//			retrieveJavaFiles(project);  //connection to db need here
+			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
+			Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow()); // in retrieveMethod it uses the Globals class
 			commitIds = new ArrayList<>(diffCommitIds);
 		}
 		
@@ -99,22 +106,31 @@ public class AnalysisService implements IAnalysisService {
 			Objects.requireNonNull(currentRevision).setSha(commitIds.get(i));
 			currentRevision.setCount(currentRevision.getCount() + 1);
 			GitUtils.getInstance().checkout(Objects.requireNonNull(project), accessToken, Objects.requireNonNull(currentRevision), Objects.requireNonNull(git));
-			System.out.printf("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getCount());
+			LOGGER.info(String.format("Calculating metrics for commit %s (%d)...\n", currentRevision.getSha(), currentRevision.getCount()));
 			try {
-//				PrincipalResponseEntity[] responseEntities = getResponseEntitiesAtCommit(git, currentRevision.getSha());
-//				if (Objects.isNull(responseEntities) || responseEntities.length == 0) {
-//					insertData(project, currentRevision);
-//					System.out.println("Calculated metrics for all files!");
-//					continue;
-//				}
-				System.out.println("Analyzing new/modified commit files...");
+				PrincipalResponseEntity[] responseEntities = GitUtils.getInstance().getResponseEntitiesAtCommit(git, currentRevision.getSha());
+				if (Objects.isNull(responseEntities) || responseEntities.length == 0) {
+					if (Globals.getJavaFiles().isEmpty()) {
+						//			InsertToDB.insertEmpty(project, currentRevision);  //connection to db need here
+						Set<CalculatedClass> calculatedClasses = new HashSet<>();
+						CalculatedJavaFile javaFile = new CalculatedJavaFile("", calculatedClasses);
+						projectRepository.initializeProjectAnalysis(javaFile, project.getUrl());
+						
+					} else {
+						//			Globals.getJavaFiles().forEach(jf -> InsertToDB.insertFileToDatabase(project, jf, currentRevision)); //connection to db need here
+						//			Globals.getJavaFiles().forEach(jf -> InsertToDB.insertMetricsToDatabase(project, jf, currentRevision));  //connection to db need here
+					}
+					LOGGER.info("Calculated metrics for all files!");
+					continue;
+				}
+				LOGGER.info("Analyzing new/modified commit files...");
 //				Utils.getInstance().setMetrics(project, currentRevision, responseEntities[0]);
-				System.out.println("Calculated metrics for all files!");
+				LOGGER.info("Calculated metrics for all files!");
 //				insertData(project, currentRevision);
 			} catch (Exception ignored) {
 			}
 		}
-		System.out.printf("Finished analysing %d revisions.\n", Objects.requireNonNull(currentRevision).getCount());
+		LOGGER.info("Finished analysing %d revisions.\n", Objects.requireNonNull(currentRevision).getCount());
 		
 	}
 }
