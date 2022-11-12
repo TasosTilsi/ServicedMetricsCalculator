@@ -1,6 +1,5 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.Kappa;
@@ -11,13 +10,16 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @NoArgsConstructor
 @Entity
 @Table(
 		name = "java_files",
 		uniqueConstraints = {
+				@UniqueConstraint(
+						name = "classes_quality_metrics_id_unique",
+						columnNames = "quality_metrics_id"
+				),
 				@UniqueConstraint(
 						name = "java_files_project_id_unique",
 						columnNames = "project_id"
@@ -27,26 +29,27 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CalculatedJavaFile {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, updatable = false)
 	private Long id;
 	
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "project_id")
-	@JsonIgnore
+//	@JsonIgnore
 	private Project project;
 	
 	@Embedded
 	private TDInterest interest;
 	
-	@OneToMany(mappedBy = "javaFile")
-	@JsonIgnore
+	@OneToMany(mappedBy = "javaFile", cascade = CascadeType.ALL)
+//	@JsonIgnore
 	private Set<CalculatedClass> classes;
 	
 	@Transient
-	private Set<String> classesNames;
+	private final Set<String> classesNames = new HashSet<>();
 	
-	@Transient
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "quality_metrics_id")
 	private QualityMetrics qualityMetrics;
 	
 	@Embedded
@@ -57,11 +60,8 @@ public class CalculatedJavaFile {
 	
 	public CalculatedJavaFile(String path, Set<CalculatedClass> classes) {
 		this.path = path;
-		this.qualityMetrics = new QualityMetrics();
 		this.classes = classes;
-//		this.classes.forEach(c -> {
-//			classesNames.add(c.getQualifiedName());
-//		});
+		this.qualityMetrics = new QualityMetrics();
 		this.interest = new TDInterest(this);
 	}
 	
@@ -74,7 +74,7 @@ public class CalculatedJavaFile {
 	public CalculatedJavaFile(String path) {
 		this.path = path;
 		this.qualityMetrics = new QualityMetrics();
-		this.classes = ConcurrentHashMap.newKeySet();
+		this.classes = new HashSet<>();
 		this.interest = new TDInterest(this);
 	}
 	
@@ -83,15 +83,15 @@ public class CalculatedJavaFile {
 		this.classes = new HashSet<>();
 		this.qualityMetrics = new QualityMetrics(revision);
 		this.interest = new TDInterest(this);
-		this.setK(new Kappa(revision, this));
+		this.k = new Kappa(revision, this);
 	}
 	
 	public CalculatedJavaFile(String path, QualityMetrics qualityMetrics, Double interestInEuros, Double interestInHours, Double interestInAvgLOC, Double avgInterestPerLOC, Double sumInterestPerLOC, Double kappa, Set<CalculatedClass> classes, Revision revision) {
 		this.path = path;
 		this.qualityMetrics = qualityMetrics;
 		this.interest = new TDInterest(this, interestInEuros, interestInHours, interestInAvgLOC, avgInterestPerLOC, sumInterestPerLOC);
-		this.setK(new Kappa(revision, kappa, this));
-		this.setClasses(classes);
+		this.k = new Kappa(revision, kappa, this);
+		this.classes = classes;
 	}
 	
 	public void aggregateMetrics() {

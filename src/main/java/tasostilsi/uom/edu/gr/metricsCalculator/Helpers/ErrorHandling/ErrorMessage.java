@@ -1,11 +1,16 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.ErrorHandling;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+@Getter
+@Setter
 public class ErrorMessage {
 	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
@@ -14,6 +19,7 @@ public class ErrorMessage {
 	private String cause;
 	private String requestUri;
 	private Map<String, String[]> paramsUsed;
+	private String stackTrace;
 	
 	
 	public ErrorMessage(Exception ex, WebRequest request) {
@@ -22,45 +28,6 @@ public class ErrorMessage {
 		this.message = ex.getLocalizedMessage();
 		this.cause = ex.toString();
 		this.paramsUsed = request.getParameterMap();
-	}
-	
-	public Date getTimestamp() {
-		return timestamp;
-	}
-	
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-	
-	public String getMessage() {
-		return message;
-	}
-	
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	
-	public String getCause() {
-		return cause;
-	}
-	
-	public void setCause(String cause) {
-		this.cause = cause;
-	}
-	
-	public String getRequestUri() {
-		return requestUri;
-	}
-	
-	public void setRequestUri(String requestUri) {
-		this.requestUri = requestUri;
-	}
-	
-	public Map<String, String[]> getParamsUsed() {
-		return paramsUsed;
-	}
-	
-	public void setParamsUsed(Map<String, String[]> paramsUsed) {
-		this.paramsUsed = paramsUsed;
+		this.stackTrace = Arrays.toString(ex.getStackTrace());
 	}
 }

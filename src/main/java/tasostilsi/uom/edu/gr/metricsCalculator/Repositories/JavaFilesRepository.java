@@ -1,8 +1,10 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 
@@ -30,5 +32,12 @@ public interface JavaFilesRepository extends JpaRepository<CalculatedJavaFile, L
 	
 	@Query("select c from CalculatedJavaFile c where c.project.id = ?1")
 	Optional<Set<CalculatedJavaFile>> getAllByProjectId(Long project_id);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "Insert into java_files c set c = ?1",
+			nativeQuery = true)
+	void insertJavaFileToDB(CalculatedJavaFile jf);
+	
 	
 }

@@ -1,6 +1,5 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Project {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, updatable = false)
 	private Long id;
 	
@@ -32,8 +31,8 @@ public class Project {
 	private String repo;
 	@Column(name = "path", nullable = false)
 	private String clonePath;
-	@OneToMany(mappedBy = "project")
-	@JsonIgnore
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+//	@JsonIgnore
 	private Set<CalculatedJavaFile> javaFiles;
 	
 	public Project(String url, String clonePath) {

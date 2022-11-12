@@ -9,6 +9,8 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.MetricsCalculator;
+import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.JavaFilesRepository;
+import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
 
 import java.io.File;
 import java.util.*;
@@ -34,9 +36,19 @@ public class Utils {
 	/**
 	 * Inserts the data of the first revision (in list).
 	 *
-	 * @param project         the project we are referring to
-	 * @param currentRevision the current revision we are analysing
+	 * @param project  the project we are referring to
+	 * @param javaFile the javaFile
 	 */
+	public void insertData(Project project, CalculatedJavaFile javaFile, ProjectRepository projectRepository, JavaFilesRepository javaFilesRepository) {
+		if (Globals.getJavaFiles().isEmpty()) {
+			//			InsertToDB.insertEmpty(project, currentRevision);  //connection to db need here
+			projectRepository.initializeProjectAnalysis(javaFile, project.getUrl());
+			
+		} else {
+			Globals.getJavaFiles().forEach(javaFilesRepository::insertJavaFileToDB); //connection to db need here
+//									Globals.getJavaFiles().forEach(jf -> InsertToDB.insertMetricsToDatabase(project, jf, currentRevision));  //connection to db need here
+		}
+	}
 	
 	
 	/**
@@ -85,22 +97,24 @@ public class Utils {
 			entity.getRenameDiffEntries()
 					.forEach(diffEntry -> {
 						for (CalculatedJavaFile javaFile : Globals.getJavaFiles()) {
-							if (javaFile.getPath().equals(diffEntry.getOldFilePath()))
+							if (javaFile.getPath().equals(diffEntry.getOldFilePath())) {
 								javaFile.setPath(diffEntry.getNewFilePath());
+							}
 						}
 					});
 	}
+	
 	
 	/**
 	 * Get Metrics from Metrics Calculator for every java file (initial calculation)
 	 *
 	 * @param project the project we are referring to
 	 */
-	public void setMetrics(Project project, Revision currentRevision) {
+	public Project setMetrics(Project project, Revision currentRevision) {
 		MetricsCalculator mc = new MetricsCalculator(new Project(project.getUrl()));
 		int resultCode = mc.start();
 		if (resultCode == -1)
-			return;
+			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!");
 		String st = mc.printResults();
 		String[] s = st.split("\\r?\\n");
 		try {
@@ -108,6 +122,7 @@ public class Utils {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
 				List<String> classNames;
+				
 				try {
 					classNames = Arrays.asList(column[14].split(","));
 				} catch (Throwable e) {
@@ -117,6 +132,7 @@ public class Utils {
 				CalculatedJavaFile jf;
 				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
 					jf = new CalculatedJavaFile(filePath, currentRevision);
+					jf.setClasses(mc.getClasses());
 					registerMetrics(column, jf, classNames);
 					Globals.addJavaFile(jf);
 				} else {
@@ -125,8 +141,11 @@ public class Utils {
 						registerMetrics(column, jf, classNames);
 					}
 				}
+				project.getJavaFiles().add(jf);
 			}
+			return project;
 		} catch (Exception ignored) {
+			throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE in setMetrics(Project project, Revision currentRevision)");
 		}
 	}
 	
@@ -174,6 +193,7 @@ public class Utils {
 			}
 			toCalculate.forEach(CalculatedJavaFile::calculateInterest);
 		} catch (Exception ignored) {
+			throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE in setMetrics(Project project, Revision currentRevision, Set<String> jfs)");
 		}
 	}
 	

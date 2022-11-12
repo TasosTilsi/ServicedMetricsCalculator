@@ -19,14 +19,15 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MetricsCalculator {
 	
-	
 	private final Project project;
+	private final Set<CalculatedClass> classes = new HashSet<>();
 	
 	public MetricsCalculator(Project project) {
 		this.project = project;
@@ -134,6 +135,7 @@ public class MetricsCalculator {
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										classNames.addAll(enumNames);
+										classes.addAll(classNames);
 										try {
 											project.getJavaFiles().add(new CalculatedJavaFile(cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1),
 													classNames));
@@ -232,7 +234,7 @@ public class MetricsCalculator {
 	
 	public String printResults() {
 		StringBuilder output = new StringBuilder();
-		output.append("FilePath\tClassesNum\tWMC\tDIT\tComplexity\tLCOM\tMPC\tNOM\tRFC\tDAC\tNOCC\tCBO\tSize1\tSize2\tClassNames");
+		output.append("FilePath\tClassesNum\tWMC\tDIT\tComplexity\tLCOM\tMPC\tNOM\tRFC\tDAC\tNOCC\tCBO\tSize1\tSize2\tClassNames\n");
 		try {
 			project.getJavaFiles().forEach(javaFile -> output.append(javaFile.getPath()).append("\t").append(javaFile.getQualityMetrics()).append("\t").append(javaFile.getClassNames()).append("\n"));
 		} catch (Throwable t) {
@@ -243,7 +245,7 @@ public class MetricsCalculator {
 	
 	public String printResults(Set<String> filesToAnalyze) {
 		StringBuilder output = new StringBuilder();
-		output.append("FilePath\tClassesNum\tWMC\tDIT\tComplexity\tLCOM\tMPC\tNOM\tRFC\tDAC\tNOCC\tCBO\tSize1\tSize2\tClassNames");
+		output.append("FilePath\tClassesNum\tWMC\tDIT\tComplexity\tLCOM\tMPC\tNOM\tRFC\tDAC\tNOCC\tCBO\tSize1\tSize2\tClassNames\n");
 		try {
 			for (String fileToAnalyze : filesToAnalyze) {
 				for (CalculatedJavaFile javaFile : project.getJavaFiles()) {
@@ -255,5 +257,9 @@ public class MetricsCalculator {
 			t.printStackTrace();
 		}
 		return output.toString();
+	}
+	
+	public Set<CalculatedClass> getClasses() {
+		return classes;
 	}
 }

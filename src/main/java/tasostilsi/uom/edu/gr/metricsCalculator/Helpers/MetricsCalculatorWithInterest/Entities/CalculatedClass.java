@@ -1,6 +1,5 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,10 +16,6 @@ import java.util.Objects;
 		name = "classes",
 		uniqueConstraints = {
 				@UniqueConstraint(
-						name = "classes_quality_metrics_id_unique",
-						columnNames = "quality_metrics_id"
-				),
-				@UniqueConstraint(
 						name = "classes_java_file_id_unique",
 						columnNames = "java_file_id"
 				)
@@ -29,20 +24,19 @@ import java.util.Objects;
 public class CalculatedClass {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "classes_id", nullable = false, updatable = false)
 	private Long id;
 	
 	@Column(name = "name", nullable = false)
 	private String qualifiedName;
 	
-	@OneToOne
-	@JoinColumn(name = "quality_metrics_id")
+	@Transient
 	private QualityMetrics qualityMetrics;
 	
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "java_file_id")
-	@JsonIgnore
+//	@JsonIgnore
 	private CalculatedJavaFile javaFile;
 	
 	public CalculatedClass(String name) {
