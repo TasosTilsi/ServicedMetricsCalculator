@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class MetricsCalculator {
 	
 	private final Project project;
-	private final Set<CalculatedClass> classes = new HashSet<>();
 	
 	public MetricsCalculator(Project project) {
 		this.project = project;
@@ -135,7 +134,6 @@ public class MetricsCalculator {
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										classNames.addAll(enumNames);
-										classes.addAll(classNames);
 										try {
 											project.getJavaFiles().add(new CalculatedJavaFile(cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1),
 													classNames));
@@ -259,7 +257,7 @@ public class MetricsCalculator {
 		return output.toString();
 	}
 	
-	public Set<CalculatedClass> getClasses() {
-		return classes;
+	public Project getProject() {
+		return project;
 	}
 }

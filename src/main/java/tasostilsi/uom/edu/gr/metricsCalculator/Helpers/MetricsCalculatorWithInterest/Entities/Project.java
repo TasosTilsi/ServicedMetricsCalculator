@@ -6,9 +6,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.File;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 @Getter
@@ -40,7 +40,7 @@ public class Project {
 		this.owner = getRepositoryOwner();
 		this.repo = getRepositoryName();
 		this.clonePath = clonePath;
-		this.javaFiles = ConcurrentHashMap.newKeySet();
+		this.javaFiles = new HashSet<>();
 	}
 	
 	public Project(String url) {
@@ -48,7 +48,7 @@ public class Project {
 		this.owner = getRepositoryOwner();
 		this.repo = getRepositoryName();
 		this.clonePath = File.separatorChar + "tmp" + File.separatorChar + getRepositoryOwner() + File.separatorChar + getRepositoryName();
-		this.javaFiles = ConcurrentHashMap.newKeySet();
+		this.javaFiles = new HashSet<>();
 	}
 	
 	public Project(String url, String owner, String repo, String clonePath) {
@@ -56,7 +56,7 @@ public class Project {
 		this.owner = owner;
 		this.repo = repo;
 		this.clonePath = clonePath;
-		this.javaFiles = ConcurrentHashMap.newKeySet();
+		this.javaFiles = new HashSet<>();
 	}
 	
 	public Project(String clonePath, Set<CalculatedJavaFile> javaFiles) {

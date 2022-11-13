@@ -96,9 +96,7 @@ public class AnalysisService implements IAnalysisService {
 			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
 			project = Utils.getInstance().setMetrics(project, currentRevision);
 			LOGGER.info("Calculated metrics for all files from first commit!");
-			projectRepository.save(project);
-//			project.getJavaFiles().forEach(javaFilesRepository::insertJavaFileToDB);
-//			project.getJavaFiles().forEach(javaFile -> javaFile.getClasses().forEach(classesRepository::insertClassesToDB));
+			projectRepository.save(project); //until here all is debuged and seems ok
 		} else {
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
 			Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow()); // in retrieveMethod it uses the Globals class

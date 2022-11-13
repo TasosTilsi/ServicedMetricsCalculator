@@ -2,6 +2,7 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils;
 
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedClass;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.DiffEntry;
@@ -115,9 +116,12 @@ public class Utils {
 		int resultCode = mc.start();
 		if (resultCode == -1)
 			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!");
+		project = mc.getProject();
 		String st = mc.printResults();
 		String[] s = st.split("\\r?\\n");
 		try {
+			Set<CalculatedJavaFile> calculatedJavaFileSet = new HashSet<>(project.getJavaFiles());
+			project.getJavaFiles().clear();
 			for (int i = 1; i < s.length; ++i) {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
@@ -131,9 +135,11 @@ public class Utils {
 				
 				CalculatedJavaFile jf;
 				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-					jf = new CalculatedJavaFile(filePath, currentRevision);
-					jf.setClasses(mc.getClasses());
+					Set<CalculatedClass> classes = calculatedJavaFileSet.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
+					jf = new CalculatedJavaFile(filePath, currentRevision,classes);
 					registerMetrics(column, jf, classNames);
+					jf.setProject(project);
+					project.getJavaFiles().add(jf);
 					Globals.addJavaFile(jf);
 				} else {
 					jf = getAlreadyDefinedFile(filePath);
@@ -141,7 +147,6 @@ public class Utils {
 						registerMetrics(column, jf, classNames);
 					}
 				}
-				project.getJavaFiles().add(jf);
 			}
 			return project;
 		} catch (Exception ignored) {

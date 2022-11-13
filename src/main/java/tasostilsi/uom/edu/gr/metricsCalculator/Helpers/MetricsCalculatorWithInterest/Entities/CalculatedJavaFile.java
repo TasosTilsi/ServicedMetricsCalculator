@@ -14,17 +14,17 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(
-		name = "java_files",
-		uniqueConstraints = {
-				@UniqueConstraint(
-						name = "classes_quality_metrics_id_unique",
-						columnNames = "quality_metrics_id"
-				),
-				@UniqueConstraint(
-						name = "java_files_project_id_unique",
-						columnNames = "project_id"
-				)
-		}
+		name = "java_files"
+//		,uniqueConstraints = {
+//				@UniqueConstraint(
+//						name = "classes_quality_metrics_id_unique",
+//						columnNames = "quality_metrics_id"
+//				),
+//				@UniqueConstraint(
+//						name = "java_files_project_id_unique",
+//						columnNames = "project_id"
+//				)
+//		}
 )
 public class CalculatedJavaFile {
 	
@@ -86,12 +86,28 @@ public class CalculatedJavaFile {
 		this.k = new Kappa(revision, this);
 	}
 	
+	public CalculatedJavaFile(String path, Revision revision, Set<CalculatedClass> classes) {
+		this.path = path;
+		this.classes = classes;
+		this.qualityMetrics = new QualityMetrics(revision);
+		this.interest = new TDInterest(this);
+		this.k = new Kappa(revision, this);
+		this.classes.forEach(calculatedClass -> {
+			calculatedClass.getQualityMetrics().setRevision(revision);
+			calculatedClass.setJavaFile(this);
+		});
+	}
+	
 	public CalculatedJavaFile(String path, QualityMetrics qualityMetrics, Double interestInEuros, Double interestInHours, Double interestInAvgLOC, Double avgInterestPerLOC, Double sumInterestPerLOC, Double kappa, Set<CalculatedClass> classes, Revision revision) {
 		this.path = path;
 		this.qualityMetrics = qualityMetrics;
 		this.interest = new TDInterest(this, interestInEuros, interestInHours, interestInAvgLOC, avgInterestPerLOC, sumInterestPerLOC);
 		this.k = new Kappa(revision, kappa, this);
 		this.classes = classes;
+		this.classes.forEach(calculatedClass -> {
+			calculatedClass.getQualityMetrics().setRevision(revision);
+			calculatedClass.setJavaFile(this);
+		});
 	}
 	
 	public void aggregateMetrics() {
@@ -164,11 +180,31 @@ public class CalculatedJavaFile {
 		return this.interest;
 	}
 	
+	public void setInterest(TDInterest interest) {
+		this.interest = interest;
+	}
+	
 	public Kappa getK() {
 		return this.k;
 	}
 	
 	public void setK(Kappa k) {
 		this.k = k;
+	}
+	
+	public Long getId() {
+		return id;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	public Project getProject() {
+		return project;
+	}
+	
+	public void setProject(Project project) {
+		this.project = project;
 	}
 }

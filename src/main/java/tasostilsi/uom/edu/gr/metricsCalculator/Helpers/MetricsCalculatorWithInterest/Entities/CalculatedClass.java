@@ -13,8 +13,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Table(
-		name = "classes",
-		uniqueConstraints = {
+		name = "classes"
+		,uniqueConstraints = {
 				@UniqueConstraint(
 						name = "classes_java_file_id_unique",
 						columnNames = "java_file_id"
