@@ -72,7 +72,9 @@ public class AnalysisService implements IAnalysisService {
 		existsInDb = projectRepository.findByUrl(project.getUrl());
 		
 		if (existsInDb.isPresent()) {
-			LOGGER.info("EXISTS IN DB");
+			LOGGER.info("Project EXISTS IN DB");
+			
+			project = existsInDb.orElseThrow();
 			
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
 			
@@ -96,7 +98,7 @@ public class AnalysisService implements IAnalysisService {
 			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
 			project = Utils.getInstance().setMetrics(project, currentRevision);
 			LOGGER.info("Calculated metrics for all files from first commit!");
-			projectRepository.save(project); //until here all is debuged and seems ok
+			projectRepository.save(project); //until here all is debugged and seems ok
 		} else {
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
 			Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow()); // in retrieveMethod it uses the Globals class
@@ -108,18 +110,19 @@ public class AnalysisService implements IAnalysisService {
 			currentRevision.setCount(currentRevision.getCount() + 1);
 			GitUtils.getInstance().checkout(Objects.requireNonNull(project), accessToken, Objects.requireNonNull(currentRevision), Objects.requireNonNull(git));
 			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
-			CalculatedJavaFile javaFile = new CalculatedJavaFile("tasos.tilsi.a.java.file", currentRevision);
 			try {
 				PrincipalResponseEntity[] responseEntities = GitUtils.getInstance().getResponseEntitiesAtCommit(git, currentRevision.getSha());
 				if (Objects.isNull(responseEntities) || responseEntities.length == 0) {
-					Utils.getInstance().insertData(project, javaFile, projectRepository, javaFilesRepository);
+//					Utils.getInstance().insertData(project, javaFile, projectRepository, javaFilesRepository);
+					projectRepository.save(project);
 					LOGGER.info("Calculated metrics for all files!");
 					continue;
 				}
 				LOGGER.info("Analyzing new/modified commit files...");
 				Utils.getInstance().setMetrics(project, currentRevision, responseEntities[0]);
 				LOGGER.info("Calculated metrics for all files!");
-				Utils.getInstance().insertData(project, javaFile, projectRepository, javaFilesRepository);
+//				Utils.getInstance().insertData(project, javaFile, projectRepository, javaFilesRepository);
+				projectRepository.save(project);
 			} catch (Exception ignored) {
 				throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE startNewAnalysis(NewAnalysisDTO newAnalysisDTO) last");
 			}

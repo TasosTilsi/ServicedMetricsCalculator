@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class MetricsCalculator {
@@ -97,6 +98,14 @@ public class MetricsCalculator {
 		project.getJavaFiles().forEach(CalculatedJavaFile::aggregateMetrics);
 	}
 	
+	private void performAggregation(Set<String> filesToAnalyze) {
+		project.getJavaFiles().forEach(javaFile -> {
+			if (!filesToAnalyze.contains(javaFile.getPath())){
+				javaFile.aggregateMetrics();
+			}
+		});
+	}
+	
 	/**
 	 * Get the project root
 	 */
@@ -135,8 +144,10 @@ public class MetricsCalculator {
 												.collect(Collectors.toSet());
 										classNames.addAll(enumNames);
 										try {
-											project.getJavaFiles().add(new CalculatedJavaFile(cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1),
-													classNames));
+											String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
+//											if (project.getJavaFiles().stream().map(CalculatedJavaFile::getPath).noneMatch(Predicate.isEqual(path))) {
+												project.getJavaFiles().add(new CalculatedJavaFile(path, classNames));
+//											}
 										} catch (Throwable ignored) {
 										}
 									});
