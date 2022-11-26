@@ -12,6 +12,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.FileSystemUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.DiffEntry;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
@@ -21,6 +22,8 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class GitUtils {
@@ -132,10 +135,8 @@ public class GitUtils {
 	 */
 	public Git cloneRepository(Project project, String accessToken) {
 		
-		try {
-			Utils.getInstance().deleteSourceCode(new File(project.getClonePath()));
-		} catch (Exception ignored) {
-			LOGGER.warn(ignored.toString());
+		if (Files.exists(Path.of(project.getClonePath()))) {
+			FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
 		}
 		
 		try {
@@ -168,7 +169,9 @@ public class GitUtils {
 		try {
 			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getCount()).setStartPoint(currentRevision.getSha()).call();
 		} catch (CheckoutConflictException e) {
-			Utils.getInstance().deleteSourceCode(new File(project.getClonePath()));
+			if (Files.exists(Path.of(project.getClonePath()))) {
+				FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
+			}
 			cloneRepository(project, accessToken);
 			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getCount()).setStartPoint(currentRevision.getSha()).call();
 		}

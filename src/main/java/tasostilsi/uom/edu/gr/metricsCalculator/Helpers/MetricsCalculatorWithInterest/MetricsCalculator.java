@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest;
 
+import ch.qos.logback.classic.Logger;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -11,6 +12,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
+import org.slf4j.LoggerFactory;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedClass;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
@@ -19,13 +21,13 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class MetricsCalculator {
+	
+	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(MetricsCalculator.class);
 	
 	private final Project project;
 	
@@ -87,7 +89,7 @@ public class MetricsCalculator {
 			return -1;
 		}
 		startCalculations(sourceRoots, filesToAnalyze);
-		performAggregation();
+		performAggregation(filesToAnalyze);
 		return 0;
 	}
 	
@@ -100,7 +102,7 @@ public class MetricsCalculator {
 	
 	private void performAggregation(Set<String> filesToAnalyze) {
 		project.getJavaFiles().forEach(javaFile -> {
-			if (!filesToAnalyze.contains(javaFile.getPath())){
+			if (filesToAnalyze.contains(javaFile.getPath())) {
 				javaFile.aggregateMetrics();
 			}
 		});
@@ -127,17 +129,20 @@ public class MetricsCalculator {
 						try {
 							sourceRoot.tryToParse()
 									.stream()
+									.parallel()
 									.filter(res -> res.getResult().isPresent())
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 												.stream()
+												.parallel()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
 												.stream()
+												.parallel()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -145,10 +150,16 @@ public class MetricsCalculator {
 										classNames.addAll(enumNames);
 										try {
 											String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
-//											if (project.getJavaFiles().stream().map(CalculatedJavaFile::getPath).noneMatch(Predicate.isEqual(path))) {
-												project.getJavaFiles().add(new CalculatedJavaFile(path, classNames));
+											LOGGER.error("CHECK HERE " + path);
+//											if (project.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(path))) {
+												CalculatedJavaFile jfile = new CalculatedJavaFile(path, classNames);
+												jfile.setProject(project);
+												project.getJavaFiles().add(jfile);
+//											} else {
+//												project.getJavaFiles().stream().filter(javaFile -> javaFile.getPath().equals(path)).forEach(javaFile -> javaFile.setClasses(classNames));
 //											}
 										} catch (Throwable ignored) {
+											LOGGER.error(ignored.getLocalizedMessage());
 										}
 									});
 						} catch (Exception ignored) {

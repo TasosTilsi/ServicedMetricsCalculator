@@ -122,7 +122,7 @@ public class Utils {
 		String[] s = st.split("\\r?\\n");
 		try {
 			Set<CalculatedJavaFile> calculatedJavaFileSet = new HashSet<>(project.getJavaFiles());
-			project.getJavaFiles().clear();
+//			project.getJavaFiles().clear();
 			for (int i = 1; i < s.length; ++i) {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
@@ -137,10 +137,14 @@ public class Utils {
 				CalculatedJavaFile jf;
 				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
 					Set<CalculatedClass> classes = calculatedJavaFileSet.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
-					jf = new CalculatedJavaFile(filePath, currentRevision, classes);
+					classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
+					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+					jf.setClasses(classes);
+					jf.getQualityMetrics().setRevision(currentRevision);
+					jf.getK().setRevision(currentRevision);
+//					jf = new CalculatedJavaFile(filePath, currentRevision, classes);
 					registerMetrics(column, jf, classNames);
-					jf.setProject(project);
-					project.getJavaFiles().add(jf);
+//					project.getJavaFiles().add(jf);
 					Globals.addJavaFile(jf);
 				} else {
 					jf = getAlreadyDefinedFile(filePath);
@@ -148,6 +152,7 @@ public class Utils {
 						registerMetrics(column, jf, classNames);
 					}
 				}
+				project.getJavaFiles().add(jf);
 			}
 			return project;
 		} catch (Exception ignored) {
@@ -172,42 +177,49 @@ public class Utils {
 		project = mc.getProject();
 		String st = mc.printResults(jfs);
 		String[] s = st.split("\\r?\\n");
-		try {
-			Set<CalculatedJavaFile> toCalculate = new HashSet<>();
-//			Set<CalculatedJavaFile> toCalculate = new HashSet<>(project.getJavaFiles());
-//			project.getJavaFiles().clear();
-			for (int i = 1; i < s.length; ++i) {
-				String[] column = s[i].split("\t");
-				String filePath = column[0];
-				List<String> classNames;
-				try {
-					classNames = Arrays.asList(column[14].split(","));
-				} catch (Throwable e) {
-					classNames = new ArrayList<>();
-				}
-				
-				CalculatedJavaFile jf;
-				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-					Set<CalculatedClass> classes = toCalculate.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
-					jf = new CalculatedJavaFile(filePath, currentRevision, classes);
-					registerMetrics(column, jf, classNames);
-					jf.setProject(project);
-					project.getJavaFiles().add(jf);
-					Globals.addJavaFile(jf);
+		
+		Set<CalculatedJavaFile> toCalculate = new HashSet<>();
+		project.getJavaFiles().forEach(javaFile -> {
+			if (jfs.contains(javaFile.getPath())) {
+				toCalculate.add(javaFile);
+			}
+		});
+//		project.getJavaFiles().removeAll(toCalculate);
+		
+		for (int i = 1; i < s.length; ++i) {
+			String[] column = s[i].split("\t");
+			String filePath = column[0];
+			List<String> classNames;
+			try {
+				classNames = Arrays.asList(column[14].split(","));
+			} catch (Throwable e) {
+				classNames = new ArrayList<>();
+			}
+			
+			CalculatedJavaFile jf;
+			if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+				Set<CalculatedClass> classes = toCalculate.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
+				classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
+				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+				jf.setClasses(classes);
+				jf.getQualityMetrics().setRevision(currentRevision);
+				jf.getK().setRevision(currentRevision);
+				registerMetrics(column, jf, classNames);
+				Globals.addJavaFile(jf);
+				toCalculate.remove(toCalculate.stream().filter(javaFile -> javaFile.getPath().equals(jf.getPath())).collect(Collectors.toList()).get(0));
+				toCalculate.add(jf);
+			} else {
+				jf = getAlreadyDefinedFile(filePath);
+				if (Objects.nonNull(jf)) {
+					toCalculate.remove(toCalculate.stream().filter(javaFile -> javaFile.getPath().equals(jf.getPath())).collect(Collectors.toList()).get(0));
 					toCalculate.add(jf);
-				} else {
-					jf = getAlreadyDefinedFile(filePath);
-					if (Objects.nonNull(jf)) {
-						toCalculate.add(jf);
-						registerMetrics(column, jf, classNames);
-					}
+					registerMetrics(column, jf, classNames);
 				}
 			}
-			toCalculate.forEach(CalculatedJavaFile::calculateInterest);
-			return project;
-		} catch (Exception ignored) {
-			throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE in setMetrics(Project project, Revision currentRevision, Set<String> jfs)");
 		}
+		toCalculate.forEach(CalculatedJavaFile::calculateInterest);
+		project.getJavaFiles().addAll(toCalculate);
+		return project;
 	}
 	
 	/**
@@ -217,7 +229,8 @@ public class Utils {
 	 * @param jf          the java file we are registering metrics to
 	 */
 	private void registerMetrics(String[] calcEntries, CalculatedJavaFile jf, List<String> classNames) {
-		jf.getQualityMetrics().setClassesNum(Integer.parseInt(calcEntries[1]));
+//		jf.getQualityMetrics().setClassesNum(Integer.parseInt(calcEntries[1]));
+		jf.getQualityMetrics().setClassesNum(jf.getClasses().size());
 		jf.getQualityMetrics().setWMC(Double.parseDouble(calcEntries[2]));
 		jf.getQualityMetrics().setDIT(Integer.parseInt(calcEntries[3]));
 		jf.getQualityMetrics().setComplexity(Double.parseDouble(calcEntries[4]));

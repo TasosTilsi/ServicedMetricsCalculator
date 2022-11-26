@@ -63,12 +63,19 @@ public class CalculatedJavaFile {
 		this.classes = classes;
 		this.qualityMetrics = new QualityMetrics();
 		this.interest = new TDInterest(this);
+		this.k = new Kappa(qualityMetrics.getRevision(), this);
+		this.classes.forEach(calculatedClass -> {
+			calculatedClass.getQualityMetrics().setRevision(qualityMetrics.getRevision());
+			calculatedClass.setJavaFile(this);
+			this.classesNames.add(calculatedClass.getQualifiedName());
+		});
 	}
 	
 	public CalculatedJavaFile(String path, QualityMetrics qualityMetrics) {
 		this.path = path;
 		this.qualityMetrics = qualityMetrics;
 		this.interest = new TDInterest(this);
+		this.k = new Kappa(qualityMetrics.getRevision(), this);
 	}
 	
 	public CalculatedJavaFile(String path) {
@@ -95,6 +102,7 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);
 			calculatedClass.setJavaFile(this);
+			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -107,6 +115,7 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);
 			calculatedClass.setJavaFile(this);
+			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -158,12 +167,12 @@ public class CalculatedJavaFile {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		CalculatedJavaFile javaFile = (CalculatedJavaFile) o;
-		return Objects.equals(path, javaFile.path) && Objects.equals(qualityMetrics, javaFile.qualityMetrics);
+		return Objects.equals(path, javaFile.path);
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(path, qualityMetrics);
+		return Objects.hash(path);
 	}
 	
 	@Override
