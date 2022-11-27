@@ -89,12 +89,13 @@ public class Utils {
 	 */
 	public Project setMetrics(Project project, Revision currentRevision, PrincipalResponseEntity entity) {
 		if (!entity.getDeleteDiffEntries().isEmpty())
-			removeDeletedFiles(currentRevision, entity.getDeleteDiffEntries());
+			project.getJavaFiles().removeAll(removeDeletedFiles(currentRevision, entity.getDeleteDiffEntries()));
 		if (!entity.getAddDiffEntries().isEmpty())
 			project = setMetrics(project, currentRevision, entity.getAddDiffEntries().stream().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
 		if (!entity.getModifyDiffEntries().isEmpty())
 			project = setMetrics(project, currentRevision, entity.getModifyDiffEntries().stream().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
-		if (!entity.getRenameDiffEntries().isEmpty())
+		if (!entity.getRenameDiffEntries().isEmpty()) {
+			final Project finalProject = project;
 			entity.getRenameDiffEntries()
 					.forEach(diffEntry -> {
 						for (CalculatedJavaFile javaFile : Globals.getJavaFiles()) {
@@ -102,7 +103,10 @@ public class Utils {
 								javaFile.setPath(diffEntry.getNewFilePath());
 							}
 						}
+						finalProject.getJavaFiles().stream().filter(file -> file.getPath().equals(diffEntry.getOldFilePath())).forEach(file -> file.setPath(diffEntry.getNewFilePath()));
 					});
+			project.setJavaFiles(finalProject.getJavaFiles());
+		}
 		return project;
 	}
 	
@@ -113,7 +117,7 @@ public class Utils {
 	 * @param project the project we are referring to
 	 */
 	public Project setMetrics(Project project, Revision currentRevision) {
-		MetricsCalculator mc = new MetricsCalculator(project);
+		MetricsCalculator mc = new MetricsCalculator(project,currentRevision);
 		int resultCode = mc.start();
 		if (resultCode == -1)
 			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!");
@@ -136,12 +140,12 @@ public class Utils {
 				
 				CalculatedJavaFile jf;
 				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-					Set<CalculatedClass> classes = calculatedJavaFileSet.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
-					classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
+//					Set<CalculatedClass> classes = calculatedJavaFileSet.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
+//					classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
 					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
-					jf.setClasses(classes);
-					jf.getQualityMetrics().setRevision(currentRevision);
-					jf.getK().setRevision(currentRevision);
+//					jf.setClasses(classes);
+//					jf.getQualityMetrics().setRevision(currentRevision);
+//					jf.getK().setRevision(currentRevision);
 //					jf = new CalculatedJavaFile(filePath, currentRevision, classes);
 					registerMetrics(column, jf, classNames);
 //					project.getJavaFiles().add(jf);
@@ -170,7 +174,7 @@ public class Utils {
 	public Project setMetrics(Project project, Revision currentRevision, Set<String> jfs) {
 		if (jfs.isEmpty())
 			throw new IllegalStateException("Java Files Set is empty!!!");
-		MetricsCalculator mc = new MetricsCalculator(project);
+		MetricsCalculator mc = new MetricsCalculator(project,currentRevision);
 		int resultCode = mc.start(jfs);
 		if (resultCode == -1)
 			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!");
@@ -198,12 +202,12 @@ public class Utils {
 			
 			CalculatedJavaFile jf;
 			if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-				Set<CalculatedClass> classes = toCalculate.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
-				classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
+//				Set<CalculatedClass> classes = toCalculate.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
+//				classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
 				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
-				jf.setClasses(classes);
-				jf.getQualityMetrics().setRevision(currentRevision);
-				jf.getK().setRevision(currentRevision);
+//				jf.setClasses(classes);
+//				jf.getQualityMetrics().setRevision(currentRevision);
+//				jf.getK().setRevision(currentRevision);
 				registerMetrics(column, jf, classNames);
 				Globals.addJavaFile(jf);
 				toCalculate.remove(toCalculate.stream().filter(javaFile -> javaFile.getPath().equals(jf.getPath())).collect(Collectors.toList()).get(0));

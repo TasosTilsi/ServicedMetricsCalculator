@@ -21,6 +21,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsReposi
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AnalysisService implements IAnalysisService {
@@ -103,6 +104,7 @@ public class AnalysisService implements IAnalysisService {
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
 			Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow()); // in retrieveMethod it uses the Globals class
 			commitIds = new ArrayList<>(diffCommitIds);
+			start = currentRevision.getCount();
 		}
 		
 		for (int i = start; i < commitIds.size(); ++i) {

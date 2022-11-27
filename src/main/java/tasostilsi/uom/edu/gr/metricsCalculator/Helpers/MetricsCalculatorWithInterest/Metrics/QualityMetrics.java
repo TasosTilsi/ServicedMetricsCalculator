@@ -84,6 +84,7 @@ public class QualityMetrics {
 		this.classesNum = 0;
 		this.complexity = 0.0;
 		this.DIT = 0;
+		this.CBO = 0.0;
 		this.NOCC = 0;
 		this.RFC = 0.0;
 		this.LCOM = 0.0;

@@ -17,12 +17,14 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.ClassVisitor;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class MetricsCalculator {
@@ -30,9 +32,11 @@ public class MetricsCalculator {
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(MetricsCalculator.class);
 	
 	private final Project project;
+	private final Revision revision;
 	
-	public MetricsCalculator(Project project) {
+	public MetricsCalculator(Project project, Revision revision) {
 		this.project = project;
+		this.revision = revision;
 	}
 	
 	/**
@@ -129,20 +133,20 @@ public class MetricsCalculator {
 						try {
 							sourceRoot.tryToParse()
 									.stream()
-									.parallel()
+//									.parallel()
 									.filter(res -> res.getResult().isPresent())
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 												.stream()
-												.parallel()
+//												.parallel()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
 												.stream()
-												.parallel()
+//												.parallel()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -151,13 +155,18 @@ public class MetricsCalculator {
 										try {
 											String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
 											LOGGER.error("CHECK HERE " + path);
-//											if (project.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(path))) {
-												CalculatedJavaFile jfile = new CalculatedJavaFile(path, classNames);
-												jfile.setProject(project);
-												project.getJavaFiles().add(jfile);
-//											} else {
-//												project.getJavaFiles().stream().filter(javaFile -> javaFile.getPath().equals(path)).forEach(javaFile -> javaFile.setClasses(classNames));
-//											}
+											AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
+											jfile.set(new CalculatedJavaFile(path,revision, classNames));
+											jfile.get().setProject(project);
+											if (!project.getJavaFiles().isEmpty() && project.getJavaFiles().stream().anyMatch(javaFile -> javaFile.getPath().equals(path))) {
+												project.getJavaFiles().forEach(file -> {
+													if (file.getPath().equals(path)) {
+														jfile.get().setId(file.getId());
+//														jfile.get().setClasses(file.getClasses());
+													}
+												});
+											}
+											project.getJavaFiles().add(jfile.get());
 										} catch (Throwable ignored) {
 											LOGGER.error(ignored.getLocalizedMessage());
 										}
@@ -166,6 +175,7 @@ public class MetricsCalculator {
 						}
 					});
 		} catch (Exception ignored) {
+			LOGGER.error(ignored.getLocalizedMessage());
 		}
 		return project.getJavaFiles().size();
 	}
@@ -181,6 +191,7 @@ public class MetricsCalculator {
 					try {
 						sourceRoot.tryToParse()
 								.stream()
+//								.parallel()
 								.filter(res -> res.getResult().isPresent())
 								.forEach(res -> {
 									analyzeCompilationUnit(res.getResult().get());
@@ -202,6 +213,7 @@ public class MetricsCalculator {
 					try {
 						sourceRoot.tryToParse()
 								.stream()
+//								.parallel()
 								.filter(res -> res.getResult().isPresent())
 								.filter(res -> res.getResult().get().getStorage().isPresent())
 								.filter(res -> new ArrayList<>(filesToAnalyze).contains(res.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1)))
@@ -283,3 +295,19 @@ public class MetricsCalculator {
 		return project;
 	}
 }
+	
+	
+	/*
+	AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
+	if (!project.getJavaFiles().isEmpty() && project.getJavaFiles().stream().anyMatch(javaFile -> javaFile.getPath().equals(path))) {
+			project.getJavaFiles().forEach(file -> {
+			if (file.getPath().equals(path)) {
+			jfile.set(file);
+			}
+			});
+			}else {
+			jfile.set(new CalculatedJavaFile(path, classNames));
+			jfile.get().setProject(project);
+			}
+			
+			project.getJavaFiles().add(jfile.get());*/

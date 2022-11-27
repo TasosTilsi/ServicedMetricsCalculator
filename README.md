@@ -1,5 +1,4 @@
-Metrics Calculator as a Service
--
+# Metrics Calculator as a Service
 Trying to remake metrics calculator to a web-service! This is my thesis as part of my Post-Graduate program in University of Macedonia, Greece, Thessaloniki, in Computer Science and Technology
 
 
@@ -22,6 +21,12 @@ If you want to build without running the tests:
     
     mvn clean install -DskipTests
 
-If you want to build a war file run the following:
-    
-    mvn package
+## API Calls
+* **Swagger**
+```shell
+host:port/
+```
+* **Start Analysis**
+```shell
+host:port/api/analysis
+```
