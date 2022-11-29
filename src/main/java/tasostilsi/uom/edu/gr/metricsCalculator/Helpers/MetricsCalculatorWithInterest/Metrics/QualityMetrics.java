@@ -76,7 +76,7 @@ public class QualityMetrics {
 		this.CBO = 0.0;
 		this.SIZE1 = 0;
 		this.SIZE2 = 0;
-		this.oldSIZE1=0;
+		this.oldSIZE1 = 0;
 	}
 	
 	public QualityMetrics(Revision revision) {

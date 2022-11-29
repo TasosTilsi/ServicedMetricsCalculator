@@ -169,7 +169,7 @@ public class CalculatedJavaFile {
 		CalculatedJavaFile javaFile = (CalculatedJavaFile) o;
 		return Objects.equals(path, javaFile.path);
 	}
-
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(path);

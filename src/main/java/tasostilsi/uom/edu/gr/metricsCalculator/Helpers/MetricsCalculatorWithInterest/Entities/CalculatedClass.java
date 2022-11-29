@@ -14,12 +14,12 @@ import java.util.Objects;
 @Entity
 @Table(
 		name = "classes"
-		,uniqueConstraints = {
-				@UniqueConstraint(
-						name = "classes_java_file_id_unique",
-						columnNames = "java_file_id"
-				)
-		}
+		, uniqueConstraints = {
+		@UniqueConstraint(
+				name = "classes_java_file_id_unique",
+				columnNames = "java_file_id"
+		)
+}
 )
 public class CalculatedClass {
 	
@@ -31,7 +31,9 @@ public class CalculatedClass {
 	@Column(name = "name", nullable = false)
 	private String qualifiedName;
 	
-	@Transient
+	//	@Transient
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "quality_metrics_id")
 	private QualityMetrics qualityMetrics;
 	
 	@ManyToOne(cascade = CascadeType.ALL)

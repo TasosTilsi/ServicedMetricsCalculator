@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure;
 
+import ch.qos.logback.classic.Logger;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -7,6 +8,7 @@ import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import org.slf4j.LoggerFactory;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedClass;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 
@@ -17,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	
+	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ClassVisitor.class);
 	private final Set<String> efferentCoupledClasses = ConcurrentHashMap.newKeySet();
 	private final List<TreeSet<String>> methodIntersection = new CopyOnWriteArrayList<>();
 	
@@ -84,6 +87,10 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 			if (javaClass.getFullyQualifiedName().isPresent()) {
 				CalculatedClass currentClassObject = jf.getClasses().stream().filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get())).findFirst().get();
 				
+				LOGGER.info("Before");
+				LOGGER.info("JAVA FILE HERE {}: {}", jf.getPath(), jf.getClasses().stream().map(CalculatedClass::getQualityMetrics).toArray());
+				LOGGER.info("CLASS HERE {}: {}", currentClassObject.getQualifiedName(), currentClassObject.getQualityMetrics());
+				LOGGER.info("");
 				investigateExtendedTypes();
 				visitAllClassMethods();
 				
@@ -104,6 +111,10 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 				} catch (Throwable t) {
 					t.printStackTrace();
 				}
+				
+				LOGGER.info("After");
+				LOGGER.info("JAVA FILE HERE {}: {}", jf.getPath(), jf.getClasses().stream().map(CalculatedClass::getQualityMetrics).toArray());
+				LOGGER.info("CLASS HERE {}: {}", currentClassObject.getQualifiedName(), currentClassObject.getQualityMetrics());
 			}
 		}
 	}
@@ -315,10 +326,11 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	}
 	
 	private CalculatedClass findClassByQualifiedName(String classQualifiedName) {
+		
 		try {
 			CalculatedJavaFile jf = javaFiles
 					.stream()
-					.filter(javaFile -> javaFile.getClasses().contains(new CalculatedClass(classQualifiedName)))
+					.filter(javaFile -> javaFile.getClasses().contains(classQualifiedName))
 					.findFirst().get();
 			return jf.getClasses().stream().filter(cl -> cl.getQualifiedName().equals(classQualifiedName)).findFirst().get();
 		} catch (Throwable ignored) {

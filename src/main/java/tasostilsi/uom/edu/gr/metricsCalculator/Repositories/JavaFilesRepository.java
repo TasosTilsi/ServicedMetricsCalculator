@@ -22,10 +22,11 @@ public interface JavaFilesRepository extends JpaRepository<CalculatedJavaFile, L
 	@Query("select distinct c.k.revision.sha from CalculatedJavaFile c where c.project.id = :project_id ")
 	List<String> getDistinctRevisionShaByProjectId(Long project_id);
 	
-	@Query("select distinct c.k.revision from CalculatedJavaFile c " +
+	@Query("select distinct c.k.revision " +
+			"from CalculatedJavaFile c " +
 			"where c.project.id = :project_id " +
-			"order by c.k.revision.count DESC")
-	Optional<Revision> getRevisionByProjectIdOrderByRevisionCountDesc(Long project_id);
+			"order by c.k.revision.count DESC ")
+	Optional<List<Revision>> getRevisionByProjectIdOrderByRevisionCountDesc(Long project_id);
 	
 	@Query("select jf.path from CalculatedJavaFile jf where jf.path = ?1")
 	Optional<String> getJavaFilePathById(String path);

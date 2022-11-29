@@ -6,7 +6,6 @@ import org.eclipse.jgit.api.Git;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
@@ -21,7 +20,6 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsReposi
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class AnalysisService implements IAnalysisService {
@@ -83,9 +81,9 @@ public class AnalysisService implements IAnalysisService {
 			// db connection to getExistingCommitIds
 			diffCommitIds = GitUtils.getInstance().findDifferenceInCommitIds(commitIds, existingCommitIds);
 			if (!diffCommitIds.isEmpty()) {
-				Revision revisionFromDb = javaFilesRepository.getRevisionByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
-				currentRevision.setSha(revisionFromDb.getSha()); // db connection for getLastRevision
-				currentRevision.setCount(revisionFromDb.getCount()); // db connection for getLastRevision
+				List<Revision> revisionFromDb = javaFilesRepository.getRevisionByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
+				currentRevision.setSha(revisionFromDb.get(0).getSha()); // db connection for getLastRevision
+				currentRevision.setCount(revisionFromDb.get(0).getCount()); // db connection for getLastRevision
 			} else {
 				throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE startNewAnalysis(NewAnalysisDTO newAnalysisDTO) first");
 			}
@@ -115,15 +113,13 @@ public class AnalysisService implements IAnalysisService {
 			try {
 				PrincipalResponseEntity[] responseEntities = GitUtils.getInstance().getResponseEntitiesAtCommit(git, currentRevision.getSha());
 				if (Objects.isNull(responseEntities) || responseEntities.length == 0) {
-//					Utils.getInstance().insertData(project, javaFile, projectRepository, javaFilesRepository);
 					projectRepository.save(project);
 					LOGGER.info("Calculated metrics for all files!");
 					continue;
 				}
 				LOGGER.info("Analyzing new/modified commit files...");
-				Utils.getInstance().setMetrics(project, currentRevision, responseEntities[0]);
+				project = Utils.getInstance().setMetrics(project, currentRevision, responseEntities[0]);
 				LOGGER.info("Calculated metrics for all files!");
-//				Utils.getInstance().insertData(project, javaFile, projectRepository, javaFilesRepository);
 				projectRepository.save(project);
 			} catch (Exception ignored) {
 				throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE startNewAnalysis(NewAnalysisDTO newAnalysisDTO) last");

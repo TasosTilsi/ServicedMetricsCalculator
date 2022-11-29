@@ -133,20 +133,20 @@ public class MetricsCalculator {
 						try {
 							sourceRoot.tryToParse()
 									.stream()
-//									.parallel()
+									.parallel()
 									.filter(res -> res.getResult().isPresent())
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 												.stream()
-//												.parallel()
+												.parallel()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
 												.stream()
-//												.parallel()
+												.parallel()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -154,15 +154,14 @@ public class MetricsCalculator {
 										classNames.addAll(enumNames);
 										try {
 											String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
-											LOGGER.error("CHECK HERE " + path);
+//											LOGGER.error("CHECK HERE " + path);
 											AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
-											jfile.set(new CalculatedJavaFile(path,revision, classNames));
+											jfile.set(new CalculatedJavaFile(path, revision, classNames));
 											jfile.get().setProject(project);
 											if (!project.getJavaFiles().isEmpty() && project.getJavaFiles().stream().anyMatch(javaFile -> javaFile.getPath().equals(path))) {
 												project.getJavaFiles().forEach(file -> {
 													if (file.getPath().equals(path)) {
 														jfile.get().setId(file.getId());
-//														jfile.get().setClasses(file.getClasses());
 													}
 												});
 											}
@@ -295,19 +294,3 @@ public class MetricsCalculator {
 		return project;
 	}
 }
-	
-	
-	/*
-	AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
-	if (!project.getJavaFiles().isEmpty() && project.getJavaFiles().stream().anyMatch(javaFile -> javaFile.getPath().equals(path))) {
-			project.getJavaFiles().forEach(file -> {
-			if (file.getPath().equals(path)) {
-			jfile.set(file);
-			}
-			});
-			}else {
-			jfile.set(new CalculatedJavaFile(path, classNames));
-			jfile.get().setProject(project);
-			}
-			
-			project.getJavaFiles().add(jfile.get());*/

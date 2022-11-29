@@ -2,7 +2,6 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils;
 
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedClass;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.DiffEntry;
@@ -10,8 +9,6 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.MetricsCalculator;
-import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.JavaFilesRepository;
-import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
 
 import java.io.File;
 import java.util.*;
@@ -33,24 +30,6 @@ public class Utils {
 		}
 		return instance;
 	}
-	
-	/**
-	 * Inserts the data of the first revision (in list).
-	 *
-	 * @param project  the project we are referring to
-	 * @param javaFile the javaFile
-	 */
-	public void insertData(Project project, CalculatedJavaFile javaFile, ProjectRepository projectRepository, JavaFilesRepository javaFilesRepository) {
-		if (Globals.getJavaFiles().isEmpty()) {
-			//			InsertToDB.insertEmpty(project, currentRevision);  //connection to db need here
-			projectRepository.initializeProjectAnalysis(javaFile, project.getUrl());
-			
-		} else {
-			Globals.getJavaFiles().forEach(javaFilesRepository::insertJavaFileToDB); //connection to db need here
-//									Globals.getJavaFiles().forEach(jf -> InsertToDB.insertMetricsToDatabase(project, jf, currentRevision));  //connection to db need here
-		}
-	}
-	
 	
 	/**
 	 * Removes those files that are marked as 'DELETED' (new code's call)
@@ -117,7 +96,7 @@ public class Utils {
 	 * @param project the project we are referring to
 	 */
 	public Project setMetrics(Project project, Revision currentRevision) {
-		MetricsCalculator mc = new MetricsCalculator(project,currentRevision);
+		MetricsCalculator mc = new MetricsCalculator(project, currentRevision);
 		int resultCode = mc.start();
 		if (resultCode == -1)
 			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!");
@@ -125,8 +104,6 @@ public class Utils {
 		String st = mc.printResults();
 		String[] s = st.split("\\r?\\n");
 		try {
-			Set<CalculatedJavaFile> calculatedJavaFileSet = new HashSet<>(project.getJavaFiles());
-//			project.getJavaFiles().clear();
 			for (int i = 1; i < s.length; ++i) {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
@@ -140,13 +117,7 @@ public class Utils {
 				
 				CalculatedJavaFile jf;
 				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-//					Set<CalculatedClass> classes = calculatedJavaFileSet.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
-//					classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
 					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
-//					jf.setClasses(classes);
-//					jf.getQualityMetrics().setRevision(currentRevision);
-//					jf.getK().setRevision(currentRevision);
-//					jf = new CalculatedJavaFile(filePath, currentRevision, classes);
 					registerMetrics(column, jf, classNames);
 //					project.getJavaFiles().add(jf);
 					Globals.addJavaFile(jf);
@@ -174,7 +145,7 @@ public class Utils {
 	public Project setMetrics(Project project, Revision currentRevision, Set<String> jfs) {
 		if (jfs.isEmpty())
 			throw new IllegalStateException("Java Files Set is empty!!!");
-		MetricsCalculator mc = new MetricsCalculator(project,currentRevision);
+		MetricsCalculator mc = new MetricsCalculator(project, currentRevision);
 		int resultCode = mc.start(jfs);
 		if (resultCode == -1)
 			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!");
