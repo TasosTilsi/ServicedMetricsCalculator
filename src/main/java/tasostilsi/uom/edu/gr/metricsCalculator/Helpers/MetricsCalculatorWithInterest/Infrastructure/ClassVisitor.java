@@ -82,7 +82,13 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 		if (javaFiles.stream().anyMatch(javaFile -> javaFile.getPath().equals(filePath))) {
 			CalculatedJavaFile jf = javaFiles
 					.stream()
-					.filter(javaFile -> javaFile.getPath().equals(filePath)).findAny().get();
+					.filter(javaFile -> javaFile.getPath().equals(filePath)).filter(javaFile -> javaFile.getId() == null).findFirst().get();
+			
+			if (jf == null) {
+				jf = javaFiles
+						.stream()
+						.filter(javaFile -> javaFile.getPath().equals(filePath)).findAny().get();
+			}
 			
 			if (javaClass.getFullyQualifiedName().isPresent()) {
 				CalculatedClass currentClassObject = jf.getClasses().stream().filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get())).findFirst().get();

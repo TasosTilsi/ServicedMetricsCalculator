@@ -127,7 +127,6 @@ public class Utils {
 						registerMetrics(column, jf, classNames);
 					}
 				}
-				project.getJavaFiles().add(jf);
 			}
 			return project;
 		} catch (Exception ignored) {
@@ -159,7 +158,6 @@ public class Utils {
 				toCalculate.add(javaFile);
 			}
 		});
-//		project.getJavaFiles().removeAll(toCalculate);
 		
 		for (int i = 1; i < s.length; ++i) {
 			String[] column = s[i].split("\t");
@@ -173,12 +171,7 @@ public class Utils {
 			
 			CalculatedJavaFile jf;
 			if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-//				Set<CalculatedClass> classes = toCalculate.stream().filter(file -> file.getPath().equals(filePath)).map(CalculatedJavaFile::getClasses).collect(Collectors.toList()).get(0);
-//				classes.forEach(calculatedClass -> calculatedClass.getQualityMetrics().setRevision(currentRevision));
 				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
-//				jf.setClasses(classes);
-//				jf.getQualityMetrics().setRevision(currentRevision);
-//				jf.getK().setRevision(currentRevision);
 				registerMetrics(column, jf, classNames);
 				Globals.addJavaFile(jf);
 				toCalculate.remove(toCalculate.stream().filter(javaFile -> javaFile.getPath().equals(jf.getPath())).collect(Collectors.toList()).get(0));
@@ -193,7 +186,6 @@ public class Utils {
 			}
 		}
 		toCalculate.forEach(CalculatedJavaFile::calculateInterest);
-		project.getJavaFiles().addAll(toCalculate);
 		return project;
 	}
 	

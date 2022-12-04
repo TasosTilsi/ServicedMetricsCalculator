@@ -18,6 +18,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.ClassVisitor;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -89,7 +90,7 @@ public class MetricsCalculator {
 		} catch (IllegalStateException e) {
 			return -1;
 		}
-		if (createFileSet(sourceRoots) == 0) {
+		if (createFileSet(sourceRoots, filesToAnalyze) == 0) {
 			return -1;
 		}
 		startCalculations(sourceRoots, filesToAnalyze);
@@ -106,7 +107,7 @@ public class MetricsCalculator {
 	
 	private void performAggregation(Set<String> filesToAnalyze) {
 		project.getJavaFiles().forEach(javaFile -> {
-			if (filesToAnalyze.contains(javaFile.getPath())) {
+			if (filesToAnalyze.contains(javaFile.getPath()) && javaFile.getQualityMetrics().equals(new QualityMetrics())) {
 				javaFile.aggregateMetrics();
 			}
 		});
@@ -133,20 +134,20 @@ public class MetricsCalculator {
 						try {
 							sourceRoot.tryToParse()
 									.stream()
-									.parallel()
+//									.parallel()
 									.filter(res -> res.getResult().isPresent())
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 												.stream()
-												.parallel()
+//												.parallel()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
 												.stream()
-												.parallel()
+//												.parallel()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -158,14 +159,62 @@ public class MetricsCalculator {
 											AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
 											jfile.set(new CalculatedJavaFile(path, revision, classNames));
 											jfile.get().setProject(project);
-											if (!project.getJavaFiles().isEmpty() && project.getJavaFiles().stream().anyMatch(javaFile -> javaFile.getPath().equals(path))) {
-												project.getJavaFiles().forEach(file -> {
-													if (file.getPath().equals(path)) {
-														jfile.get().setId(file.getId());
-													}
-												});
-											}
+//											if (!project.getJavaFiles().isEmpty() && project.getJavaFiles().stream().anyMatch(javaFile -> javaFile.getPath().equals(path))) {
+//												project.getJavaFiles().forEach(file -> {
+//													if (file.getPath().equals(path)) {
+//														jfile.get().setId(file.getId());
+//													}
+//												});
+//											}
 											project.getJavaFiles().add(jfile.get());
+										} catch (Throwable ignored) {
+											LOGGER.error(ignored.getLocalizedMessage());
+										}
+									});
+						} catch (Exception ignored) {
+						}
+					});
+		} catch (Exception ignored) {
+			LOGGER.error(ignored.getLocalizedMessage());
+		}
+		return project.getJavaFiles().size();
+	}
+	
+	private int createFileSet(List<SourceRoot> sourceRoots, Set<String> filesToAnalyze) {
+		try {
+			sourceRoots
+					.forEach(sourceRoot -> {
+						try {
+							sourceRoot.tryToParse()
+									.stream()
+//									.parallel()
+									.filter(res -> res.getResult().isPresent())
+									.filter(cu -> cu.getResult().get().getStorage().isPresent())
+									.forEach(cu -> {
+										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
+												.stream()
+//												.parallel()
+												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
+												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
+												.map(CalculatedClass::new)
+												.collect(Collectors.toSet());
+										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
+												.stream()
+//												.parallel()
+												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
+												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
+												.map(CalculatedClass::new)
+												.collect(Collectors.toSet());
+										classNames.addAll(enumNames);
+										try {
+											String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
+											if (filesToAnalyze.contains(path)) {
+//											LOGGER.error("CHECK HERE " + path);
+												AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
+												jfile.set(new CalculatedJavaFile(path, revision, classNames));
+												jfile.get().setProject(project);
+												project.getJavaFiles().add(jfile.get());
+											}
 										} catch (Throwable ignored) {
 											LOGGER.error(ignored.getLocalizedMessage());
 										}

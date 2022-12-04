@@ -28,26 +28,21 @@ import java.util.Set;
 )
 public class CalculatedJavaFile {
 	
+	@Transient
+	private final Set<String> classesNames = new HashSet<>();
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, updatable = false)
 	private Long id;
-	
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "project_id")
 //	@JsonIgnore
 	private Project project;
-	
 	@Embedded
 	private TDInterest interest;
-	
 	@OneToMany(mappedBy = "javaFile", cascade = CascadeType.ALL)
 //	@JsonIgnore
 	private Set<CalculatedClass> classes;
-	
-	@Transient
-	private final Set<String> classesNames = new HashSet<>();
-	
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "quality_metrics_id")
 	private QualityMetrics qualityMetrics;
@@ -167,12 +162,12 @@ public class CalculatedJavaFile {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		CalculatedJavaFile javaFile = (CalculatedJavaFile) o;
-		return Objects.equals(path, javaFile.path);
+		return Objects.equals(path, javaFile.path) && Objects.equals(qualityMetrics, javaFile.qualityMetrics);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(path);
+		return Objects.hash(path, qualityMetrics);
 	}
 	
 	@Override
