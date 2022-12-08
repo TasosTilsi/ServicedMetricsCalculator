@@ -85,7 +85,7 @@ public class CalculatedJavaFile {
 		this.classes = new HashSet<>();
 		this.qualityMetrics = new QualityMetrics(revision);
 		this.interest = new TDInterest(this);
-		this.k = new Kappa(revision, this);
+		this.k = new Kappa(qualityMetrics.getRevision(), this);
 	}
 	
 	public CalculatedJavaFile(String path, Revision revision, Set<CalculatedClass> classes) {
@@ -93,7 +93,7 @@ public class CalculatedJavaFile {
 		this.classes = classes;
 		this.qualityMetrics = new QualityMetrics(revision);
 		this.interest = new TDInterest(this);
-		this.k = new Kappa(revision, this);
+		this.k = new Kappa(qualityMetrics.getRevision(), this);
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);
 			calculatedClass.setJavaFile(this);
@@ -105,7 +105,7 @@ public class CalculatedJavaFile {
 		this.path = path;
 		this.qualityMetrics = qualityMetrics;
 		this.interest = new TDInterest(this, interestInEuros, interestInHours, interestInAvgLOC, avgInterestPerLOC, sumInterestPerLOC);
-		this.k = new Kappa(revision, kappa, this);
+		this.k = new Kappa(qualityMetrics.getRevision(), kappa, this);
 		this.classes = classes;
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);

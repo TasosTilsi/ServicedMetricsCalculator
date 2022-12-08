@@ -21,6 +21,6 @@ public class AnalysisController {
 	@PostMapping
 	public ResponseEntity<String> makeNewAnalysis(@RequestBody NewAnalysisDTO newAnalysisDTO) throws Exception {
 		analysisService.startNewAnalysis(newAnalysisDTO);
-		return new ResponseEntity<>("New Analysis for " + newAnalysisDTO.getGitUrl() + " has started with " + newAnalysisDTO.getAccessToken() + " access token", HttpStatus.OK);
+		return new ResponseEntity<>("New Analysis for " + newAnalysisDTO.getGitUrl() + " completed with " + newAnalysisDTO.getAccessToken() + " access token", HttpStatus.OK);
 	}
 }

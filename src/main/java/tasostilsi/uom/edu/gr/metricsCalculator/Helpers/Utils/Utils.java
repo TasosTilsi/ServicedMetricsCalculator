@@ -154,7 +154,7 @@ public class Utils {
 		
 		Set<CalculatedJavaFile> toCalculate = new HashSet<>();
 		project.getJavaFiles().forEach(javaFile -> {
-			if (jfs.contains(javaFile.getPath())) {
+			if (jfs.contains(javaFile.getPath()) && javaFile.getId() == null) {
 				toCalculate.add(javaFile);
 			}
 		});

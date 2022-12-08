@@ -329,7 +329,7 @@ public class MetricsCalculator {
 		try {
 			for (String fileToAnalyze : filesToAnalyze) {
 				for (CalculatedJavaFile javaFile : project.getJavaFiles()) {
-					if (javaFile.getPath().equals(fileToAnalyze))
+					if (javaFile.getPath().equals(fileToAnalyze) && javaFile.getId() == null)
 						output.append(javaFile.getPath()).append("\t").append(javaFile.getQualityMetrics()).append("\t").append(javaFile.getClassNames()).append("\n");
 				}
 			}
