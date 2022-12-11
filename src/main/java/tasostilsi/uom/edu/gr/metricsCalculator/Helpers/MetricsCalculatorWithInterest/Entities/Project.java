@@ -37,6 +37,8 @@ public class Project {
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
 //	@JsonIgnore
 	private Set<CalculatedJavaFile> javaFiles;
+	@Column(name = "locked", nullable = false)
+	private boolean locked;
 	
 	public Project(String url, String clonePath) {
 		this.url = url;
@@ -44,6 +46,7 @@ public class Project {
 		this.repo = getRepositoryName();
 		this.clonePath = clonePath;
 		this.javaFiles = new HashSet<>();
+		this.locked = false;
 	}
 	
 	public Project(String url) {
@@ -52,6 +55,7 @@ public class Project {
 		this.repo = getRepositoryName();
 		this.clonePath = File.separatorChar + "tmp" + File.separatorChar + getRepositoryOwner() + File.separatorChar + getRepositoryName();
 		this.javaFiles = new HashSet<>();
+		this.locked = false;
 	}
 	
 	public Project(String url, String owner, String repo, String clonePath) {
@@ -60,11 +64,13 @@ public class Project {
 		this.repo = repo;
 		this.clonePath = clonePath;
 		this.javaFiles = new HashSet<>();
+		this.locked = false;
 	}
 	
 	public Project(String clonePath, Set<CalculatedJavaFile> javaFiles) {
 		this.clonePath = clonePath;
 		this.javaFiles = javaFiles;
+		this.locked = false;
 	}
 	
 	public String getUrl() {
@@ -149,5 +155,13 @@ public class Project {
 	
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public boolean isLocked() {
+		return locked;
+	}
+	
+	public void setLocked(boolean locked) {
+		this.locked = locked;
 	}
 }

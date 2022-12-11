@@ -5,8 +5,6 @@ import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
@@ -75,7 +73,9 @@ public class AnalysisService implements IAnalysisService {
 			LOGGER.info("Project EXISTS IN DB");
 			
 			project = existsInDb.orElseThrow();
-			
+
+//			if (!project.isLocked()) {
+			project.setLocked(true);
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
 			
 			List<String> existingCommitIds = javaFilesRepository.getDistinctRevisionShaByProjectId(projectId);  // db connection to getExistingCommitIds
@@ -86,8 +86,10 @@ public class AnalysisService implements IAnalysisService {
 				currentRevision.setSha(revisionFromDb.get(0).getSha()); // db connection for getLastRevision
 				currentRevision.setCount(revisionFromDb.get(0).getCount()); // db connection for getLastRevision
 			} else {
-				throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE startNewAnalysis(NewAnalysisDTO newAnalysisDTO) first");
+				project.setLocked(false);
+				throw new IllegalStateException("No Different Commits exist or something is wrong with revision");
 			}
+//			}
 		}
 		
 		if (existsInDb.isEmpty() || new HashSet<>(diffCommitIds).containsAll(commitIds)) {
@@ -97,6 +99,8 @@ public class AnalysisService implements IAnalysisService {
 			GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
 			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
 			try {
+				project.setLocked(true);
+				projectRepository.save(project);
 				project = Utils.getInstance().setMetrics(project, currentRevision);
 				LOGGER.info("Calculated metrics for all files from first commit!");
 				projectRepository.save(project); //until here all is debugged and seems ok
@@ -129,10 +133,16 @@ public class AnalysisService implements IAnalysisService {
 				LOGGER.info("Calculated metrics for all files!");
 				projectRepository.save(project);
 			} catch (Exception ignored) {
-				throw new IllegalStateException("ERROR_TO_BE_DESCRIBED_HERE startNewAnalysis(NewAnalysisDTO newAnalysisDTO) last");
+				project.setLocked(false);
+				projectRepository.save(project);
+				throw new IllegalStateException("Project analysis is interrupted at revision count " + currentRevision.getCount());
 			}
 		}
+		
+		
 		LOGGER.info("Finished analysing {} revisions.\n", Objects.requireNonNull(currentRevision).getCount());
+		project.setLocked(false);
+		projectRepository.save(project);
 		
 	}
 }
