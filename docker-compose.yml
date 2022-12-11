@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+
+  serviced-metrics-calculator:
+    restart: unless-stopped
+    container_name: serviced-metrics-calculator
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - postgresdb
+
+  postgresdb:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    container_name: postgresdb
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password

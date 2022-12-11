@@ -99,7 +99,7 @@ public class Utils {
 		MetricsCalculator mc = new MetricsCalculator(project, currentRevision);
 		int resultCode = mc.start();
 		if (resultCode == -1)
-			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!");
+			throw new IllegalStateException("Something went wrong with Metrics Calculator!!!\nProbably first commit has no sources to analyze, or the project structure is not supported!");
 		project = mc.getProject();
 		String st = mc.printResults();
 		String[] s = st.split("\\r?\\n");
@@ -174,13 +174,9 @@ public class Utils {
 				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 				registerMetrics(column, jf, classNames);
 				Globals.addJavaFile(jf);
-				toCalculate.remove(toCalculate.stream().filter(javaFile -> javaFile.getPath().equals(jf.getPath())).collect(Collectors.toList()).get(0));
-				toCalculate.add(jf);
 			} else {
 				jf = getAlreadyDefinedFile(filePath);
 				if (Objects.nonNull(jf)) {
-					toCalculate.remove(toCalculate.stream().filter(javaFile -> javaFile.getPath().equals(jf.getPath())).collect(Collectors.toList()).get(0));
-					toCalculate.add(jf);
 					registerMetrics(column, jf, classNames);
 				}
 			}

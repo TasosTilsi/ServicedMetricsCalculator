@@ -3,6 +3,8 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInt
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.io.File;
@@ -16,6 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "project")
+@Transactional(isolation= Isolation.SERIALIZABLE)
 public class Project {
 	
 	@Id

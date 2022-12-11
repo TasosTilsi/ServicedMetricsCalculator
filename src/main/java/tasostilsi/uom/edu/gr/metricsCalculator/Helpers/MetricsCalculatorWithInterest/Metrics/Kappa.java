@@ -2,6 +2,8 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInt
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 
@@ -12,6 +14,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AttributeOverride(name = "value", column = @Column(name = "kappa_value"))
 @Embeddable
+@Transactional(isolation= Isolation.SERIALIZABLE)
 public class Kappa {
 	
 	@Transient

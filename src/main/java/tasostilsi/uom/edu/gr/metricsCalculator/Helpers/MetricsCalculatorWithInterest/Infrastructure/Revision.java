@@ -1,6 +1,8 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure;
 
 import lombok.Data;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -11,6 +13,7 @@ import java.util.Objects;
 @Data
 @AttributeOverride(name = "sha", column = @Column(name = "revision_sha"))
 @AttributeOverride(name = "count", column = @Column(name = "revision_count"))
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class Revision {
 	
 	private String sha;

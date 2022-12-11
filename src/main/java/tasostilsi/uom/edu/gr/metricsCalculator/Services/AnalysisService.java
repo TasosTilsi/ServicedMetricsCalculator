@@ -5,6 +5,8 @@ import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
@@ -30,7 +32,6 @@ public class AnalysisService implements IAnalysisService {
 	private final QualityMetricsRepository metricsRepository;
 	private final JavaFilesRepository javaFilesRepository;
 	private final ClassesRepository classesRepository;
-	private Project project;
 	
 	@Autowired
 	public AnalysisService(ProjectRepository projectRepository,
@@ -47,7 +48,7 @@ public class AnalysisService implements IAnalysisService {
 	public void startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
 		
 		String accessToken = newAnalysisDTO.getAccessToken();
-		project = new Project(newAnalysisDTO.getGitUrl());
+		Project project = new Project(newAnalysisDTO.getGitUrl());
 		
 		LOGGER.info("Project : {}", JSONSerializer.serializeObject(project));
 		
@@ -95,9 +96,15 @@ public class AnalysisService implements IAnalysisService {
 			Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1);
 			GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
 			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
-			project = Utils.getInstance().setMetrics(project, currentRevision);
-			LOGGER.info("Calculated metrics for all files from first commit!");
-			projectRepository.save(project); //until here all is debugged and seems ok
+			try {
+				project = Utils.getInstance().setMetrics(project, currentRevision);
+				LOGGER.info("Calculated metrics for all files from first commit!");
+				projectRepository.save(project); //until here all is debugged and seems ok
+			} catch (Exception e) {
+				LOGGER.warn("First commit has no source roots to analyze!!!");
+				e.printStackTrace();
+			}
+			
 		} else {
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
 			Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow()); // in retrieveMethod it uses the Globals class

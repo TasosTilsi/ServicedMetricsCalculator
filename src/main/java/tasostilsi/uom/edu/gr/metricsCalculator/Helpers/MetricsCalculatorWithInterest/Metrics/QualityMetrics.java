@@ -2,6 +2,8 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInt
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 
 import javax.persistence.*;
@@ -11,6 +13,7 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(name = "metrics")
+@Transactional(isolation= Isolation.SERIALIZABLE)
 public class QualityMetrics {
 	
 	@Id

@@ -1,6 +1,8 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.Kappa;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
@@ -13,19 +15,8 @@ import java.util.Set;
 
 @NoArgsConstructor
 @Entity
-@Table(
-		name = "java_files"
-//		,uniqueConstraints = {
-//				@UniqueConstraint(
-//						name = "classes_quality_metrics_id_unique",
-//						columnNames = "quality_metrics_id"
-//				),
-//				@UniqueConstraint(
-//						name = "java_files_project_id_unique",
-//						columnNames = "project_id"
-//				)
-//		}
-)
+@Table(name = "java_files")
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class CalculatedJavaFile {
 	
 	@Transient

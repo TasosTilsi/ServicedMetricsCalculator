@@ -2,6 +2,8 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInt
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
 
@@ -13,6 +15,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Embeddable
+@Transactional(isolation= Isolation.SERIALIZABLE)
 public class TDInterest {
 	
 	@Transient

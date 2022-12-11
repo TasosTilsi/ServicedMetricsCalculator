@@ -3,6 +3,8 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInt
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
 
 import javax.persistence.*;
@@ -12,15 +14,8 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(
-		name = "classes"
-		, uniqueConstraints = {
-		@UniqueConstraint(
-				name = "classes_java_file_id_unique",
-				columnNames = "java_file_id"
-		)
-}
-)
+@Table(name = "classes")
+@Transactional(isolation= Isolation.SERIALIZABLE)
 public class CalculatedClass {
 	
 	@Id
