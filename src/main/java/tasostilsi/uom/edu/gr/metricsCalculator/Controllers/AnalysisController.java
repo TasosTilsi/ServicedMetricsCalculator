@@ -1,6 +1,8 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Controllers;
 
 
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +16,14 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Services.AnalysisService;
 @RestController
 @RequestMapping(path = "/api/analysis")
 public class AnalysisController {
-	
+	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(AnalysisService.class);
 	@Autowired
 	private AnalysisService analysisService;
 	
 	@PostMapping
 	public ResponseEntity<String> makeNewAnalysis(@RequestBody NewAnalysisDTO newAnalysisDTO) throws Exception {
-		analysisService.startNewAnalysis(newAnalysisDTO);
-		return new ResponseEntity<>("New Analysis for " + newAnalysisDTO.getGitUrl() + " completed with " + newAnalysisDTO.getAccessToken() + " access token", HttpStatus.OK);
+		LOGGER.info("New Analysis started for " + newAnalysisDTO.getGitUrl() + " completed with " + newAnalysisDTO.getAccessToken() + " access token");
+		String response = analysisService.startNewAnalysis(newAnalysisDTO);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

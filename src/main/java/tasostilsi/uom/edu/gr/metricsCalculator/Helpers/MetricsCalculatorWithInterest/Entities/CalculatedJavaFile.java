@@ -19,8 +19,8 @@ import java.util.Set;
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class CalculatedJavaFile {
 	
-	@Transient
-	private final Set<String> classesNames = new HashSet<>();
+//	@Transient
+//	private final Set<String> classesNames = new HashSet<>();
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, updatable = false)
@@ -53,7 +53,7 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(qualityMetrics.getRevision());
 			calculatedClass.setJavaFile(this);
-			this.classesNames.add(calculatedClass.getQualifiedName());
+//			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -88,7 +88,7 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);
 			calculatedClass.setJavaFile(this);
-			this.classesNames.add(calculatedClass.getQualifiedName());
+//			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -101,7 +101,7 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);
 			calculatedClass.setJavaFile(this);
-			this.classesNames.add(calculatedClass.getQualifiedName());
+//			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -144,9 +144,9 @@ public class CalculatedJavaFile {
 		return classesAsString.isEmpty() ? "" : classesAsString.substring(0, classesAsString.length() - 1);
 	}
 	
-	public void addClassName(String className) {
-		classesNames.add(className);
-	}
+//	public void addClassName(String className) {
+//		classesNames.add(className);
+//	}
 	
 	@Override
 	public boolean equals(Object o) {

@@ -1,10 +1,12 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
 
 import javax.persistence.*;
 import java.io.File;
@@ -35,10 +37,10 @@ public class Project {
 	@Column(name = "path", nullable = false)
 	private String clonePath;
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-//	@JsonIgnore
+	@JsonIgnore
 	private Set<CalculatedJavaFile> javaFiles;
 	@Column(name = "locked", nullable = false)
-	private boolean locked;
+	private String state;
 	
 	public Project(String url, String clonePath) {
 		this.url = url;
@@ -46,7 +48,7 @@ public class Project {
 		this.repo = getRepositoryName();
 		this.clonePath = clonePath;
 		this.javaFiles = new HashSet<>();
-		this.locked = false;
+		this.state = State.INITIAL.name();
 	}
 	
 	public Project(String url) {
@@ -55,7 +57,7 @@ public class Project {
 		this.repo = getRepositoryName();
 		this.clonePath = File.separatorChar + "tmp" + File.separatorChar + getRepositoryOwner() + File.separatorChar + getRepositoryName();
 		this.javaFiles = new HashSet<>();
-		this.locked = false;
+		this.state = State.INITIAL.name();
 	}
 	
 	public Project(String url, String owner, String repo, String clonePath) {
@@ -64,13 +66,13 @@ public class Project {
 		this.repo = repo;
 		this.clonePath = clonePath;
 		this.javaFiles = new HashSet<>();
-		this.locked = false;
+		this.state = State.INITIAL.name();
 	}
 	
 	public Project(String clonePath, Set<CalculatedJavaFile> javaFiles) {
 		this.clonePath = clonePath;
 		this.javaFiles = javaFiles;
-		this.locked = false;
+		this.state = State.INITIAL.name();
 	}
 	
 	public String getUrl() {
@@ -157,11 +159,11 @@ public class Project {
 		this.id = id;
 	}
 	
-	public boolean isLocked() {
-		return locked;
+	public String getState() {
+		return state;
 	}
 	
-	public void setLocked(boolean locked) {
-		this.locked = locked;
+	public void setState(String state) {
+		this.state = state;
 	}
 }

@@ -107,24 +107,16 @@ public class Utils {
 			for (int i = 1; i < s.length; ++i) {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
-				List<String> classNames;
-				
-				try {
-					classNames = Arrays.asList(column[14].split(","));
-				} catch (Throwable e) {
-					classNames = new ArrayList<>();
-				}
 				
 				CalculatedJavaFile jf;
 				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
 					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
-					registerMetrics(column, jf, classNames);
-//					project.getJavaFiles().add(jf);
+					registerMetrics(column, jf);
 					Globals.addJavaFile(jf);
 				} else {
 					jf = getAlreadyDefinedFile(filePath);
 					if (Objects.nonNull(jf)) {
-						registerMetrics(column, jf, classNames);
+						registerMetrics(column, jf);
 					}
 				}
 			}
@@ -162,22 +154,16 @@ public class Utils {
 		for (int i = 1; i < s.length; ++i) {
 			String[] column = s[i].split("\t");
 			String filePath = column[0];
-			List<String> classNames;
-			try {
-				classNames = Arrays.asList(column[14].split(","));
-			} catch (Throwable e) {
-				classNames = new ArrayList<>();
-			}
 			
 			CalculatedJavaFile jf;
 			if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
 				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
-				registerMetrics(column, jf, classNames);
+				registerMetrics(column, jf);
 				Globals.addJavaFile(jf);
 			} else {
 				jf = getAlreadyDefinedFile(filePath);
 				if (Objects.nonNull(jf)) {
-					registerMetrics(column, jf, classNames);
+					registerMetrics(column, jf);
 				}
 			}
 		}
@@ -191,8 +177,7 @@ public class Utils {
 	 * @param calcEntries entries taken from MetricsCalculator's results
 	 * @param jf          the java file we are registering metrics to
 	 */
-	private void registerMetrics(String[] calcEntries, CalculatedJavaFile jf, List<String> classNames) {
-//		jf.getQualityMetrics().setClassesNum(Integer.parseInt(calcEntries[1]));
+	private void registerMetrics(String[] calcEntries, CalculatedJavaFile jf) {
 		jf.getQualityMetrics().setClassesNum(jf.getClasses().size());
 		jf.getQualityMetrics().setWMC(Double.parseDouble(calcEntries[2]));
 		jf.getQualityMetrics().setDIT(Integer.parseInt(calcEntries[3]));
@@ -206,8 +191,6 @@ public class Utils {
 		jf.getQualityMetrics().setCBO(Double.parseDouble(calcEntries[11]));
 		jf.getQualityMetrics().setSIZE1(Integer.parseInt(calcEntries[12]));
 		jf.getQualityMetrics().setSIZE2(Integer.parseInt(calcEntries[13]));
-		for (String className : classNames)
-			jf.addClassName(className);
 	}
 	
 	/**

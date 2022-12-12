@@ -1,11 +1,12 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Services;
 
 import ch.qos.logback.classic.Logger;
-import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
@@ -19,6 +20,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 @Service
@@ -43,79 +45,64 @@ public class AnalysisService implements IAnalysisService {
 	}
 	
 	@Override
-	public void startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
-		
+	public String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
+		Project project;
 		String accessToken = newAnalysisDTO.getAccessToken();
-		Project project = new Project(newAnalysisDTO.getGitUrl());
 		
-		LOGGER.info("Project : {}", JSONSerializer.serializeObject(project));
+		Optional<Project> existsInDb = projectRepository.findByUrl(newAnalysisDTO.getGitUrl());
 		
-		LOGGER.info("Cloning repository from: " + project.getRepo() + " into " + project.getClonePath());
-		Git git = GitUtils.getInstance().cloneRepository(project, accessToken);
-		
-		List<String> diffCommitIds = new ArrayList<>();
-		List<String> commitIds = GitUtils.getInstance().getCommitIds(git);
-		
-		try {
-			Collections.reverse(commitIds);
-		} catch (Exception e) {
-			LOGGER.error("CommitIds List might be null");
-			e.printStackTrace();
-		}
-		
-		int start = 0;
-		Optional<Project> existsInDb;
-		Revision currentRevision = new Revision("", 0);
-		
-		existsInDb = projectRepository.findByUrl(project.getUrl());
-		
-		if (existsInDb.isPresent()) {
-			LOGGER.info("Project EXISTS IN DB");
+		project = existsInDb.orElseGet(() -> new Project(newAnalysisDTO.getGitUrl()));
+		if (!Objects.equals(project.getState(), State.RUNNING.name())) {
+			project.setState(State.RUNNING.name());
+			projectRepository.save(project);
 			
-			project = existsInDb.orElseThrow();
-
-//			if (!project.isLocked()) {
-			project.setLocked(true);
-			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
+			LOGGER.info("Project : {} State: {}", project.getUrl(), project.getState());
 			
-			List<String> existingCommitIds = javaFilesRepository.getDistinctRevisionShaByProjectId(projectId);  // db connection to getExistingCommitIds
-			// db connection to getExistingCommitIds
-			diffCommitIds = GitUtils.getInstance().findDifferenceInCommitIds(commitIds, existingCommitIds);
-			if (!diffCommitIds.isEmpty()) {
-				List<Revision> revisionFromDb = javaFilesRepository.getRevisionByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
-				currentRevision.setSha(revisionFromDb.get(0).getSha()); // db connection for getLastRevision
-				currentRevision.setCount(revisionFromDb.get(0).getCount()); // db connection for getLastRevision
-			} else {
-				project.setLocked(false);
-				throw new IllegalStateException("No Different Commits exist or something is wrong with revision");
+			LOGGER.info("Cloning repository from: " + project.getRepo() + " into " + project.getClonePath());
+			Git git = GitUtils.getInstance().cloneRepository(project, accessToken);
+			
+			List<String> diffCommitIds = new ArrayList<>();
+			List<String> commitIds = GitUtils.getInstance().getCommitIds(git);
+			
+			if (commitIds.isEmpty()) {
+				LOGGER.error("No new commits to analyze");
+				return "No new commits to analyze";
 			}
-//			}
-		}
-		
-		if (existsInDb.isEmpty() || new HashSet<>(diffCommitIds).containsAll(commitIds)) {
-			start = 1;
-			Objects.requireNonNull(currentRevision).setSha(Objects.requireNonNull(commitIds.get(0)));
-			Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1);
-			GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
-			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
+			
 			try {
-				project.setLocked(true);
-				projectRepository.save(project);
-				project = Utils.getInstance().setMetrics(project, currentRevision);
-				LOGGER.info("Calculated metrics for all files from first commit!");
-				projectRepository.save(project); //until here all is debugged and seems ok
+				Collections.reverse(commitIds);
 			} catch (Exception e) {
-				LOGGER.warn("First commit has no source roots to analyze!!!");
+				LOGGER.error("CommitIds List might be null");
 				e.printStackTrace();
 			}
 			
+			int start = 0;
+			Revision currentRevision = new Revision("", 0);
+			
+			diffCommitIds = isThereAnyNewCommit(project, existsInDb, diffCommitIds, commitIds, currentRevision);
+			
+			if (existsInDb.isEmpty() || new HashSet<>(diffCommitIds).containsAll(commitIds)) {
+				start = 1;
+				project = analyzeFirstDifferentCommit(project, accessToken, git, commitIds, currentRevision);
+			} else {
+				Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
+				Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow());
+				commitIds = new ArrayList<>(diffCommitIds);
+				start = currentRevision.getCount();
+			}
+			
+			project = loopThroughCommitsAndGetMetrics(project, accessToken, git, commitIds, start, currentRevision);
+			
+			LOGGER.info("Finished analysing {} revisions.\n", Objects.requireNonNull(currentRevision).getCount());
+			project.setState(State.COMPLETED.name());
+			projectRepository.save(project);
+			return "Finished analysing " + currentRevision.getCount() + " revisions.";
 		} else {
-			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
-			Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow()); // in retrieveMethod it uses the Globals class
-			commitIds = new ArrayList<>(diffCommitIds);
-			start = currentRevision.getCount();
+			return "Project " + newAnalysisDTO.getGitUrl() + " is analyzing currently!";
 		}
-		
+	}
+	
+	private Project loopThroughCommitsAndGetMetrics(Project project, String accessToken, Git git, List<String> commitIds, int start, Revision currentRevision) throws GitAPIException {
 		for (int i = start; i < commitIds.size(); ++i) {
 			Objects.requireNonNull(currentRevision).setSha(commitIds.get(i));
 			currentRevision.setCount(currentRevision.getCount() + 1);
@@ -125,24 +112,57 @@ public class AnalysisService implements IAnalysisService {
 				PrincipalResponseEntity[] responseEntities = GitUtils.getInstance().getResponseEntitiesAtCommit(git, currentRevision.getSha());
 				if (Objects.isNull(responseEntities) || responseEntities.length == 0) {
 					projectRepository.save(project);
-					LOGGER.info("Calculated metrics for all files!");
+					LOGGER.info("Calculated metrics for all files in {},{} revision", currentRevision.getCount(), currentRevision.getSha());
 					continue;
 				}
 				LOGGER.info("Analyzing new/modified commit files...");
 				project = Utils.getInstance().setMetrics(project, currentRevision, responseEntities[0]);
-				LOGGER.info("Calculated metrics for all files!");
+				LOGGER.info("Calculated metrics for all files in {},{} revision", currentRevision.getCount(), currentRevision.getSha());
 				projectRepository.save(project);
 			} catch (Exception ignored) {
-				project.setLocked(false);
+				project.setState(State.ABORTED.name());
 				projectRepository.save(project);
 				throw new IllegalStateException("Project analysis is interrupted at revision count " + currentRevision.getCount());
 			}
 		}
-		
-		
-		LOGGER.info("Finished analysing {} revisions.\n", Objects.requireNonNull(currentRevision).getCount());
-		project.setLocked(false);
-		projectRepository.save(project);
-		
+		return project;
+	}
+	
+	@Nullable
+	private Project analyzeFirstDifferentCommit(Project project, String accessToken, Git git, List<String> commitIds, Revision currentRevision) throws GitAPIException {
+		Objects.requireNonNull(currentRevision).setSha(Objects.requireNonNull(commitIds.get(0)));
+		Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1);
+		GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
+		LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
+		try {
+			project = Utils.getInstance().setMetrics(project, currentRevision);
+			LOGGER.info("Calculated metrics for all files from first commit!");
+			projectRepository.save(project);
+		} catch (Exception e) {
+			LOGGER.warn("This commit has no source roots to analyze, continuing!!!");
+			e.printStackTrace();
+		}
+		return project;
+	}
+	
+	private List<String> isThereAnyNewCommit(Project project, Optional<Project> existsInDb, List<String> diffCommitIds, List<String> commitIds, Revision currentRevision) {
+		if (existsInDb.isPresent()) {
+			LOGGER.info("Project EXISTS IN DB");
+			
+			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
+			
+			List<String> existingCommitIds = javaFilesRepository.getDistinctRevisionShaByProjectId(projectId);
+			diffCommitIds = GitUtils.getInstance().findDifferenceInCommitIds(commitIds, existingCommitIds);
+			if (!diffCommitIds.isEmpty()) {
+				List<Revision> revisionFromDb = javaFilesRepository.getRevisionByProjectIdOrderByRevisionCountDesc(projectId).orElseThrow();
+				currentRevision.setSha(revisionFromDb.get(0).getSha());
+				currentRevision.setCount(revisionFromDb.get(0).getCount());
+			} else {
+				project.setState(State.ABORTED.name());
+				projectRepository.save(project);
+				throw new IllegalStateException("No Different Commits exist or something is wrong with git revision");
+			}
+		}
+		return diffCommitIds;
 	}
 }

@@ -4,5 +4,5 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 
 public interface IAnalysisService {
 	
-	void startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception;
+	String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception;
 }
