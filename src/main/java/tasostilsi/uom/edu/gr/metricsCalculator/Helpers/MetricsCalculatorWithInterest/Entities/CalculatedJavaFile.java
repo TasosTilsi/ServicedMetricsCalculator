@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,20 +20,18 @@ import java.util.Set;
 @Transactional(isolation = Isolation.SERIALIZABLE)
 public class CalculatedJavaFile {
 	
-//	@Transient
-//	private final Set<String> classesNames = new HashSet<>();
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, updatable = false)
 	private Long id;
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "project_id")
-//	@JsonIgnore
+	@JsonIgnore
 	private Project project;
 	@Embedded
 	private TDInterest interest;
 	@OneToMany(mappedBy = "javaFile", cascade = CascadeType.ALL)
-//	@JsonIgnore
+	@JsonIgnore
 	private Set<CalculatedClass> classes;
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "quality_metrics_id")
@@ -53,7 +52,6 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(qualityMetrics.getRevision());
 			calculatedClass.setJavaFile(this);
-//			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -88,7 +86,6 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);
 			calculatedClass.setJavaFile(this);
-//			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -101,7 +98,6 @@ public class CalculatedJavaFile {
 		this.classes.forEach(calculatedClass -> {
 			calculatedClass.getQualityMetrics().setRevision(revision);
 			calculatedClass.setJavaFile(this);
-//			this.classesNames.add(calculatedClass.getQualifiedName());
 		});
 	}
 	
@@ -143,10 +139,6 @@ public class CalculatedJavaFile {
 		String classesAsString = classesAsStringBuilder.toString();
 		return classesAsString.isEmpty() ? "" : classesAsString.substring(0, classesAsString.length() - 1);
 	}
-	
-//	public void addClassName(String className) {
-//		classesNames.add(className);
-//	}
 	
 	@Override
 	public boolean equals(Object o) {

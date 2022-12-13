@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,14 +27,13 @@ public class CalculatedClass {
 	@Column(name = "name", nullable = false)
 	private String qualifiedName;
 	
-	//	@Transient
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "quality_metrics_id")
 	private QualityMetrics qualityMetrics;
 	
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "java_file_id")
-//	@JsonIgnore
+	@JsonIgnore
 	private CalculatedJavaFile javaFile;
 	
 	public CalculatedClass(String name) {

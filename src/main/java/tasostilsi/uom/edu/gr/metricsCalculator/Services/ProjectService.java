@@ -26,7 +26,7 @@ public class ProjectService implements IProjectService {
 	
 	public List<Project> getProjects() {
 		List<Project> projects = projectRepository.findAll();
-		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
 		
 		return projects;
 	}
@@ -34,7 +34,7 @@ public class ProjectService implements IProjectService {
 	@Override
 	public List<Project> getProjectsByOwner(String owner) {
 		List<Project> projects = projectRepository.findByOwner(owner);
-		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
 		
 		return projects;
 	}
@@ -42,7 +42,7 @@ public class ProjectService implements IProjectService {
 	@Override
 	public List<Project> getProjectsByRepo(String repo) {
 		List<Project> projects = projectRepository.findByRepo(repo);
-		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(projects));
 		
 		return projects;
 	}
@@ -50,7 +50,7 @@ public class ProjectService implements IProjectService {
 	@Override
 	public Project getProjectById(Long id) {
 		Project project = projectRepository.findById(id).orElseThrow();
-		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
 		
 		return project;
 	}
@@ -58,7 +58,7 @@ public class ProjectService implements IProjectService {
 	@Override
 	public Project getProjectByUrl(String url) {
 		Project project = projectRepository.findByUrl(url).orElseThrow();
-		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
 		
 		return project;
 	}
@@ -66,7 +66,7 @@ public class ProjectService implements IProjectService {
 	@Override
 	public Project getProjectByOwnerAndRepo(String owner, String repo) {
 		Project project = projectRepository.findByOwnerAndRepo(owner, repo).orElseThrow();
-		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
 		
 		return project;
 	}

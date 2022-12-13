@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.transaction.annotation.Isolation;
@@ -18,6 +19,7 @@ import javax.persistence.*;
 public class Kappa {
 	
 	@Transient
+	@JsonIgnore
 	private CalculatedJavaFile javaFile;
 	
 	@Column(name = "kappa_value", nullable = false)

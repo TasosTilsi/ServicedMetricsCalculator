@@ -193,35 +193,4 @@ public class Utils {
 		jf.getQualityMetrics().setSIZE2(Integer.parseInt(calcEntries[13]));
 	}
 	
-	/**
-	 * Deletes source code (if exists) before the analysis
-	 * procedure.
-	 *
-	 * @param file the directory that the repository will be cloned
-	 */
-	public void deleteSourceCode(File file) throws NullPointerException {
-		if (file.isDirectory()) {
-			/* If directory is empty, then delete it */
-			if (Objects.requireNonNull(file.list()).length == 0)
-				file.delete();
-			else {
-				/* List all the directory contents */
-				String[] files = file.list();
-				
-				for (String temp : files) {
-					/* Construct the file structure */
-					File fileDelete = new File(file, temp);
-					/* Recursive delete */
-					deleteSourceCode(fileDelete);
-				}
-				
-				/* Check the directory again, if empty then delete it */
-				if (Objects.requireNonNull(file.list()).length == 0)
-					file.delete();
-			}
-		} else {
-			/* If file, then delete it */
-			file.delete();
-		}
-	}
 }

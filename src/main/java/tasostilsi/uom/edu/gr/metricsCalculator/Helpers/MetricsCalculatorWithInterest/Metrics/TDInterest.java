@@ -1,5 +1,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.transaction.annotation.Isolation;
@@ -22,6 +23,7 @@ public class TDInterest {
 	private static final Double HOURLY_WAGE = 40.00;
 	
 	@Transient
+	@JsonIgnore
 	private CalculatedJavaFile javaFile;
 	
 	@Column(name = "interestInEuros")

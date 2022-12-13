@@ -6,6 +6,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
@@ -14,13 +15,12 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.GitUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
-import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ClassesRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.JavaFilesRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
-import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -29,19 +29,13 @@ public class AnalysisService implements IAnalysisService {
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(AnalysisService.class);
 	
 	private final ProjectRepository projectRepository;
-	private final QualityMetricsRepository metricsRepository;
 	private final JavaFilesRepository javaFilesRepository;
-	private final ClassesRepository classesRepository;
 	
 	@Autowired
 	public AnalysisService(ProjectRepository projectRepository,
-	                       QualityMetricsRepository metricsRepository,
-	                       JavaFilesRepository javaFilesRepository,
-	                       ClassesRepository classesRepository) {
+	                       JavaFilesRepository javaFilesRepository) {
 		this.projectRepository = projectRepository;
-		this.metricsRepository = metricsRepository;
 		this.javaFilesRepository = javaFilesRepository;
-		this.classesRepository = classesRepository;
 	}
 	
 	@Override
@@ -54,7 +48,6 @@ public class AnalysisService implements IAnalysisService {
 		project = existsInDb.orElseGet(() -> new Project(newAnalysisDTO.getGitUrl()));
 		if (!Objects.equals(project.getState(), State.RUNNING.name())) {
 			project.setState(State.RUNNING.name());
-			projectRepository.save(project);
 			
 			LOGGER.info("Project : {} State: {}", project.getUrl(), project.getState());
 			
@@ -65,9 +58,11 @@ public class AnalysisService implements IAnalysisService {
 			List<String> commitIds = GitUtils.getInstance().getCommitIds(git);
 			
 			if (commitIds.isEmpty()) {
-				LOGGER.error("No new commits to analyze");
-				return "No new commits to analyze";
+				LOGGER.error("No commits to analyze, or something is wrong with git url!\nPlease review the git url you provided.\nIf this repo is private please provide access token!");
+				FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
+				throw new RuntimeException("No commits to analyze, or something is wrong with git url!\nPlease review the git url you provided.\nIf this repo is private please provide access token!");
 			}
+			projectRepository.save(project);
 			
 			try {
 				Collections.reverse(commitIds);

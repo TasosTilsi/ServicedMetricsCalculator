@@ -7,7 +7,9 @@ import lombok.Setter;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
@@ -15,7 +17,9 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class NewAnalysisDTO {
 	
-	@NotNull
+	@NotEmpty(message = "The url is required.")
+	//find some patterns that matches the git urls
+//	@Pattern(regexp = "^[a-zA-Z0-9]+://[a-zA-Z0-9]+\\.[a-zA-Z0-9]+/[a-zA-Z0-9]+/[a-zA-Z0-9]+$" , message="Invalid URL provided")
 	@Valid
 	private String gitUrl;
 	

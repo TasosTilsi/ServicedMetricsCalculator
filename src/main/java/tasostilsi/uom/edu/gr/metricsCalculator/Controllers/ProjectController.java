@@ -14,7 +14,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Services.ProjectService;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/v1/project")
+@RequestMapping(path = "api/project")
 public class ProjectController {
 	
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ProjectController.class);
@@ -42,7 +42,7 @@ public class ProjectController {
 	}
 	
 	@GetMapping(
-			path = "/by/owner",
+			path = "/owner",
 			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
 	)
 	public ResponseEntity<List<Project>> getProjectsByOwner(@RequestParam String owner) {
@@ -58,7 +58,7 @@ public class ProjectController {
 	}
 	
 	@GetMapping(
-			path = "/by/repo",
+			path = "/repo",
 			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
 	)
 	public ResponseEntity<List<Project>> getProjectsByRepo(@RequestParam String repo) {
@@ -74,7 +74,7 @@ public class ProjectController {
 	}
 	
 	@GetMapping(
-			path = "/by/url",
+			path = "/url",
 			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
 	)
 	public ResponseEntity<Project> getProjectByUrl(@RequestParam String url) {
@@ -90,7 +90,7 @@ public class ProjectController {
 	}
 	
 	@GetMapping(
-			path = "/by/owner_and_repo",
+			path = "/owner_and_repo",
 			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
 	)
 	public ResponseEntity<Project> getProjectByOwnerAndRepo(@RequestParam String owner, @RequestParam String repo) {
