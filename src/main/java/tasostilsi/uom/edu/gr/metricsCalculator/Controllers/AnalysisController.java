@@ -1,3 +1,15 @@
+/*
+ * ******************************************************************************
+ *  * Copyright (C) 2022-2023 University of Macedonia
+ *  *
+ *  * This program and the accompanying materials are made
+ *  * available under the terms of the Eclipse Public License 2.0
+ *  * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *  *
+ *  * SPDX-License-Identifier: EPL-2.0
+ *  *****************************************************************************
+ */
+
 package tasostilsi.uom.edu.gr.metricsCalculator.Controllers;
 
 
@@ -22,7 +34,7 @@ public class AnalysisController {
 	
 	@PostMapping
 	public ResponseEntity<String> makeNewAnalysis(@RequestBody NewAnalysisDTO newAnalysisDTO) throws Exception {
-		LOGGER.info("New Analysis started for " + newAnalysisDTO.getGitUrl() + " completed with " + newAnalysisDTO.getAccessToken() + " access token");
+		LOGGER.info("New Analysis requested for " + newAnalysisDTO.getGitUrl() + " completed with " + newAnalysisDTO.getAccessToken() + " access token");
 		String response = analysisService.startNewAnalysis(newAnalysisDTO);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
