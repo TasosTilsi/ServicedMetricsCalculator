@@ -22,6 +22,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.TDInterest;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -101,7 +102,16 @@ public class CalculatedJavaFile {
 		});
 	}
 	
-	public CalculatedJavaFile(String path, QualityMetrics qualityMetrics, Double interestInEuros, Double interestInHours, Double interestInAvgLOC, Double avgInterestPerLOC, Double sumInterestPerLOC, Double kappa, Set<CalculatedClass> classes, Revision revision) {
+	public CalculatedJavaFile(String path,
+	                          QualityMetrics qualityMetrics,
+	                          BigDecimal interestInEuros,
+	                          BigDecimal interestInHours,
+	                          BigDecimal interestInAvgLOC,
+	                          BigDecimal avgInterestPerLOC,
+	                          BigDecimal sumInterestPerLOC,
+	                          Double kappa,
+	                          Set<CalculatedClass> classes,
+	                          Revision revision) {
 		this.path = path;
 		this.qualityMetrics = qualityMetrics;
 		this.interest = new TDInterest(this, interestInEuros, interestInHours, interestInAvgLOC, avgInterestPerLOC, sumInterestPerLOC);

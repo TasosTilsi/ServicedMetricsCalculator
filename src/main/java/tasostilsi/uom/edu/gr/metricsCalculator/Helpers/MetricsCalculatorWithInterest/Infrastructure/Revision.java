@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Embeddable

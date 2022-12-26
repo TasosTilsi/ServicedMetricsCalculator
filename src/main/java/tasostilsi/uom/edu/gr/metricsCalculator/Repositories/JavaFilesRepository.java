@@ -19,7 +19,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.ProjectDTO;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -52,5 +54,18 @@ public interface JavaFilesRepository extends JpaRepository<CalculatedJavaFile, L
 			nativeQuery = true)
 	void insertJavaFileToDB(CalculatedJavaFile jf);
 	
+	@Query("select c from CalculatedJavaFile c " +
+			"where c.interest.interestInEuros = ?1 " +
+			"and c.interest.interestInHours = ?2 " +
+			"and c.interest.interestInAvgLOC = ?3 " +
+			"and c.interest.avgInterestPerLOC = ?4 " +
+			"and c.interest.sumInterestPerLOC = ?5 " +
+			"and c.k.revision.sha = ?6 " +
+			"and c.k.revision.count = ?7 " +
+			"and c.project.url = ?8 " +
+			"and c.project.owner = ?9 " +
+			"and c.project.repo = ?10 " +
+			"and c.qualityMetrics.DIT = ?11")
+	Collection<CalculatedJavaFile> test(Double interestInEuros, Double interestInHours, Double interestInAvgLOC, Double avgInterestPerLOC, Double sumInterestPerLOC, String sha, Integer count, String url, String owner, String repo, Integer DIT);
 	
 }

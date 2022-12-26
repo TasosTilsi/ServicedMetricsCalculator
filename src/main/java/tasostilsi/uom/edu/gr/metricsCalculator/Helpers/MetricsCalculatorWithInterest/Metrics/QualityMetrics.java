@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
@@ -112,7 +113,21 @@ public class QualityMetrics {
 		this.oldSIZE1 = 0;
 	}
 	
-	public QualityMetrics(Revision revision, Integer classesNum, Double complexity, Integer DIT, Integer NOCC, Double RFC, Double LCOM, Double WMC, Double NOM, Double MPC, Integer DAC, Integer oldSIZE1, Double CBO, Integer SIZE1, Integer SIZE2) {
+	public QualityMetrics(Revision revision,
+	                      Integer classesNum,
+	                      Double complexity,
+	                      Integer DIT,
+	                      Integer NOCC,
+	                      Double RFC,
+	                      Double LCOM,
+	                      Double WMC,
+	                      Double NOM,
+	                      Double MPC,
+	                      Integer DAC,
+	                      Integer oldSIZE1,
+	                      Double CBO,
+	                      Integer SIZE1,
+	                      Integer SIZE2) {
 		this.revision = revision;
 		this.classesNum = classesNum;
 		this.complexity = complexity;

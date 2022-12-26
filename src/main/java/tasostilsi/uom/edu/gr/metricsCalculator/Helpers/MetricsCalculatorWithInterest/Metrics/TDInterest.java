@@ -23,6 +23,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Data
@@ -39,30 +40,30 @@ public class TDInterest {
 	private CalculatedJavaFile javaFile;
 	
 	@Column(name = "interestInEuros")
-	private Double interestInEuros;
+	private BigDecimal interestInEuros;
 	
 	@Column(name = "interestInHours")
-	private Double interestInHours;
+	private BigDecimal interestInHours;
 	
 	@Column(name = "interestInAvgLOC")
-	private Double interestInAvgLOC;
+	private BigDecimal interestInAvgLOC;
 	
 	@Column(name = "avgInterestPerLOC")
-	private Double avgInterestPerLOC;
+	private BigDecimal avgInterestPerLOC;
 	
 	@Column(name = "sumInterestPerLOC")
-	private Double sumInterestPerLOC;
+	private BigDecimal sumInterestPerLOC;
 	
 	public TDInterest(CalculatedJavaFile javaFile) {
-		this.interestInEuros = 0.0;
-		this.interestInHours = 0.0;
-		this.interestInAvgLOC = 0.0;
-		this.avgInterestPerLOC = 0.0;
-		this.sumInterestPerLOC = 0.0;
+		this.interestInEuros = BigDecimal.valueOf(0.0);
+		this.interestInHours = BigDecimal.valueOf(0.0);
+		this.interestInAvgLOC = BigDecimal.valueOf(0.0);
+		this.avgInterestPerLOC = BigDecimal.valueOf(0.0);
+		this.sumInterestPerLOC = BigDecimal.valueOf(0.0);
 		this.javaFile = javaFile;
 	}
 	
-	public TDInterest(CalculatedJavaFile javaFile, Double interestInEuros, Double interestInHours, Double interestInAvgLOC, Double avgInterestPerLOC, Double sumInterestPerLOC) {
+	public TDInterest(CalculatedJavaFile javaFile, BigDecimal interestInEuros, BigDecimal interestInHours, BigDecimal interestInAvgLOC, BigDecimal avgInterestPerLOC, BigDecimal sumInterestPerLOC) {
 		this.javaFile = javaFile;
 		this.interestInEuros = interestInEuros;
 		this.interestInHours = interestInHours;
@@ -98,13 +99,13 @@ public class TDInterest {
                Get difference optimal to actual */
 		this.setSumInterestPerLOC(this.calculateInterestPerLoc(javaFile, optimalMetrics));
 		
-		this.setAvgInterestPerLOC(this.getSumInterestPerLOC() / 10);
+		this.setAvgInterestPerLOC(this.getSumInterestPerLOC().divide(BigDecimal.valueOf(10)));
 		
-		this.setInterestInAvgLOC(this.getAvgInterestPerLOC() * javaFile.getK().getValue());
+		this.setInterestInAvgLOC(this.getAvgInterestPerLOC().multiply(BigDecimal.valueOf(javaFile.getK().getValue())));
 		
-		this.setInterestInHours(this.getInterestInAvgLOC() / 25);
+		this.setInterestInHours(this.getInterestInAvgLOC().divide(BigDecimal.valueOf(25)));
 		
-		this.setInterestInEuros(this.getInterestInHours() * HOURLY_WAGE);
+		this.setInterestInEuros(this.getInterestInHours().multiply(BigDecimal.valueOf(HOURLY_WAGE)));
 
 //            System.out.println("File: " + CalculatedJavaFile.this.path + " | Interest: " + this.getInterestInEuros());
 //            System.out.println("Kappa: " + CalculatedJavaFile.this.getK().getValue());
@@ -120,7 +121,7 @@ public class TDInterest {
 	 * @param optimalMetrics the optimal metrics object
 	 * @return the interest per line of code (double)
 	 */
-	private Double calculateInterestPerLoc(CalculatedJavaFile jf, QualityMetrics optimalMetrics) {
+	private BigDecimal calculateInterestPerLoc(CalculatedJavaFile jf, QualityMetrics optimalMetrics) {
 		double sumInterestPerLOC = 0.0;
 		sumInterestPerLOC += Math.abs(jf.getQualityMetrics().getDIT() - optimalMetrics.getDIT()) * 1.0 / optimalMetrics.getDIT();
 		sumInterestPerLOC += Math.abs(jf.getQualityMetrics().getNOCC() - optimalMetrics.getNOCC()) * 1.0 / optimalMetrics.getNOCC();
@@ -132,7 +133,7 @@ public class TDInterest {
 		sumInterestPerLOC += Math.abs(jf.getQualityMetrics().getDAC() - optimalMetrics.getDAC()) * 1.0 / optimalMetrics.getDAC();
 		sumInterestPerLOC += Math.abs(jf.getQualityMetrics().getSIZE1() - optimalMetrics.getSIZE1()) * 1.0 / optimalMetrics.getSIZE1();
 		sumInterestPerLOC += Math.abs(jf.getQualityMetrics().getSIZE2() - optimalMetrics.getSIZE2()) * 1.0 / optimalMetrics.getSIZE2();
-		return sumInterestPerLOC;
+		return BigDecimal.valueOf(sumInterestPerLOC);
 	}
 	
 	/**
@@ -263,43 +264,43 @@ public class TDInterest {
 		return optimalMetrics;
 	}
 	
-	public Double getInterestInHours() {
+	public BigDecimal getInterestInHours() {
 		return this.interestInHours;
 	}
 	
-	public void setInterestInHours(Double interestInHours) {
+	public void setInterestInHours(BigDecimal interestInHours) {
 		this.interestInHours = interestInHours;
 	}
 	
-	public Double getInterestInAvgLOC() {
+	public BigDecimal getInterestInAvgLOC() {
 		return this.interestInAvgLOC;
 	}
 	
-	public void setInterestInAvgLOC(Double interestInAvgLOC) {
+	public void setInterestInAvgLOC(BigDecimal interestInAvgLOC) {
 		this.interestInAvgLOC = interestInAvgLOC;
 	}
 	
-	public Double getAvgInterestPerLOC() {
+	public BigDecimal getAvgInterestPerLOC() {
 		return this.avgInterestPerLOC;
 	}
 	
-	public void setAvgInterestPerLOC(Double avgInterestPerLOC) {
+	public void setAvgInterestPerLOC(BigDecimal avgInterestPerLOC) {
 		this.avgInterestPerLOC = avgInterestPerLOC;
 	}
 	
-	public Double getSumInterestPerLOC() {
+	public BigDecimal getSumInterestPerLOC() {
 		return this.sumInterestPerLOC;
 	}
 	
-	public void setSumInterestPerLOC(Double sumInterestPerLOC) {
+	public void setSumInterestPerLOC(BigDecimal sumInterestPerLOC) {
 		this.sumInterestPerLOC = sumInterestPerLOC;
 	}
 	
-	public Double getInterestInEuros() {
+	public BigDecimal getInterestInEuros() {
 		return this.interestInEuros;
 	}
 	
-	public void setInterestInEuros(Double interestInEuros) {
+	public void setInterestInEuros(BigDecimal interestInEuros) {
 		this.interestInEuros = interestInEuros;
 	}
 }

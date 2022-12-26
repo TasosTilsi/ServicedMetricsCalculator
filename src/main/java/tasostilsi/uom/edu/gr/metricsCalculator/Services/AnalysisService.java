@@ -26,8 +26,11 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.GitUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.ProjectDTO;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.*;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.JavaFilesRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
+import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
 import javax.annotation.Nullable;
@@ -41,12 +44,15 @@ public class AnalysisService implements IAnalysisService {
 	
 	private final ProjectRepository projectRepository;
 	private final JavaFilesRepository javaFilesRepository;
+	private final QualityMetricsRepository metricsRepository;
 	
 	@Autowired
 	public AnalysisService(ProjectRepository projectRepository,
-	                       JavaFilesRepository javaFilesRepository) {
+	                       JavaFilesRepository javaFilesRepository,
+	                       QualityMetricsRepository metricsRepository) {
 		this.projectRepository = projectRepository;
 		this.javaFilesRepository = javaFilesRepository;
+		this.metricsRepository = metricsRepository;
 	}
 	
 	@Override
@@ -171,4 +177,64 @@ public class AnalysisService implements IAnalysisService {
 		}
 		return diffCommitIds;
 	}
+	
+	@Override
+	public Collection<CumulativeInterest> findCumulativeInterestPerCommit(String url) {
+		return metricsRepository.findCumulativeInterestPerCommit(new ProjectDTO(url));
+	}
+	
+	@Override
+	public Collection<CumulativeInterest> findCumulativeInterestByCommit(String url, String sha) {
+		return metricsRepository.findCumulativeInterestByCommit(new ProjectDTO(url), sha);
+	}
+	/*
+	@Override
+	public Collection<InterestPerCommitFile> findInterestByCommitFile(String url, String sha, String filePath) {
+		return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), sha, filePath);
+	}
+	
+	@Override
+	public Collection<InterestChange> findInterestChangeByCommit(String url, String sha) {
+		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
+	}
+	
+	@Override
+	public FileInterestChange findInterestChangeByCommitAndFile(String url, String sha, String filePath) {
+		return metricsRepository.findInterestChangeByCommitAndFile(new ProjectDTO(url), sha, filePath);
+	}
+	
+	@Override
+	public Collection<NormalizedInterest> findNormalizedInterest(String url) {
+		return metricsRepository.findNormalizedInterest(new ProjectDTO(url));
+	}
+	
+	@Override
+	public Collection<NormalizedInterest> findNormalizedInterestByCommit(String url, String sha) {
+		return metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
+	}
+	
+	@Override
+	public Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, String url, String sha) {
+		return metricsRepository.findHighInterestFiles(pageable, new ProjectDTO(url), sha);
+	}
+	
+	@Override
+	public Slice<ProjectReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url) {
+		return metricsRepository.findReusabilityMetrics(pageable, new ProjectDTO(url));
+	}
+	
+	@Override
+	public Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha) {
+		return metricsRepository.findReusabilityMetrics(pageable, new ProjectDTO(url), sha);
+	}
+	
+	@Override
+	public Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha, String filePath) {
+		return metricsRepository.findReusabilityMetrics(pageable, new ProjectDTO(url), sha, filePath);
+	}
+	
+	@Override
+	public Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url) {
+		return metricsRepository.findAnalyzedCommits(pageable, new ProjectDTO(url));
+	}*/
 }

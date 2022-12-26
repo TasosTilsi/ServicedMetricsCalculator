@@ -23,6 +23,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.MetricsCalculator;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
