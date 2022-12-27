@@ -68,4 +68,9 @@ public interface JavaFilesRepository extends JpaRepository<CalculatedJavaFile, L
 			"and c.qualityMetrics.DIT = ?11")
 	Collection<CalculatedJavaFile> test(Double interestInEuros, Double interestInHours, Double interestInAvgLOC, Double avgInterestPerLOC, Double sumInterestPerLOC, String sha, Integer count, String url, String owner, String repo, Integer DIT);
 	
+	@Query("select c from CalculatedJavaFile c where c.path = ?1")
+	Optional<CalculatedJavaFile> test2(String path);
+	
+	
+	
 }

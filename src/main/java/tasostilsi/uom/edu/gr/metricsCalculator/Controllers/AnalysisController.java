@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.AnalysisService;
 
 import java.util.Collection;
@@ -40,19 +41,24 @@ public class AnalysisController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@CrossOrigin(origins = "*")
 	@GetMapping(value = "/cumulativeInterest")
-	Collection<CumulativeInterest> getCumulativeInterestPerCommit(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
+	public ResponseEntity<Collection<CumulativeInterest>> getCumulativeInterestPerCommit(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
+		Collection<CumulativeInterest> response;
 		if (Objects.isNull(sha))
-			return analysisService.findCumulativeInterestPerCommit(url);
-		return analysisService.findCumulativeInterestByCommit(url, sha);
+			response = analysisService.findCumulativeInterestPerCommit(url);
+		else
+			response = analysisService.findCumulativeInterestByCommit(url, sha);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/interestPerCommitFile")
+	public ResponseEntity<Collection<InterestPerCommitFile>> getInterestPerCommitFile(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath) {
+		Collection<InterestPerCommitFile> response = analysisService.findInterestByCommitFile(url, sha, filePath);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	/*
-	@GetMapping(value = "/interestPerCommitFile")
-	Collection<InterestPerCommitFile> getInterestPerCommitFile(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath) {
-		return analysisService.findInterestByCommitFile(url, sha, filePath);
-	}
+	
 	
 	@GetMapping(value = "/interestChange")
 	Collection<InterestChange> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha) {

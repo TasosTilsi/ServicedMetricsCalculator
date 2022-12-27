@@ -15,20 +15,20 @@ import java.util.Objects;
 
 public class CumulativeInterest {
 	private String sha;
-	private int revisionCount;
+	private Long revisionCount;
 	private BigDecimal interestEu;
 	private BigDecimal interestHours;
 
 	public CumulativeInterest() { }
 	
-	public CumulativeInterest(String sha, int revisionCount, BigDecimal interestEu, BigDecimal interestHours) {
+	public CumulativeInterest(String sha, Long revisionCount, BigDecimal interestEu, BigDecimal interestHours) {
 		this.sha = sha;
 		this.revisionCount = revisionCount;
 		this.interestEu = interestEu;
 		this.interestHours = interestHours;
 	}
 
-	public CumulativeInterest(String sha, int revisionCount, Double interestEu, Double interestHours) {
+	public CumulativeInterest(String sha, Long revisionCount, Double interestEu, Double interestHours) {
 		this.sha = sha;
 		this.revisionCount = revisionCount;
 		this.interestEu = BigDecimal.valueOf(interestEu);
@@ -43,11 +43,11 @@ public class CumulativeInterest {
 		this.sha = sha;
 	}
 
-	public int getRevisionCount() {
+	public Long getRevisionCount() {
 		return revisionCount;
 	}
 
-	public void setRevisionCount(int revisionCount) {
+	public void setRevisionCount(Long revisionCount) {
 		this.revisionCount = revisionCount;
 	}
 

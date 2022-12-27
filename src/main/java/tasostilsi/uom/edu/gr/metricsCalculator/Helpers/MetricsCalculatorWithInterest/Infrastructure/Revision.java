@@ -31,14 +31,14 @@ public class Revision {
 	
 	private String sha;
 	
-	private Integer count;
+	private Long count;
 	
 	public Revision() {
 		this.sha = null;
 		this.count = null;
 	}
 	
-	public Revision(String sha, Integer count) {
+	public Revision(String sha, Long count) {
 		this.sha = sha;
 		this.count = count;
 	}
@@ -51,11 +51,11 @@ public class Revision {
 		this.sha = sha;
 	}
 	
-	public Integer getCount() {
+	public Long getCount() {
 		return count;
 	}
 	
-	public void setCount(Integer count) {
+	public void setCount(Long count) {
 		this.count = count;
 	}
 	

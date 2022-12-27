@@ -14,6 +14,7 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces;
 
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile;
 
 import java.util.Collection;
 
@@ -25,9 +26,9 @@ public interface IAnalysisService {
 	
 	Collection<CumulativeInterest> findCumulativeInterestByCommit(String url, String sha);
 	
-	/*
-	
 	Collection<InterestPerCommitFile> findInterestByCommitFile(String url, String sha, String filePath);
+
+	/*
 	
 	Collection<InterestChange> findInterestChangeByCommit(String url, String sha);
 	

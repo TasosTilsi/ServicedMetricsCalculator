@@ -2,7 +2,7 @@
  * ******************************************************************************
  *  * Copyright (C) 2022-2023 University of Macedonia
  *  *
- *  * This program and the accompanying materials are made
+ *  * This program AND the accompanying materials are made
  *  * available under the terms of the Eclipse Public License 2.0
  *  * which is available at https://www.eclipse.org/legal/epl-2.0/
  *  *
@@ -19,38 +19,47 @@ import org.springframework.stereotype.Repository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Metrics.QualityMetrics;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.ProjectDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile;
 
 import java.util.Collection;
 
 @Repository
 public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, Long> {
 	
-	@Query(value = "select new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(c.qualityMetrics.revision.sha," +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(c.qualityMetrics.revision.sha," +
 			"c.qualityMetrics.revision.count, " +
-			"round(sum(c.interest.interestInEuros),2), " +
-			"round(sum(c.interest.interestInHours),1))" +
-			"from CalculatedJavaFile c " +
-			"where c.project.url = :#{#project.url} " +
+			"ROUND(SUM(c.interest.interestInEuros),2), " +
+			"ROUND(SUM(c.interest.interestInHours),1))" +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count " +
 			"ORDER BY c.qualityMetrics.revision.count")
 	Collection<CumulativeInterest> findCumulativeInterestPerCommit(ProjectDTO project);
 	
-	@Query(value = "select new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(c.qualityMetrics.revision.sha," +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(c.qualityMetrics.revision.sha," +
 			"c.qualityMetrics.revision.count, " +
-			"round(sum(c.interest.interestInEuros),2), " +
-			"round(sum(c.interest.interestInHours),1))" +
-			"from CalculatedJavaFile c " +
-			"where c.project.url = :#{#project.url} and c.qualityMetrics.revision.sha = :sha " +
+			"ROUND(SUM(c.interest.interestInEuros),2), " +
+			"ROUND(SUM(c.interest.interestInHours),1))" +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.sha = :sha " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count " +
 			"ORDER BY c.qualityMetrics.revision.count")
 	Collection<CumulativeInterest> findCumulativeInterestByCommit(ProjectDTO project, @Param("sha") String sha);
 	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(c.qualityMetrics.revision.sha, " +
+			"c.path," +
+			"c.qualityMetrics.revision.count, " +
+			"c.interest.interestInEuros," +
+			"c.interest.interestInHours) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.sha = :sha " +
+			"AND c.path = :filePath " +
+			"ORDER BY c.path")
+	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
+	
 /*
-
-	@Query(value = "SELECT new CumulativeInterest(m.sha, m.revisionCount, SUM(m.interestEu), SUM(m.interestHours)) "
-			+ "FROM Metrics m "
-			+ "WHERE m.pid = (SELECT pid FROM Projects WHERE owner = :#{#project.owner} AND repo = :#{#project.repo}) AND m.sha = :sha GROUP BY m.sha, m.revisionCount")
-	Collection<CumulativeInterest> findCumulativeInterestByCommit(ProjectDTO project, @Param("sha") String sha);
 
 	@Query(value = "SELECT new InterestPerCommitFile(m.sha, f.filePath, m.revisionCount, m.interestEu, m.interestHours) "
 			+ "FROM Metrics m JOIN Files f ON m.fid = f.fid AND m.sha = f.sha "

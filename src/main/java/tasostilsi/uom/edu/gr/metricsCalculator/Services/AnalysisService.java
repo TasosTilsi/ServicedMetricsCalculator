@@ -35,6 +35,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisServ
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 
 @Service
@@ -89,7 +90,7 @@ public class AnalysisService implements IAnalysisService {
 			}
 			
 			int start = 0;
-			Revision currentRevision = new Revision("", 0);
+			Revision currentRevision = new Revision("", 0L);
 			
 			diffCommitIds = isThereAnyNewCommit(project, existsInDb, diffCommitIds, commitIds, currentRevision);
 			
@@ -100,7 +101,7 @@ public class AnalysisService implements IAnalysisService {
 				Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
 				Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow());
 				commitIds = new ArrayList<>(diffCommitIds);
-				start = currentRevision.getCount();
+				start = currentRevision.getCount().intValue();
 			}
 			
 			project = loopThroughCommitsAndGetMetrics(project, accessToken, git, commitIds, start, currentRevision);
@@ -117,7 +118,7 @@ public class AnalysisService implements IAnalysisService {
 	private Project loopThroughCommitsAndGetMetrics(Project project, String accessToken, Git git, List<String> commitIds, int start, Revision currentRevision) throws GitAPIException {
 		for (int i = start; i < commitIds.size(); ++i) {
 			Objects.requireNonNull(currentRevision).setSha(commitIds.get(i));
-			currentRevision.setCount(currentRevision.getCount() + 1);
+			currentRevision.setCount(currentRevision.getCount() + 1L);
 			GitUtils.getInstance().checkout(Objects.requireNonNull(project), accessToken, Objects.requireNonNull(currentRevision), Objects.requireNonNull(git));
 			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
 			try {
@@ -143,7 +144,7 @@ public class AnalysisService implements IAnalysisService {
 	@Nullable
 	private Project analyzeFirstDifferentCommit(Project project, String accessToken, Git git, List<String> commitIds, Revision currentRevision) throws GitAPIException {
 		Objects.requireNonNull(currentRevision).setSha(Objects.requireNonNull(commitIds.get(0)));
-		Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1);
+		Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1L);
 		GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
 		LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
 		try {
@@ -187,12 +188,12 @@ public class AnalysisService implements IAnalysisService {
 	public Collection<CumulativeInterest> findCumulativeInterestByCommit(String url, String sha) {
 		return metricsRepository.findCumulativeInterestByCommit(new ProjectDTO(url), sha);
 	}
-	/*
+	
 	@Override
 	public Collection<InterestPerCommitFile> findInterestByCommitFile(String url, String sha, String filePath) {
 		return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), sha, filePath);
 	}
-	
+	/*
 	@Override
 	public Collection<InterestChange> findInterestChangeByCommit(String url, String sha) {
 		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
