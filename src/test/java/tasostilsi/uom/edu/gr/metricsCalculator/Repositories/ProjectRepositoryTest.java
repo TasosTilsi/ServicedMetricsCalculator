@@ -18,16 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedClass;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.testng.Assert.*;
 
@@ -158,24 +154,6 @@ class ProjectRepositoryTest {
 			LOGGER.info("Path retrieved: " + retrievedProjectFromDB.orElseThrow());
 			
 			assertEquals(retrievedProjectFromDB.get(), project.getClonePath(), "ID matches");
-		} finally {
-			projectRepository.deleteAll();
-		}
-	}
-	
-	@Test
-	void initializeProjectAnalysis() {
-		try {
-			Project project = createProject();
-			saveProjectToDB(project);
-
-			Set<CalculatedClass> calculatedClasses = ConcurrentHashMap.newKeySet();
-			CalculatedJavaFile javaFile = new CalculatedJavaFile("", calculatedClasses);
-			
-			LOGGER.info("Retrieving Project from DB");
-			int retrievedProjectFromDB = projectRepository.initializeProjectAnalysis(javaFile, project.getUrl());
-			
-			assertEquals(retrievedProjectFromDB, 1, "Status returned");
 		} finally {
 			projectRepository.deleteAll();
 		}

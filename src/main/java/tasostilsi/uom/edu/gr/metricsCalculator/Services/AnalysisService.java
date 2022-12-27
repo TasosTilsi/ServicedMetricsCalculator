@@ -35,7 +35,6 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisServ
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.*;
 
 @Service
@@ -193,9 +192,12 @@ public class AnalysisService implements IAnalysisService {
 	public Collection<InterestPerCommitFile> findInterestByCommitFile(String url, String sha, String filePath) {
 		return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), sha, filePath);
 	}
-	/*
+	
 	@Override
 	public Collection<InterestChange> findInterestChangeByCommit(String url, String sha) {
+		if (metricsRepository.findDistinctRevisionCountByRevisionSha(sha) <= 3) {
+			throw new IllegalStateException("Please choose a revision sha that has revision count more than 3!");
+		}
 		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
 	}
 	
@@ -213,6 +215,8 @@ public class AnalysisService implements IAnalysisService {
 	public Collection<NormalizedInterest> findNormalizedInterestByCommit(String url, String sha) {
 		return metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
 	}
+	
+	/*
 	
 	@Override
 	public Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, String url, String sha) {

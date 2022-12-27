@@ -20,8 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest;
-import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.*;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.AnalysisService;
 
 import java.util.Collection;
@@ -57,23 +56,30 @@ public class AnalysisController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	/*
-	
-	
 	@GetMapping(value = "/interestChange")
-	Collection<InterestChange> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha) {
-		return analysisService.findInterestChangeByCommit(url, sha);
+	public ResponseEntity<Collection<InterestChange>> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha) {
+		Collection<InterestChange> response = analysisService.findInterestChangeByCommit(url, sha);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/fileInterestChange")
-	FileInterestChange getFileInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath) {
-		return analysisService.findInterestChangeByCommitAndFile(url, sha, filePath);
+	public ResponseEntity<FileInterestChange> getFileInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath) {
+		FileInterestChange response = analysisService.findInterestChangeByCommitAndFile(url, sha, filePath);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/normalizedInterest")
-	Collection<NormalizedInterest> getNormalizedInterest(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
-		return (Objects.isNull(sha)) ? analysisService.findNormalizedInterest(url) : analysisService.findNormalizedInterestByCommit(url, sha);
+	public ResponseEntity<Collection<NormalizedInterest>> getNormalizedInterest(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
+		Collection<NormalizedInterest> response;
+		if (Objects.isNull(sha))
+			response = analysisService.findNormalizedInterest(url);
+		else
+			response = analysisService.findNormalizedInterestByCommit(url, sha);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	/*
+
 	
 	@GetMapping(value = "/highInterestFiles")
 	Collection<HighInterestFile> getHighInterestFiles(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = false) Integer limit) {
