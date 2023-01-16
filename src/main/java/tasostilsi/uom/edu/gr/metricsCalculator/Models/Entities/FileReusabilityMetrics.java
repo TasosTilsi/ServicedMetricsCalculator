@@ -21,12 +21,12 @@ public class FileReusabilityMetrics {
     private Integer dit;
     private BigDecimal wmc;
     private BigDecimal rfc;
-    private BigInteger lcom;
+    private BigDecimal lcom;
     private Integer nocc;
 
     public FileReusabilityMetrics() { }
 
-    public FileReusabilityMetrics(String sha, Long revisionCount, String filePath, BigDecimal cbo, Integer dit, BigDecimal wmc, BigDecimal rfc, BigInteger lcom, Integer nocc) {
+    public FileReusabilityMetrics(String sha, Long revisionCount, String filePath, BigDecimal cbo, Integer dit, BigDecimal wmc, BigDecimal rfc, BigDecimal lcom, Integer nocc) {
         this.sha = sha;
         this.revisionCount = revisionCount;
         this.filePath = filePath;
@@ -35,6 +35,18 @@ public class FileReusabilityMetrics {
         this.wmc = wmc;
         this.rfc = rfc;
         this.lcom = lcom;
+        this.nocc = nocc;
+    }
+    
+    public FileReusabilityMetrics(String sha, Long revisionCount, String filePath, Double cbo, Integer dit, Double wmc, Double rfc, Double lcom, Integer nocc) {
+        this.sha = sha;
+        this.revisionCount = revisionCount;
+        this.filePath = filePath;
+        this.cbo = BigDecimal.valueOf(cbo);
+        this.dit = dit;
+        this.wmc = BigDecimal.valueOf(wmc);
+        this.rfc = BigDecimal.valueOf(rfc);
+        this.lcom = BigDecimal.valueOf(lcom);
         this.nocc = nocc;
     }
 
@@ -94,11 +106,11 @@ public class FileReusabilityMetrics {
         this.rfc = rfc;
     }
 
-    public BigInteger getLcom() {
+    public BigDecimal getLcom() {
         return lcom;
     }
 
-    public void setLcom(BigInteger lcom) {
+    public void setLcom(BigDecimal lcom) {
         this.lcom = lcom;
     }
 

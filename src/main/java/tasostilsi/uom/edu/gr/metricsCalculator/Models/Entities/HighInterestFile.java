@@ -32,6 +32,15 @@ public class HighInterestFile {
         this.interestHours = interestHours;
         this.interestPercentageOfProject = interestPercentageOfProject;
     }
+    
+    public HighInterestFile(String sha, Long revisionCount, String filePath, Double interestEu, Double interestHours, Double interestPercentageOfProject) {
+        this.sha = sha;
+        this.revisionCount = revisionCount;
+        this.filePath = filePath;
+        this.interestEu = BigDecimal.valueOf(interestEu);
+        this.interestHours = BigDecimal.valueOf(interestHours);
+        this.interestPercentageOfProject = BigDecimal.valueOf(interestPercentageOfProject);
+    }
 
     public String getSha() {
         return sha;

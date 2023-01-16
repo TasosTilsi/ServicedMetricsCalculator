@@ -12,6 +12,8 @@
 
 package tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.*;
 
@@ -35,15 +37,13 @@ public interface IAnalysisService {
 	
 	Collection<NormalizedInterest> findNormalizedInterestByCommit(String url, String sha);
 
-	/*
-	
 	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, String url, String sha);
-	
+
 	Slice<ProjectReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url);
-	
+
 	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha);
-	
+
 	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha, String filePath);
-	
-	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url);*/
+
+	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url);
 }

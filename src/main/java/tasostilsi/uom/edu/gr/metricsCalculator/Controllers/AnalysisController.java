@@ -16,6 +16,7 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Controllers;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -78,31 +79,53 @@ public class AnalysisController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	/*
-
-	
 	@GetMapping(value = "/highInterestFiles")
-	Collection<HighInterestFile> getHighInterestFiles(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = false) Integer limit) {
-		return Objects.isNull(limit) ? analysisService.findHighInterestFiles(null, url, sha).getContent() : analysisService.findHighInterestFiles(PageRequest.of(0, limit), url, sha).getContent();
+	ResponseEntity<Collection<HighInterestFile>> getHighInterestFiles(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = false) Integer limit) {
+		Collection<HighInterestFile> response;
+		if (Objects.isNull(limit))
+			response = analysisService.findHighInterestFiles(null, url, sha).getContent();
+		else
+			response = analysisService.findHighInterestFiles(PageRequest.of(0, limit), url, sha).getContent();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/reusabilityMetrics")
-	Collection<ProjectReusabilityMetrics> getReusabilityMetrics(@RequestParam(required = true) String url, @RequestParam(required = false) Integer limit) {
-		return Objects.isNull(limit) ? analysisService.findReusabilityMetrics(null, url).getContent() : analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url).getContent();
+	ResponseEntity<Collection<ProjectReusabilityMetrics>> getReusabilityMetrics(@RequestParam(required = true) String url, @RequestParam(required = false) Integer limit) {
+		Collection<ProjectReusabilityMetrics> response;
+		if (Objects.isNull(limit))
+			response = analysisService.findReusabilityMetrics(null, url).getContent();
+		else
+			response = analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url).getContent();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/reusabilityMetricsByCommit")
-	Collection<FileReusabilityMetrics> getReusabilityMetricsByCommit(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = false) Integer limit) {
-		return Objects.isNull(limit) ? analysisService.findReusabilityMetrics(null, url, sha).getContent() : analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url, sha).getContent();
+	ResponseEntity<Collection<FileReusabilityMetrics>> getReusabilityMetricsByCommit(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = false) Integer limit) {
+		Collection<FileReusabilityMetrics> response;
+		if (Objects.isNull(limit))
+			response = analysisService.findReusabilityMetrics(null, url, sha).getContent();
+		else
+			response = analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url, sha).getContent();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/reusabilityMetricsByCommitAndFile")
-	Collection<FileReusabilityMetrics> getReusabilityMetricsByCommitAndFile(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath, @RequestParam(required = false) Integer limit) {
-		return Objects.isNull(limit) ? analysisService.findReusabilityMetrics(null, url, sha, filePath).getContent() : analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url, sha, filePath).getContent();
+	ResponseEntity<Collection<FileReusabilityMetrics>> getReusabilityMetricsByCommitAndFile(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath, @RequestParam(required = false) Integer limit) {
+		Collection<FileReusabilityMetrics> response;
+		if (Objects.isNull(limit))
+			response = analysisService.findReusabilityMetrics(null, url, sha, filePath).getContent();
+		else
+			response = analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url, sha, filePath).getContent();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/analyzedCommits")
-	Collection<AnalyzedCommit> getAnalyzedCommitIds(@RequestParam(required = true) String url, @RequestParam(required = false) Integer limit) {
-		return Objects.isNull(limit) ? analysisService.findAnalyzedCommits(null, url).getContent() : analysisService.findAnalyzedCommits(PageRequest.of(0, limit), url).getContent();
-	}*/
+	ResponseEntity<Collection<AnalyzedCommit>> getAnalyzedCommitIds(@RequestParam(required = true) String url, @RequestParam(required = false) Integer limit) {
+		Collection<AnalyzedCommit> response;
+		if (Objects.isNull(limit))
+			response = analysisService.findAnalyzedCommits(null, url).getContent();
+		else
+			response = analysisService.findAnalyzedCommits(PageRequest.of(0, limit), url).getContent();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

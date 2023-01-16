@@ -26,6 +26,13 @@ public class NormalizedInterest {
         this.normalizedInterestEu = normalizedInterestEu;
         this.normalizedInterestHours = normalizedInterestHours;
     }
+    
+    public NormalizedInterest(String sha, Long revisionCount, Double normalizedInterestEu, Double normalizedInterestHours) {
+        this.sha = sha;
+        this.revisionCount = revisionCount;
+        this.normalizedInterestEu = BigDecimal.valueOf(normalizedInterestEu);
+        this.normalizedInterestHours = BigDecimal.valueOf(normalizedInterestHours);
+    }
 
     public String getSha() {
         return sha;

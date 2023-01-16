@@ -16,6 +16,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
@@ -216,7 +218,6 @@ public class AnalysisService implements IAnalysisService {
 		return metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
 	}
 	
-	/*
 	
 	@Override
 	public Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, String url, String sha) {
@@ -241,5 +242,5 @@ public class AnalysisService implements IAnalysisService {
 	@Override
 	public Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url) {
 		return metricsRepository.findAnalyzedCommits(pageable, new ProjectDTO(url));
-	}*/
+	}
 }
