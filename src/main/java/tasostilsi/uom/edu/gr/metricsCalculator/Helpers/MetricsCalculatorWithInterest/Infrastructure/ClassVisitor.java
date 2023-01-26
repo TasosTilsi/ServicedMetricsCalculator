@@ -57,13 +57,13 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	
 	@Override
 	public void visit(EnumDeclaration javaClass, Void arg) {
-		if (javaFiles.stream().anyMatch(javaFile -> javaFile.getPath().equals(filePath))) {
+		if (javaFiles.stream().parallel().anyMatch(javaFile -> javaFile.getPath().equals(filePath))) {
 			CalculatedJavaFile jf = javaFiles
-					.stream()
+					.stream().parallel()
 					.filter(javaFile -> javaFile.getPath().equals(filePath)).findAny().get();
 			
 			if (javaClass.getFullyQualifiedName().isPresent()) {
-				CalculatedClass currentClassObject = jf.getClasses().stream().filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get())).findFirst().get();
+				CalculatedClass currentClassObject = jf.getClasses().stream().parallel().filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get())).findFirst().get();
 				
 				investigateExtendedTypes();
 				visitAllClassMethods();
@@ -91,24 +91,24 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	
 	@Override
 	public void visit(ClassOrInterfaceDeclaration javaClass, Void arg) {
-		if (javaFiles.stream().anyMatch(javaFile -> javaFile.getPath().equals(filePath))) {
+		if (javaFiles.stream().parallel().anyMatch(javaFile -> javaFile.getPath().equals(filePath))) {
 			CalculatedJavaFile jf = javaFiles
-					.stream()
+					.stream().parallel()
 					.filter(javaFile -> javaFile.getPath().equals(filePath)).filter(javaFile -> javaFile.getId() == null).findFirst().get();
 			
 			if (jf == null) {
 				jf = javaFiles
-						.stream()
+						.stream().parallel()
 						.filter(javaFile -> javaFile.getPath().equals(filePath)).findAny().get();
 			}
 			
 			if (javaClass.getFullyQualifiedName().isPresent()) {
-				CalculatedClass currentClassObject = jf.getClasses().stream().filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get())).findFirst().get();
+				CalculatedClass currentClassObject = jf.getClasses().stream().parallel().filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get())).findFirst().get();
 				
-				LOGGER.info("Before");
-				LOGGER.info("JAVA FILE HERE {}: {}", jf.getPath(), jf.getClasses().stream().map(CalculatedClass::getQualityMetrics).toArray());
-				LOGGER.info("CLASS HERE {}: {}", currentClassObject.getQualifiedName(), currentClassObject.getQualityMetrics());
-				LOGGER.info("");
+//				LOGGER.info("Before");
+//				LOGGER.info("JAVA FILE HERE {}: {}", jf.getPath(), jf.getClasses().stream().map(CalculatedClass::getQualityMetrics).toArray());
+//				LOGGER.info("CLASS HERE {}: {}", currentClassObject.getQualifiedName(), currentClassObject.getQualityMetrics());
+//				LOGGER.info("");
 				investigateExtendedTypes();
 				visitAllClassMethods();
 				
@@ -130,9 +130,9 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 					t.printStackTrace();
 				}
 				
-				LOGGER.info("After");
-				LOGGER.info("JAVA FILE HERE {}: {}", jf.getPath(), jf.getClasses().stream().map(CalculatedClass::getQualityMetrics).toArray());
-				LOGGER.info("CLASS HERE {}: {}", currentClassObject.getQualifiedName(), currentClassObject.getQualityMetrics());
+//				LOGGER.info("After");
+//				LOGGER.info("JAVA FILE HERE {}: {}", jf.getPath(), jf.getClasses().stream().map(CalculatedClass::getQualityMetrics).toArray());
+//				LOGGER.info("CLASS HERE {}: {}", currentClassObject.getQualifiedName(), currentClassObject.getQualityMetrics());
 			}
 		}
 	}
@@ -165,7 +165,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 * Visit all class methods & register metrics values
 	 */
 	private void visitAllClassMethods() {
-		javaClass.getMethods()
+		javaClass.getMethods().stream().parallel()
 				.forEach(this::visitMethod);
 	}
 	
@@ -215,7 +215,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 */
 	private int countSwitch(MethodDeclaration method) {
 		final int[] count = {0};
-		method.findAll(SwitchStmt.class).forEach(switchStmt -> count[0] += switchStmt.getEntries().size());
+		method.findAll(SwitchStmt.class).stream().parallel().forEach(switchStmt -> count[0] += switchStmt.getEntries().size());
 		return count[0];
 	}
 	
@@ -284,7 +284,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 * @return LCOM metric value
 	 */
 	private int calculateLCOM() {
-		javaClass.getMethods().forEach(methodDeclaration -> methodIntersection.add(new TreeSet<>()));
+		javaClass.getMethods().stream().parallel().forEach(methodDeclaration -> methodIntersection.add(new TreeSet<>()));
 		int lcom = 0;
 		for (int i = 0; i < methodIntersection.size(); ++i) {
 			for (int j = i + 1; j < methodIntersection.size(); ++j) {
@@ -302,7 +302,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	}
 	
 	private double calculateWmc() {
-		return javaClass.getMethods().stream().filter(methodDeclaration -> !methodDeclaration.isConstructorDeclaration()).count();
+		return javaClass.getMethods().stream().parallel().filter(methodDeclaration -> !methodDeclaration.isConstructorDeclaration()).count();
 	}
 	
 	/**
@@ -363,8 +363,8 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 */
 	private void investigateFieldAccess(MethodDeclaration method) {
 		try {
-			method.findAll(NameExpr.class).forEach(expr -> javaClass.getFields().forEach(classField -> classField.getVariables()
-					.stream().filter(var -> var.getNameAsString().equals(expr.getNameAsString()))
+			method.findAll(NameExpr.class).stream().parallel().forEach(expr -> javaClass.getFields().forEach(classField -> classField.getVariables()
+					.stream().parallel().filter(var -> var.getNameAsString().equals(expr.getNameAsString()))
 					.forEach(var -> registerFieldAccess(expr.getNameAsString()))));
 		} catch (Throwable ignored) {
 		}
@@ -377,7 +377,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 */
 	private void investigateExceptions(MethodDeclaration method) {
 		try {
-			method.resolve().getSpecifiedExceptions()
+			method.resolve().getSpecifiedExceptions().stream().parallel()
 					.forEach(exception -> {
 						try {
 							registerCoupling(exception.asReferenceType().getQualifiedName());
@@ -395,7 +395,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 */
 	private void investigateParameters(MethodDeclaration method) {
 		try {
-			method.getParameters()
+			method.getParameters().stream().parallel()
 					.forEach(p -> {
 						try {
 							registerCoupling(p.getType().resolve().asReferenceType().getQualifiedName());
@@ -413,7 +413,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 */
 	private void investigateInvocation(MethodDeclaration method) {
 		try {
-			method.findAll(MethodCallExpr.class)
+			method.findAll(MethodCallExpr.class).stream().parallel()
 					.forEach(methodCall -> {
 						try {
 							registerMethodInvocation(methodCall.resolve().getPackageName() + "." + methodCall.resolve().getClassName(), methodCall.resolve().getQualifiedSignature());

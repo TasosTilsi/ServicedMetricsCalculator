@@ -58,7 +58,33 @@ public class AnalysisService implements IAnalysisService {
 	}
 	
 	@Override
-	public String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
+	public String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) {
+		final String[] returnString = {"The project with url: " + newAnalysisDTO.getGitUrl() + " analysis started"};
+		
+		Optional<Project> existsInDb = projectRepository.findByUrl(newAnalysisDTO.getGitUrl());
+		
+		Project project = existsInDb.orElseGet(() -> new Project(newAnalysisDTO.getGitUrl()));
+		
+		if (!Objects.equals(project.getState(), State.RUNNING.name())) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						returnString[0] = backgroundAnalysis(newAnalysisDTO);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}).start();
+			
+		} else {
+			return "Project " + newAnalysisDTO.getGitUrl() + " is analyzing currently!";
+		}
+		
+		return returnString[0];
+	}
+	
+	private String backgroundAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
 		Project project;
 		String accessToken = newAnalysisDTO.getAccessToken();
 		
@@ -77,9 +103,13 @@ public class AnalysisService implements IAnalysisService {
 			List<String> commitIds = GitUtils.getInstance().getCommitIds(git);
 			
 			if (commitIds.isEmpty()) {
-				LOGGER.error("No commits to analyze, or something is wrong with git url!\nPlease review the git url you provided.\nIf this repo is private please provide access token!");
+				LOGGER.error("No commits to analyze, or something is wrong with git url!\n" +
+						"Please review the git url you provided.\n" +
+						"If this repo is private please provide access token!");
 				FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
-				throw new RuntimeException("No commits to analyze, or something is wrong with git url!\nPlease review the git url you provided.\nIf this repo is private please provide access token!");
+				throw new RuntimeException("No commits to analyze, or something is wrong with git url!\n" +
+						"Please review the git url you provided.\n" +
+						"If this repo is private please provide access token!");
 			}
 			projectRepository.save(project);
 			
@@ -110,7 +140,7 @@ public class AnalysisService implements IAnalysisService {
 			LOGGER.info("Finished analysing {} revisions.\n", Objects.requireNonNull(currentRevision).getCount());
 			project.setState(State.COMPLETED.name());
 			projectRepository.save(project);
-			return "Finished analysing " + currentRevision.getCount() + " revisions.";
+			return "Finished analysing " + currentRevision.getCount() + " revisions for " + project.getUrl() + ".";
 		} else {
 			return "Project " + newAnalysisDTO.getGitUrl() + " is analyzing currently!";
 		}

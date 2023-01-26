@@ -222,30 +222,4 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, ProjectDTO project);
 	
-/*
-
-	@Query(value = "SELECT new HighInterestFile(c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count, c.path, c.interest.interestInEuros, c.interest.interestInHours, c.interest.interestInEuros/(SELECT SUM(c2.interest.interestInEuros) FROM CalculatedJavaFile c2 WHERE c2.project.url = :#{#project.url} AND c2.qualityMetrics.revision.sha = :sha)) "
-			+ "FROM CalculatedJavaFile c AND c.qualityMetrics.revision.sha = f.sha "
-			+ "WHERE c.project.url = :#{#project.url} AND c.qualityMetrics.revision.sha = :sha GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count, c.path, c.interest.interestInEuros, c.interest.interestInHours ORDER BY c.interest.interestInEuros DESC")
-	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, ProjectDTO project, @Param("sha") String sha);
-
-	@Query(value = "SELECT new ProjectReusabilityMetrics(c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count, AVG(c.qualityMetrics.CBO), AVG(c.qualityMetrics.DIT), AVG(c.qualityMetrics.WMC), AVG(c.qualityMetrics.RFC), AVG(c.qualityMetrics.LCOM), AVG(c.qualityMetrics.NOCC)) "
-			+ "FROM CalculatedJavaFile c "
-			+ "WHERE c.project.url = :#{#project.url} AND c.qualityMetrics.LCOM >= 0 AND c.qualityMetrics.DIT >= 0 GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count ORDER BY c.qualityMetrics.revision.count")
-	Slice<ProjectReusabilityMetrics> findReusabilityMetrics(Pageable pageable, ProjectDTO project);
-
-	@Query(value = "SELECT new FileReusabilityMetrics(c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count, c.path, c.qualityMetrics.CBO, c.qualityMetrics.DIT, c.qualityMetrics.WMC, c.qualityMetrics.RFC, c.qualityMetrics.LCOM, c.qualityMetrics.NOCC) "
-			+ "FROM CalculatedJavaFile c AND c.qualityMetrics.revision.sha = f.sha "
-			+ "WHERE c.project.url = :#{#project.url} AND c.qualityMetrics.revision.sha = :sha AND c.qualityMetrics.LCOM >= 0 AND c.qualityMetrics.DIT >= 0 ORDER BY c.path")
-	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha);
-
-	@Query(value = "SELECT new FileReusabilityMetrics(c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count, c.path, c.qualityMetrics.CBO, c.qualityMetrics.DIT, c.qualityMetrics.WMC, c.qualityMetrics.RFC, c.qualityMetrics.LCOM, c.qualityMetrics.NOCC) "
-			+ "FROM CalculatedJavaFile c AND c.qualityMetrics.revision.sha = f.sha "
-			+ "WHERE c.project.url = :#{#project.url} AND c.qualityMetrics.revision.sha = :sha AND c.path = :filePath AND c.qualityMetrics.LCOM >= 0 AND c.qualityMetrics.DIT >= 0 ORDER BY c.path")
-	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
-
-	@Query(value = "SELECT DISTINCT new AnalyzedCommit(c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count) "
-			+ "FROM CalculatedJavaFile c "
-			+ "WHERE c.project.url = :#{#project.url} ORDER BY c.qualityMetrics.revision.count DESC")
-	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, ProjectDTO project);*/
 }

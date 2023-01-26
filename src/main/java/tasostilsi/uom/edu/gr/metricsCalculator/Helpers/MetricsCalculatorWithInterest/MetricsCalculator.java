@@ -118,7 +118,7 @@ public class MetricsCalculator {
 	}
 	
 	private void performAggregation(Set<String> filesToAnalyze) {
-		project.getJavaFiles().forEach(javaFile -> {
+		project.getJavaFiles().stream().parallel().forEach(javaFile -> {
 			if (filesToAnalyze.contains(javaFile.getPath()) && javaFile.getQualityMetrics().equals(new QualityMetrics())) {
 				javaFile.aggregateMetrics();
 			}
@@ -146,20 +146,20 @@ public class MetricsCalculator {
 						try {
 							sourceRoot.tryToParse()
 									.stream()
-//									.parallel()
+									.parallel()
 									.filter(res -> res.getResult().isPresent())
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 												.stream()
-//												.parallel()
+												.parallel()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
 												.stream()
-//												.parallel()
+												.parallel()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -199,20 +199,20 @@ public class MetricsCalculator {
 						try {
 							sourceRoot.tryToParse()
 									.stream()
-//									.parallel()
+									.parallel()
 									.filter(res -> res.getResult().isPresent())
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 												.stream()
-//												.parallel()
+												.parallel()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
 												.stream()
-//												.parallel()
+												.parallel()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -251,7 +251,7 @@ public class MetricsCalculator {
 					try {
 						sourceRoot.tryToParse()
 								.stream()
-//								.parallel()
+								.parallel()
 								.filter(res -> res.getResult().isPresent())
 								.forEach(res -> {
 									analyzeCompilationUnit(res.getResult().get());
@@ -273,7 +273,7 @@ public class MetricsCalculator {
 					try {
 						sourceRoot.tryToParse()
 								.stream()
-//								.parallel()
+								.parallel()
 								.filter(res -> res.getResult().isPresent())
 								.filter(res -> res.getResult().get().getStorage().isPresent())
 								.filter(res -> new ArrayList<>(filesToAnalyze).contains(res.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1)))
