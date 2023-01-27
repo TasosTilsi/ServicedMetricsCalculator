@@ -57,7 +57,7 @@ public class AnalysisService implements IAnalysisService {
 		this.metricsRepository = metricsRepository;
 	}
 	
-	@Override
+	/*@Override
 	public String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) {
 		final String[] returnString = {"The project with url: " + newAnalysisDTO.getGitUrl() + " analysis started"};
 		
@@ -82,6 +82,68 @@ public class AnalysisService implements IAnalysisService {
 		}
 		
 		return returnString[0];
+	}*/
+	@Override
+	public String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
+		Project project;
+		String accessToken = newAnalysisDTO.getAccessToken();
+		
+		Optional<Project> existsInDb = projectRepository.findByUrl(newAnalysisDTO.getGitUrl());
+		
+		project = existsInDb.orElseGet(() -> new Project(newAnalysisDTO.getGitUrl()));
+		if (!Objects.equals(project.getState(), State.RUNNING.name())) {
+			project.setState(State.RUNNING.name());
+			
+			LOGGER.info("Project : {} State: {}", project.getUrl(), project.getState());
+			
+			LOGGER.info("Cloning repository from: " + project.getRepo() + " into " + project.getClonePath());
+			Git git = GitUtils.getInstance().cloneRepository(project, accessToken);
+			
+			List<String> diffCommitIds = new ArrayList<>();
+			List<String> commitIds = GitUtils.getInstance().getCommitIds(git);
+			
+			if (commitIds.isEmpty()) {
+				LOGGER.error("No commits to analyze, or something is wrong with git url!\n" +
+						"Please review the git url you provided.\n" +
+						"If this repo is private please provide access token!");
+				FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
+				throw new RuntimeException("No commits to analyze, or something is wrong with git url!\n" +
+						"Please review the git url you provided.\n" +
+						"If this repo is private please provide access token!");
+			}
+			projectRepository.save(project);
+			
+			try {
+				Collections.reverse(commitIds);
+			} catch (Exception e) {
+				LOGGER.error("CommitIds List might be null");
+				e.printStackTrace();
+			}
+			
+			int start = 0;
+			Revision currentRevision = new Revision("", 0L);
+			
+			diffCommitIds = isThereAnyNewCommit(project, existsInDb, diffCommitIds, commitIds, currentRevision);
+			
+			if (existsInDb.isEmpty() || new HashSet<>(diffCommitIds).containsAll(commitIds)) {
+				start = 1;
+				project = analyzeFirstDifferentCommit(project, accessToken, git, commitIds, currentRevision);
+			} else {
+				Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
+				Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow());
+				commitIds = new ArrayList<>(diffCommitIds);
+				start = currentRevision.getCount().intValue();
+			}
+			
+			project = loopThroughCommitsAndGetMetrics(project, accessToken, git, commitIds, start, currentRevision);
+			
+			LOGGER.info("Finished analysing {} revisions.\n", Objects.requireNonNull(currentRevision).getCount());
+			project.setState(State.COMPLETED.name());
+			projectRepository.save(project);
+			return "Finished analysing " + currentRevision.getCount() + " revisions for " + project.getUrl() + ".";
+		} else {
+			return "Project " + newAnalysisDTO.getGitUrl() + " is analyzing currently!";
+		}
 	}
 	
 	private String backgroundAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {

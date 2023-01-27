@@ -22,9 +22,9 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.MetricsCalculator;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -83,9 +83,9 @@ public class Utils {
 		if (!entity.getDeleteDiffEntries().isEmpty())
 			project.getJavaFiles().removeAll(removeDeletedFiles(currentRevision, entity.getDeleteDiffEntries()));
 		if (!entity.getAddDiffEntries().isEmpty())
-			project = setMetrics(project, currentRevision, entity.getAddDiffEntries().stream().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
+			project = setMetrics(project, currentRevision, entity.getAddDiffEntries().stream().parallel().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
 		if (!entity.getModifyDiffEntries().isEmpty())
-			project = setMetrics(project, currentRevision, entity.getModifyDiffEntries().stream().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
+			project = setMetrics(project, currentRevision, entity.getModifyDiffEntries().stream().parallel().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
 		if (!entity.getRenameDiffEntries().isEmpty()) {
 			final Project finalProject = project;
 			entity.getRenameDiffEntries()
@@ -95,7 +95,7 @@ public class Utils {
 								javaFile.setPath(diffEntry.getNewFilePath());
 							}
 						}
-						finalProject.getJavaFiles().stream().filter(file -> file.getPath().equals(diffEntry.getOldFilePath())).forEach(file -> file.setPath(diffEntry.getNewFilePath()));
+						finalProject.getJavaFiles().stream().parallel().filter(file -> file.getPath().equals(diffEntry.getOldFilePath())).forEach(file -> file.setPath(diffEntry.getNewFilePath()));
 					});
 			project.setJavaFiles(finalProject.getJavaFiles());
 		}
@@ -122,8 +122,8 @@ public class Utils {
 				String filePath = column[0];
 				
 				CalculatedJavaFile jf;
-				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+				if (Globals.getJavaFiles().stream().parallel().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+					jf = project.getJavaFiles().stream().parallel().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 					registerMetrics(column, jf);
 					Globals.addJavaFile(jf);
 				} else {
@@ -169,8 +169,8 @@ public class Utils {
 			String filePath = column[0];
 			
 			CalculatedJavaFile jf;
-			if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+			if (Globals.getJavaFiles().stream().parallel().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+				jf = project.getJavaFiles().stream().parallel().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 				registerMetrics(column, jf);
 				Globals.addJavaFile(jf);
 			} else {

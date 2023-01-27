@@ -302,7 +302,7 @@ public class MetricsCalculator {
 	 * @param cu the compilation unit given
 	 */
 	private void analyzeClassOrInterfaces(CompilationUnit cu) {
-		cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cl -> {
+		cu.findAll(ClassOrInterfaceDeclaration.class).stream().parallel().forEach(cl -> {
 			try {
 				cl.accept(new ClassVisitor(project.getJavaFiles(), cu.getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1), cl), null);
 			} catch (Exception ignored) {
@@ -316,7 +316,7 @@ public class MetricsCalculator {
 	 * @param cu the compilation unit given
 	 */
 	private void analyzeEnums(CompilationUnit cu) {
-		cu.findAll(EnumDeclaration.class).forEach(cl -> {
+		cu.findAll(EnumDeclaration.class).stream().parallel().forEach(cl -> {
 			try {
 				cl.accept(new ClassVisitor(project.getJavaFiles(), cu.getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1), cl), null);
 			} catch (Exception ignored) {

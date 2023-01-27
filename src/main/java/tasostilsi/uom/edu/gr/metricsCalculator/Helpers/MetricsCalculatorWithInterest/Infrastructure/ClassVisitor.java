@@ -347,7 +347,7 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 		
 		try {
 			CalculatedJavaFile jf = javaFiles
-					.stream()
+					.stream().parallel()
 					.filter(javaFile -> javaFile.getClasses().contains(classQualifiedName))
 					.findFirst().get();
 			return jf.getClasses().stream().filter(cl -> cl.getQualifiedName().equals(classQualifiedName)).findFirst().get();

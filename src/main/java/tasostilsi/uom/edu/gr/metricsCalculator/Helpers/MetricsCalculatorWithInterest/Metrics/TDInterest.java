@@ -212,52 +212,52 @@ public class TDInterest {
 	private QualityMetrics getOptimalMetrics(Set<CalculatedJavaFile> topFiveNeighbors) {
 		QualityMetrics optimalMetrics = new QualityMetrics();
 		optimalMetrics.setDIT(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getDIT())
 				.min(Integer::compare)
 				.orElse(0));
 		optimalMetrics.setNOCC(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getNOCC())
 				.min(Integer::compare)
 				.orElse(0));
 		optimalMetrics.setRFC(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getRFC())
 				.min(Double::compare)
 				.orElse(0.0));
 		optimalMetrics.setLCOM(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getLCOM())
 				.min(Double::compare)
 				.orElse(0.0));
 		optimalMetrics.setWMC(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getWMC())
 				.min(Double::compare)
 				.orElse(0.0));
 		optimalMetrics.setNOM(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getNOM())
 				.min(Double::compare)
 				.orElse(0.0));
 		optimalMetrics.setMPC(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getMPC())
 				.min(Double::compare)
 				.orElse(0.0));
 		optimalMetrics.setDAC(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getDAC())
 				.min(Integer::compare)
 				.orElse(0));
 		optimalMetrics.setSIZE1(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getSIZE1())
 				.min(Integer::compare)
 				.orElse(0));
 		optimalMetrics.setSIZE2(topFiveNeighbors
-				.stream()
+				.stream().parallel()
 				.map(n -> n.getQualityMetrics().getSIZE2())
 				.min(Integer::compare)
 				.orElse(0));
