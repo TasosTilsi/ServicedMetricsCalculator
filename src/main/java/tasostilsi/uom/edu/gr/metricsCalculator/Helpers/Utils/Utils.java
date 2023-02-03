@@ -32,16 +32,16 @@ public class Utils {
 	
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(Utils.class);
 	
-	private static Utils instance;
-	
 	private Utils() {
 	}
 	
 	public static Utils getInstance() {
-		if (instance == null) {
-			instance = new Utils();
-		}
-		return instance;
+		//double-checked locking - because second check of Singleton instance with lock
+		return UtilsInstanceHolder.instance;
+	}
+	
+	private static final class UtilsInstanceHolder {
+		private static final Utils instance = new Utils();
 	}
 	
 	/**

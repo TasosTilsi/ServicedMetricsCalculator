@@ -171,13 +171,6 @@ public class MetricsCalculator {
 											AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
 											jfile.set(new CalculatedJavaFile(path, revision, classNames));
 											jfile.get().setProject(project);
-//											if (!project.getJavaFiles().isEmpty() && project.getJavaFiles().stream().anyMatch(javaFile -> javaFile.getPath().equals(path))) {
-//												project.getJavaFiles().forEach(file -> {
-//													if (file.getPath().equals(path)) {
-//														jfile.get().setId(file.getId());
-//													}
-//												});
-//											}
 											project.getJavaFiles().add(jfile.get());
 										} catch (Throwable ignored) {
 											LOGGER.error(ignored.getLocalizedMessage());

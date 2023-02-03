@@ -42,16 +42,57 @@ public class GitUtils {
 	
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(GitUtils.class);
 	
-	private static GitUtils instance;
-	
 	private GitUtils() {
 	}
 	
 	public static GitUtils getInstance() {
-		if (instance == null) {
-			instance = new GitUtils();
+		//double-checked locking - because second check of Singleton instance with lock
+		return GitUtilsInstanceHolder.instance;
+	}
+	
+	/**
+	 * Gets all commit ids for a specific git repo.
+	 *
+	 * @param git the git object
+	 */
+	public PrincipalResponseEntity[] getResponseEntitiesAtCommit(Git git, String sha) {
+		String javaFileExtension = ".java";
+		RevCommit headCommit;
+		try {
+			headCommit = git.getRepository().parseCommit(ObjectId.fromString(sha));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
-		return instance;
+		RevCommit diffWith = Objects.requireNonNull(headCommit).getParent(0);
+		FileOutputStream stdout = new FileOutputStream(FileDescriptor.out);
+		PrincipalResponseEntity[] principalResponseEntities = new PrincipalResponseEntity[1];
+		try (DiffFormatter diffFormatter = new DiffFormatter(stdout)) {
+			diffFormatter.setRepository(git.getRepository());
+			try {
+				Set<DiffEntry> addDiffEntries = new HashSet<>();
+				Set<DiffEntry> modifyDiffEntries = new HashSet<>();
+				Set<DiffEntry> renameDiffEntries = new HashSet<>();
+				Set<DiffEntry> deleteDiffEntries = new HashSet<>();
+				RenameDetector renameDetector = new RenameDetector(git.getRepository());
+				renameDetector.addAll(diffFormatter.scan(diffWith, headCommit));
+				for (org.eclipse.jgit.diff.DiffEntry entry : renameDetector.compute()) {
+					if ((entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.ADD) || entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.COPY)) && entry.getNewPath().toLowerCase().endsWith(javaFileExtension))
+						addDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
+					else if (entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.MODIFY) && entry.getNewPath().toLowerCase().endsWith(javaFileExtension))
+						modifyDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
+					else if (entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE) && entry.getOldPath().toLowerCase().endsWith(javaFileExtension))
+						deleteDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
+					else if (entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.RENAME) && entry.getNewPath().toLowerCase().endsWith(javaFileExtension)) {
+						renameDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
+					}
+				}
+				principalResponseEntities[0] = new PrincipalResponseEntity(headCommit.getName(), headCommit.getCommitTime(), addDiffEntries, modifyDiffEntries, renameDiffEntries, deleteDiffEntries);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return principalResponseEntities;
 	}
 	
 	/**
@@ -95,48 +136,8 @@ public class GitUtils {
 		return result;
 	}
 	
-	/**
-	 * Gets all commit ids for a specific git repo.
-	 *
-	 * @param git the git object
-	 */
-	public PrincipalResponseEntity[] getResponseEntitiesAtCommit(Git git, String sha) {
-		RevCommit headCommit;
-		try {
-			headCommit = git.getRepository().parseCommit(ObjectId.fromString(sha));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-		RevCommit diffWith = Objects.requireNonNull(headCommit).getParent(0);
-		FileOutputStream stdout = new FileOutputStream(FileDescriptor.out);
-		PrincipalResponseEntity[] principalResponseEntities = new PrincipalResponseEntity[1];
-		try (DiffFormatter diffFormatter = new DiffFormatter(stdout)) {
-			diffFormatter.setRepository(git.getRepository());
-			try {
-				Set<DiffEntry> addDiffEntries = new HashSet<>();
-				Set<DiffEntry> modifyDiffEntries = new HashSet<>();
-				Set<DiffEntry> renameDiffEntries = new HashSet<>();
-				Set<DiffEntry> deleteDiffEntries = new HashSet<>();
-				RenameDetector renameDetector = new RenameDetector(git.getRepository());
-				renameDetector.addAll(diffFormatter.scan(diffWith, headCommit));
-				for (org.eclipse.jgit.diff.DiffEntry entry : renameDetector.compute()) {
-					if ((entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.ADD) || entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.COPY)) && entry.getNewPath().toLowerCase().endsWith(".java"))
-						addDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
-					else if (entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.MODIFY) && entry.getNewPath().toLowerCase().endsWith(".java"))
-						modifyDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
-					else if (entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.DELETE) && entry.getOldPath().toLowerCase().endsWith(".java"))
-						deleteDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
-					else if (entry.getChangeType().equals(org.eclipse.jgit.diff.DiffEntry.ChangeType.RENAME) && entry.getNewPath().toLowerCase().endsWith(".java")) {
-						renameDiffEntries.add(new DiffEntry(entry.getOldPath(), entry.getNewPath(), entry.getChangeType().toString()));
-					}
-				}
-				principalResponseEntities[0] = new PrincipalResponseEntity(headCommit.getName(), headCommit.getCommitTime(), addDiffEntries, modifyDiffEntries, renameDiffEntries, deleteDiffEntries);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return principalResponseEntities;
+	private static final class GitUtilsInstanceHolder {
+		private static final GitUtils instance = new GitUtils();
 	}
 	
 	/**
