@@ -18,8 +18,8 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
@@ -225,6 +225,7 @@ public class MetricsCalculator {
 										}
 									});
 						} catch (Exception ignored) {
+							LOGGER.error(ignored.getLocalizedMessage());
 						}
 					});
 		} catch (Exception ignored) {

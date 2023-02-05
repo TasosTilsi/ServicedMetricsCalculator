@@ -166,6 +166,7 @@ public class GitUtils {
 						.call();
 			}
 		} catch (Exception e) {
+			LOGGER.error(e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 		return null;
@@ -179,6 +180,7 @@ public class GitUtils {
 	 * @param git             a git object
 	 */
 	public void checkout(Project project, String accessToken, Revision currentRevision, Git git) throws GitAPIException {
+		LOGGER.info("{} checking out into: {} with revision sha: {}", project.getUrl(), "version" + currentRevision.getCount(), currentRevision.getSha());
 		try {
 			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getCount()).setStartPoint(currentRevision.getSha()).call();
 		} catch (CheckoutConflictException e) {

@@ -78,7 +78,7 @@ public class BackroundAnalysis implements Runnable {
 					"Please review the git url you provided.\n" +
 					"If this repo is private please provide access token!");
 		}
-		project = projectRepository.saveAndFlush(project);
+		project = projectRepository.save(project);
 		
 		try {
 			Collections.reverse(commitIds);
@@ -114,7 +114,7 @@ public class BackroundAnalysis implements Runnable {
 		
 		LOGGER.info("Finished analysing {} revisions.\n", Objects.requireNonNull(currentRevision).getCount());
 		project.setState(State.COMPLETED.name());
-		project = projectRepository.saveAndFlush(project);
+		project = projectRepository.save(project);
 		LOGGER.info("Finished analysing " + currentRevision.getCount() + " revisions for " + project.getUrl() + ".");
 		
 	}
@@ -128,17 +128,17 @@ public class BackroundAnalysis implements Runnable {
 			try {
 				PrincipalResponseEntity[] responseEntities = GitUtils.getInstance().getResponseEntitiesAtCommit(git, currentRevision.getSha());
 				if (Objects.isNull(responseEntities) || responseEntities.length == 0) {
-					project = projectRepository.saveAndFlush(project);
+					project = projectRepository.save(project);
 					LOGGER.info("Calculated metrics for all files in {},{} revision", currentRevision.getCount(), currentRevision.getSha());
 					continue;
 				}
 				LOGGER.info("Analyzing new/modified commit files...");
 				project = Utils.getInstance().setMetrics(project, currentRevision, responseEntities[0]);
 				LOGGER.info("Calculated metrics for all files in {},{} revision", currentRevision.getCount(), currentRevision.getSha());
-				project = projectRepository.saveAndFlush(project);
+				project = projectRepository.save(project);
 			} catch (Exception ignored) {
 				project.setState(State.ABORTED.name());
-				this.project = projectRepository.saveAndFlush(project);
+				this.project = projectRepository.save(project);
 				throw new IllegalStateException("Project analysis is interrupted at revision count " + currentRevision.getCount());
 			}
 		}
@@ -154,7 +154,7 @@ public class BackroundAnalysis implements Runnable {
 		try {
 			project = Utils.getInstance().setMetrics(project, currentRevision);
 			LOGGER.info("Calculated metrics for all files from first commit!");
-			project = projectRepository.saveAndFlush(project);
+			project = projectRepository.save(project);
 		} catch (Exception e) {
 			LOGGER.warn("This commit has no source roots to analyze, continuing!!!");
 			e.printStackTrace();
@@ -176,7 +176,7 @@ public class BackroundAnalysis implements Runnable {
 				currentRevision.setCount(revisionFromDb.get(0).getCount());
 			} else {
 				project.setState(State.ABORTED.name());
-				this.project = projectRepository.saveAndFlush(project);
+				this.project = projectRepository.save(project);
 				throw new IllegalStateException("No Different Commits exist or something is wrong with git revision");
 			}
 		}
