@@ -60,6 +60,7 @@ public class BackroundAnalysis implements Runnable {
 		Optional<Project> existsInDb = projectRepository.findByUrl(newAnalysisDTO.getGitUrl());
 		
 		project.setState(State.RUNNING.name());
+		project = projectRepository.save(project);
 		
 		LOGGER.info("Project : {} State: {}", project.getUrl(), project.getState());
 		
@@ -78,7 +79,7 @@ public class BackroundAnalysis implements Runnable {
 					"Please review the git url you provided.\n" +
 					"If this repo is private please provide access token!");
 		}
-		project = projectRepository.save(project);
+//		project = projectRepository.save(project);
 		
 		try {
 			Collections.reverse(commitIds);
