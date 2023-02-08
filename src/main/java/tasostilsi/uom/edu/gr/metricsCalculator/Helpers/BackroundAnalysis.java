@@ -14,9 +14,7 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers;
 
 import ch.qos.logback.classic.Logger;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.LoggerFactory;
@@ -39,8 +37,6 @@ import java.util.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class BackroundAnalysis implements Runnable {
 	
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(BackroundAnalysis.class);
@@ -79,7 +75,6 @@ public class BackroundAnalysis implements Runnable {
 					"Please review the git url you provided.\n" +
 					"If this repo is private please provide access token!");
 		}
-//		project = projectRepository.save(project);
 		
 		try {
 			Collections.reverse(commitIds);
