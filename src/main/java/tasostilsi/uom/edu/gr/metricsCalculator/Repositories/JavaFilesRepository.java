@@ -44,4 +44,6 @@ public interface JavaFilesRepository extends JpaRepository<CalculatedJavaFile, L
 	@Query("select c from CalculatedJavaFile c where c.project.id = ?1")
 	Optional<Set<CalculatedJavaFile>> getAllByProjectId(Long project_id);
 	
+	Optional<Double> findKappaValueById(Long javaFileId);
+	
 }

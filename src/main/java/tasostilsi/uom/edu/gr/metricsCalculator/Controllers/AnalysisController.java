@@ -36,7 +36,7 @@ public class AnalysisController {
 	
 	@PostMapping
 	public ResponseEntity<String> makeNewAnalysis(@RequestBody NewAnalysisDTO newAnalysisDTO) throws Exception {
-		LOGGER.info("New Analysis requested for " + newAnalysisDTO.getGitUrl() + " completed with " + newAnalysisDTO.getAccessToken() + " access token");
+		LOGGER.info("New Analysis requested for " + newAnalysisDTO.getGitUrl() + " with user: " + newAnalysisDTO.getUser());
 		String response = analysisService.startNewAnalysis(newAnalysisDTO);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}

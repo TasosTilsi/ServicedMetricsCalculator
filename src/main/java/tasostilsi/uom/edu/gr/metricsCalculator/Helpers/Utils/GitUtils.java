@@ -29,6 +29,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.DiffEntry;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.GitUserCredentialsDTO;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -146,25 +147,34 @@ public class GitUtils {
 	 * @param project the project we are referring to
 	 * @return a git object
 	 */
-	public Git cloneRepository(Project project, String accessToken) {
+	public Git cloneRepository(Project project, GitUserCredentialsDTO user) {
 		
 		if (Files.exists(Path.of(project.getClonePath()))) {
 			FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
 		}
 		
 		try {
-			if (Objects.isNull(accessToken))
+			if (Objects.isNull(user))
 				return Git.cloneRepository()
 						.setURI(project.getUrl())
 						.setDirectory(new File(project.getClonePath()))
 						.call();
 			else {
-				return Git.cloneRepository()
-						.setURI(project.getUrl())
-						.setDirectory(new File(project.getClonePath()))
-						.setCredentialsProvider(new UsernamePasswordCredentialsProvider(accessToken, ""))
-						.call();
+				if (user.hasPassword()) {
+					return Git.cloneRepository()
+							.setURI(project.getUrl())
+							.setDirectory(new File(project.getClonePath()))
+							.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user.getUrernameOrAccessToken(), user.getPassword()))
+							.call();
+				} else {
+					return Git.cloneRepository()
+							.setURI(project.getUrl())
+							.setDirectory(new File(project.getClonePath()))
+							.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user.getUrernameOrAccessToken(), ""))
+							.call();
+				}
 			}
+			
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 			e.printStackTrace();
@@ -179,7 +189,7 @@ public class GitUtils {
 	 * @param currentRevision the revision we are checking out to
 	 * @param git             a git object
 	 */
-	public void checkout(Project project, String accessToken, Revision currentRevision, Git git) throws GitAPIException {
+	public void checkout(Project project, GitUserCredentialsDTO user, Revision currentRevision, Git git) throws GitAPIException {
 		LOGGER.info("{} checking out into: {} with revision sha: {}", project.getUrl(), "version" + currentRevision.getCount(), currentRevision.getSha());
 		try {
 			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getCount()).setStartPoint(currentRevision.getSha()).call();
@@ -187,7 +197,7 @@ public class GitUtils {
 			if (Files.exists(Path.of(project.getClonePath()))) {
 				FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
 			}
-			cloneRepository(project, accessToken);
+			cloneRepository(project, user);
 			git.checkout().setCreateBranch(true).setName("version" + currentRevision.getCount()).setStartPoint(currentRevision.getSha()).call();
 		}
 	}

@@ -17,22 +17,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewAnalysisDTO {
+public class GitUserCredentialsDTO {
 	
-	@NotEmpty(message = "The url is required.")
-	//find some patterns that matches the git urls
-//	@Pattern(regexp = "^[a-zA-Z0-9]+://[a-zA-Z0-9]+\\.[a-zA-Z0-9]+/[a-zA-Z0-9]+/[a-zA-Z0-9]+$" , message="Invalid URL provided")
-	@Valid
-	private String gitUrl;
+	private String urernameOrAccessToken;
 	
-	@Nullable
-	private GitUserCredentialsDTO user;
+	private String password;
+	
+	public boolean hasPassword() {
+		return !password.isEmpty() || !password.isBlank();
+	}
 }

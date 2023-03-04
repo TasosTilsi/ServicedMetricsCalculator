@@ -26,6 +26,7 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.GitUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
+import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.GitUserCredentialsDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.JavaFilesRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
@@ -51,8 +52,6 @@ public class BackroundAnalysis implements Runnable {
 	@Override
 	public void run() {
 		
-		String accessToken = newAnalysisDTO.getAccessToken();
-		
 		Optional<Project> existsInDb = projectRepository.findByUrl(newAnalysisDTO.getGitUrl());
 		
 		project.setState(State.RUNNING.name());
@@ -61,7 +60,7 @@ public class BackroundAnalysis implements Runnable {
 		LOGGER.info("Project : {} State: {}", project.getUrl(), project.getState());
 		
 		LOGGER.info("Cloning repository from: " + project.getRepo() + " into " + project.getClonePath());
-		Git git = GitUtils.getInstance().cloneRepository(project, accessToken);
+		Git git = GitUtils.getInstance().cloneRepository(project, newAnalysisDTO.getUser());
 		
 		List<String> diffCommitIds = new ArrayList<>();
 		List<String> commitIds = GitUtils.getInstance().getCommitIds(git);
@@ -91,7 +90,7 @@ public class BackroundAnalysis implements Runnable {
 		if (existsInDb.isEmpty() || new HashSet<>(diffCommitIds).containsAll(commitIds)) {
 			start = 1;
 			try {
-				project = analyzeFirstDifferentCommit(project, accessToken, git, commitIds, currentRevision);
+				project = analyzeFirstDifferentCommit(project, newAnalysisDTO.getUser(), git, commitIds, currentRevision);
 			} catch (GitAPIException e) {
 				throw new RuntimeException(e);
 			}
@@ -103,7 +102,7 @@ public class BackroundAnalysis implements Runnable {
 		}
 		
 		try {
-			project = loopThroughCommitsAndGetMetrics(project, accessToken, git, commitIds, start, currentRevision);
+			project = loopThroughCommitsAndGetMetrics(project, newAnalysisDTO.getUser(), git, commitIds, start, currentRevision);
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
@@ -112,14 +111,14 @@ public class BackroundAnalysis implements Runnable {
 		project.setState(State.COMPLETED.name());
 		project = projectRepository.save(project);
 		LOGGER.info("Finished analysing " + currentRevision.getCount() + " revisions for " + project.getUrl() + ".");
-		
+		project = null;
 	}
 	
-	private Project loopThroughCommitsAndGetMetrics(Project project, String accessToken, Git git, List<String> commitIds, int start, Revision currentRevision) throws GitAPIException {
+	private Project loopThroughCommitsAndGetMetrics(Project project, GitUserCredentialsDTO user, Git git, List<String> commitIds, int start, Revision currentRevision) throws GitAPIException {
 		for (int i = start; i < commitIds.size(); ++i) {
 			Objects.requireNonNull(currentRevision).setSha(commitIds.get(i));
 			currentRevision.setCount(currentRevision.getCount() + 1L);
-			GitUtils.getInstance().checkout(Objects.requireNonNull(project), accessToken, Objects.requireNonNull(currentRevision), Objects.requireNonNull(git));
+			GitUtils.getInstance().checkout(Objects.requireNonNull(project), user, Objects.requireNonNull(currentRevision), Objects.requireNonNull(git));
 			LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
 			try {
 				PrincipalResponseEntity[] responseEntities = GitUtils.getInstance().getResponseEntitiesAtCommit(git, currentRevision.getSha());
@@ -142,10 +141,10 @@ public class BackroundAnalysis implements Runnable {
 	}
 	
 	@Nullable
-	private Project analyzeFirstDifferentCommit(Project project, String accessToken, Git git, List<String> commitIds, Revision currentRevision) throws GitAPIException {
+	private Project analyzeFirstDifferentCommit(Project project, GitUserCredentialsDTO user, Git git, List<String> commitIds, Revision currentRevision) throws GitAPIException {
 		Objects.requireNonNull(currentRevision).setSha(Objects.requireNonNull(commitIds.get(0)));
 		Objects.requireNonNull(currentRevision).setCount(currentRevision.getCount() + 1L);
-		GitUtils.getInstance().checkout(project, accessToken, currentRevision, Objects.requireNonNull(git));
+		GitUtils.getInstance().checkout(project, user, currentRevision, Objects.requireNonNull(git));
 		LOGGER.info("Calculating metrics for commit {} ({})...\n", currentRevision.getSha(), currentRevision.getCount());
 		try {
 			project = Utils.getInstance().setMetrics(project, currentRevision);
