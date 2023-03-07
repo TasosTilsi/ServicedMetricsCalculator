@@ -26,10 +26,13 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Services.ProjectService;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping(path = "api/project")
 public class ProjectController {
 	
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ProjectController.class);
+	
+	private static final String PROJECT_ENTITY_NULL_MESSAGE = "Project Entity is null! You must post a project url first!";
 	
 	@Autowired
 	private final ProjectService service;
@@ -46,8 +49,8 @@ public class ProjectController {
 		List<Project> returnedList = service.getProjects();
 		
 		if (returnedList == null) {
-			LOGGER.error("Project Entity is null! You must post a project url first!");
-			throw new NullPointerException("Project Entity is null! You must post a project url first!");
+			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
+			throw new NullPointerException(PROJECT_ENTITY_NULL_MESSAGE);
 		}
 		
 		return new ResponseEntity<>(returnedList, HttpStatus.OK);
@@ -62,8 +65,8 @@ public class ProjectController {
 		List<Project> returnedList = service.getProjectsByOwner(owner);
 		
 		if (returnedList == null) {
-			LOGGER.error("Project Entity is null! You must post a project url first!");
-			throw new NullPointerException("Project Entity is null! You must post a project url first!");
+			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
+			throw new NullPointerException(PROJECT_ENTITY_NULL_MESSAGE);
 		}
 		
 		return new ResponseEntity<>(returnedList, HttpStatus.OK);
@@ -78,8 +81,8 @@ public class ProjectController {
 		List<Project> returnedList = service.getProjectsByRepo(repo);
 		
 		if (returnedList == null) {
-			LOGGER.error("Project Entity is null! You must post a project url first!");
-			throw new NullPointerException("Project Entity is null! You must post a project url first!");
+			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
+			throw new NullPointerException(PROJECT_ENTITY_NULL_MESSAGE);
 		}
 		
 		return new ResponseEntity<>(returnedList, HttpStatus.OK);
@@ -94,8 +97,8 @@ public class ProjectController {
 		Project returned = service.getProjectByUrl(url);
 		
 		if (returned == null) {
-			LOGGER.error("Project Entity is null! You must post a project url first!");
-			throw new NullPointerException("Project Entity is null! You must post a project url first!");
+			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
+			throw new NullPointerException(PROJECT_ENTITY_NULL_MESSAGE);
 		}
 		
 		return new ResponseEntity<>(returned, HttpStatus.OK);
@@ -110,8 +113,8 @@ public class ProjectController {
 		Project returned = service.getProjectByOwnerAndRepo(owner, repo);
 		
 		if (returned == null) {
-			LOGGER.error("Project Entity is null! You must post a project url first!");
-			throw new NullPointerException("Project Entity is null! You must post a project url first!");
+			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
+			throw new NullPointerException(PROJECT_ENTITY_NULL_MESSAGE);
 		}
 		
 		return new ResponseEntity<>(returned, HttpStatus.OK);
@@ -126,8 +129,8 @@ public class ProjectController {
 		Project returnedList = service.getProjectById(id);
 		
 		if (returnedList == null) {
-			LOGGER.error("Project Entity is null! You must post a project url first!");
-			throw new NullPointerException("Project Entity is null! You must post a project url first!");
+			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
+			throw new NullPointerException(PROJECT_ENTITY_NULL_MESSAGE);
 		}
 		
 		return new ResponseEntity<>(returnedList, HttpStatus.OK);

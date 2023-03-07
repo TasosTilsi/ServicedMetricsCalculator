@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/analysis")
 public class AnalysisController {
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(AnalysisService.class);

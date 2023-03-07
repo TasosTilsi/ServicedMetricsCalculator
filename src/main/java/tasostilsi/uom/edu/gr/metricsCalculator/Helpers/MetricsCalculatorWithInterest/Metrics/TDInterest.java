@@ -33,7 +33,7 @@ import java.util.*;
 public class TDInterest {
 	
 	@Transient
-	private static final Double HOURLY_WAGE = 40.00;
+	private static final Double HOURLY_WAGE = 37.50;
 	
 	@Transient
 	@JsonIgnore
