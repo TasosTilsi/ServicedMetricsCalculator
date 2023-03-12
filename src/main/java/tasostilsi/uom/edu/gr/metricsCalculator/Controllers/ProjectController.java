@@ -135,4 +135,24 @@ public class ProjectController {
 		
 		return new ResponseEntity<>(returnedList, HttpStatus.OK);
 	}
+	
+	@DeleteMapping(
+			path = "/url"
+	)
+	public ResponseEntity<String> deleteProjectByUrl(@RequestParam String url) {
+		LOGGER.info("HttpRequest: deleteProjectByUrl");
+		service.deleteProjectByUrl(url);
+		
+		return new ResponseEntity<>("Project with url " + url + " deleted", HttpStatus.OK);
+	}
+	
+	@DeleteMapping(
+			path = "{id}"
+	)
+	public ResponseEntity<String> deleteProjectById(@PathVariable Long id) {
+		LOGGER.info("HttpRequest: deleteProjectById");
+		service.deleteProjectById(id);
+		
+		return new ResponseEntity<>("Project with id " + id + " deleted", HttpStatus.OK);
+	}
 }

@@ -13,7 +13,6 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Services;
 
 import ch.qos.logback.classic.Logger;
-import nonapi.io.github.classgraph.json.JSONSerializer;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,5 +80,22 @@ public class ProjectService implements IProjectService {
 //		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
 		
 		return project;
+	}
+	
+	@Override
+	public void deleteProjectByUrl(String url) {
+		Project project = projectRepository.findByUrl(url).orElseThrow();
+		
+		projectRepository.delete(project);
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+	
+	}
+	
+	@Override
+	public void deleteProjectById(Long id) {
+		Project project = projectRepository.findById(id).orElseThrow();
+		projectRepository.delete(project);
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+	
 	}
 }

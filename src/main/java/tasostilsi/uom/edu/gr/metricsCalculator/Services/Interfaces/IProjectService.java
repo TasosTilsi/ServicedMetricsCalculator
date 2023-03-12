@@ -29,4 +29,8 @@ public interface IProjectService {
 	Project getProjectByUrl(String url);
 	
 	Project getProjectByOwnerAndRepo(String owner, String repo);
+	
+	void deleteProjectByUrl(String url);
+	
+	void deleteProjectById(Long id);
 }
