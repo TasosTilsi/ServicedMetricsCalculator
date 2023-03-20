@@ -81,7 +81,12 @@ public class AnalysisService implements IAnalysisService {
 	
 	@Override
 	public Collection<InterestPerCommitFile> findInterestByCommitFile(String url, String sha, String filePath) {
-		return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), sha, filePath);
+		boolean shaExists = !(sha == null || sha.isBlank() || sha.isEmpty());
+		boolean filePathExists = !(filePath == null || filePath.isBlank() || filePath.isEmpty());
+		if (shaExists && filePathExists) {
+			return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), sha, filePath);
+		}
+		return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url));
 	}
 	
 	@Override
@@ -113,19 +118,23 @@ public class AnalysisService implements IAnalysisService {
 		return metricsRepository.findHighInterestFiles(pageable, new ProjectDTO(url), sha);
 	}
 	
-	@Override
-	public Slice<ProjectReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url) {
-		return metricsRepository.findReusabilityMetrics(pageable, new ProjectDTO(url));
+	public Slice<ProjectReusabilityMetrics> findProjectReusabilityMetrics(Pageable pageable, String url) {
+		return metricsRepository.findProjectReusabilityMetrics(pageable, new ProjectDTO(url));
 	}
 	
 	@Override
-	public Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha) {
-		return metricsRepository.findReusabilityMetrics(pageable, new ProjectDTO(url), sha);
+	public Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, String url, String sha) {
+		return metricsRepository.findFileReusabilityMetrics(pageable, new ProjectDTO(url), sha);
 	}
 	
 	@Override
-	public Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha, String filePath) {
-		return metricsRepository.findReusabilityMetrics(pageable, new ProjectDTO(url), sha, filePath);
+	public Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, String url, String sha, String filePath) {
+		return metricsRepository.findFileReusabilityMetrics(pageable, new ProjectDTO(url), sha, filePath);
+	}
+	
+	@Override
+	public Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, String url) {
+		return metricsRepository.findFileReusabilityMetrics(pageable, new ProjectDTO(url));
 	}
 	
 	@Override

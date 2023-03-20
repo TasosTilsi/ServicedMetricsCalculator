@@ -36,14 +36,16 @@ public interface IAnalysisService {
 	Collection<NormalizedInterest> findNormalizedInterest(String url);
 	
 	Collection<NormalizedInterest> findNormalizedInterestByCommit(String url, String sha);
-
+	
 	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, String url, String sha);
-
-	Slice<ProjectReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url);
-
-	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha);
-
-	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, String url, String sha, String filePath);
-
+	
+	Slice<ProjectReusabilityMetrics> findProjectReusabilityMetrics(Pageable pageable, String url);
+	
+	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, String url);
+	
+	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, String url, String sha);
+	
+	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, String url, String sha, String filePath);
+	
 	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url);
 }

@@ -1,3 +1,14 @@
+##
+## Build stage
+##
+#FROM maven:3.6.3-jdk-11-slim AS build
+#COPY ./pom.xml ./pom.xml
+#COPY ./src ./src
+#COPY ./.git ./.git
+##RUN mvn dependency:go-offline -B
+#RUN mvn clean install
+#
+
 FROM openjdk:11
 # Add Maintainer Info
 LABEL maintainer="tilsizoglou@protonmail.com"

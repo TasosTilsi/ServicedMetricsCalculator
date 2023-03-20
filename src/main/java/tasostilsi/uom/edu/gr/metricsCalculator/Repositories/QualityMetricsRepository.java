@@ -63,6 +63,16 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.path")
 	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
 	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(c.qualityMetrics.revision.sha, " +
+			"c.path," +
+			"c.qualityMetrics.revision.count, " +
+			"c.interest.interestInEuros," +
+			"c.interest.interestInHours) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"ORDER BY c.qualityMetrics.revision.count")
+	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project);
+	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestChange(c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
 			"SUM(c.interest.interestInEuros) - " +
@@ -179,7 +189,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c.qualityMetrics.DIT >= 0 " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count " +
 			"ORDER BY c.qualityMetrics.revision.count")
-	Slice<ProjectReusabilityMetrics> findReusabilityMetrics(Pageable pageable, ProjectDTO project);
+	Slice<ProjectReusabilityMetrics> findProjectReusabilityMetrics(Pageable pageable, ProjectDTO project);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
@@ -195,7 +205,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c.qualityMetrics.revision.sha = :sha " +
 			"AND c.qualityMetrics.LCOM >= 0 AND c.qualityMetrics.DIT >= 0 " +
 			"ORDER BY c.path")
-	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha);
+	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
@@ -213,7 +223,23 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c.qualityMetrics.LCOM >= 0 " +
 			"AND c.qualityMetrics.DIT >= 0 " +
 			"ORDER BY c.path")
-	Slice<FileReusabilityMetrics> findReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
+	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
+	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(c.qualityMetrics.revision.sha, " +
+			"c.qualityMetrics.revision.count, " +
+			"c.path, " +
+			"c.qualityMetrics.CBO, " +
+			"c.qualityMetrics.DIT, " +
+			"c.qualityMetrics.WMC, " +
+			"c.qualityMetrics.RFC, " +
+			"c.qualityMetrics.LCOM, " +
+			"c.qualityMetrics.NOCC) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.LCOM >= 0 " +
+			"AND c.qualityMetrics.DIT >= 0 " +
+			"ORDER BY c.path")
+	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, ProjectDTO project);
 	
 	@Query(value = "SELECT DISTINCT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.AnalyzedCommit(c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count) " +

@@ -53,7 +53,7 @@ public class AnalysisController {
 	}
 	
 	@GetMapping(value = "/interestPerCommitFile")
-	public ResponseEntity<Collection<InterestPerCommitFile>> getInterestPerCommitFile(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath) {
+	public ResponseEntity<Collection<InterestPerCommitFile>> getInterestPerCommitFile(@RequestParam(required = true) String url, @RequestParam(required = false) String sha, @RequestParam(required = false) String filePath) {
 		Collection<InterestPerCommitFile> response = analysisService.findInterestByCommitFile(url, sha, filePath);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -90,33 +90,43 @@ public class AnalysisController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@GetMapping(value = "/reusabilityMetrics")
-	ResponseEntity<Collection<ProjectReusabilityMetrics>> getReusabilityMetrics(@RequestParam(required = true) String url, @RequestParam(required = false) Integer limit) {
+	@GetMapping(value = "/projectReusabilityMetrics")
+	ResponseEntity<Collection<ProjectReusabilityMetrics>> getProjectReusabilityMetrics(@RequestParam(required = true) String url, @RequestParam(required = false) Integer limit) {
 		Collection<ProjectReusabilityMetrics> response;
 		if (Objects.isNull(limit))
-			response = analysisService.findReusabilityMetrics(null, url).getContent();
+			response = analysisService.findProjectReusabilityMetrics(null, url).getContent();
 		else
-			response = analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url).getContent();
+			response = analysisService.findProjectReusabilityMetrics(PageRequest.of(0, limit), url).getContent();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@GetMapping(value = "/reusabilityMetricsByCommit")
+	@GetMapping(value = "/fileReusabilityMetrics")
+	ResponseEntity<Collection<FileReusabilityMetrics>> getFileReusabilityMetricsByCommit(@RequestParam(required = true) String url, @RequestParam(required = false) Integer limit) {
+		Collection<FileReusabilityMetrics> response;
+		if (Objects.isNull(limit))
+			response = analysisService.findFileReusabilityMetrics(null, url).getContent();
+		else
+			response = analysisService.findFileReusabilityMetrics(PageRequest.of(0, limit), url).getContent();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/fileReusabilityMetricsByCommit")
 	ResponseEntity<Collection<FileReusabilityMetrics>> getReusabilityMetricsByCommit(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = false) Integer limit) {
 		Collection<FileReusabilityMetrics> response;
 		if (Objects.isNull(limit))
-			response = analysisService.findReusabilityMetrics(null, url, sha).getContent();
+			response = analysisService.findFileReusabilityMetrics(null, url, sha).getContent();
 		else
-			response = analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url, sha).getContent();
+			response = analysisService.findFileReusabilityMetrics(PageRequest.of(0, limit), url, sha).getContent();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@GetMapping(value = "/reusabilityMetricsByCommitAndFile")
+	@GetMapping(value = "/fileReusabilityMetricsByCommitAndFile")
 	ResponseEntity<Collection<FileReusabilityMetrics>> getReusabilityMetricsByCommitAndFile(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath, @RequestParam(required = false) Integer limit) {
 		Collection<FileReusabilityMetrics> response;
 		if (Objects.isNull(limit))
-			response = analysisService.findReusabilityMetrics(null, url, sha, filePath).getContent();
+			response = analysisService.findFileReusabilityMetrics(null, url, sha, filePath).getContent();
 		else
-			response = analysisService.findReusabilityMetrics(PageRequest.of(0, limit), url, sha, filePath).getContent();
+			response = analysisService.findFileReusabilityMetrics(PageRequest.of(0, limit), url, sha, filePath).getContent();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
