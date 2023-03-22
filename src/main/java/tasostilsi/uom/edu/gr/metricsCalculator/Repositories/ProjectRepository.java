@@ -40,4 +40,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 	@Query("select p.clonePath from Project p where p.url = ?1")
 	Optional<String> getProjectPathByUrl(String url);
 	
+	@Query("select p.state from Project p where p.url = ?1")
+	Optional<String> getProjectStateByUrl(String url);
+	
 }

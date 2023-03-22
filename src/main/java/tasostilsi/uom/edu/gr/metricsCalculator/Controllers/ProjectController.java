@@ -136,6 +136,22 @@ public class ProjectController {
 		return new ResponseEntity<>(returnedList, HttpStatus.OK);
 	}
 	
+	@GetMapping(
+			path = "/state",
+			produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+	)
+	public ResponseEntity<String> getProjectStateByUrl(@RequestParam String url) {
+		LOGGER.info("HttpRequest: getProjectByUrl");
+		String returned = service.getProjectStateByUrl(url);
+		
+		if (returned == null) {
+			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
+			throw new NullPointerException(PROJECT_ENTITY_NULL_MESSAGE);
+		}
+		
+		return new ResponseEntity<>(returned, HttpStatus.OK);
+	}
+	
 	@DeleteMapping(
 			path = "/url"
 	)

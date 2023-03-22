@@ -83,6 +83,14 @@ public class ProjectService implements IProjectService {
 	}
 	
 	@Override
+	public String getProjectStateByUrl(String url) {
+		String projectState = projectRepository.getProjectStateByUrl(url).orElseThrow();
+//		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
+		
+		return projectState;
+	}
+	
+	@Override
 	public void deleteProjectByUrl(String url) {
 		Project project = projectRepository.findByUrl(url).orElseThrow();
 		

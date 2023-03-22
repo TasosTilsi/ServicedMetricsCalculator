@@ -30,6 +30,8 @@ public interface IProjectService {
 	
 	Project getProjectByOwnerAndRepo(String owner, String repo);
 	
+	String getProjectStateByUrl(String url);
+	
 	void deleteProjectByUrl(String url);
 	
 	void deleteProjectById(Long id);

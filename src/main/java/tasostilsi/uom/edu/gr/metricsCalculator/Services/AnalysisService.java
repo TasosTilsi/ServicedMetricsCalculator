@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.BackroundAnalysis;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.NewAnalysisDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.DTOs.ProjectDTO;
 import tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.*;
@@ -81,8 +82,8 @@ public class AnalysisService implements IAnalysisService {
 	
 	@Override
 	public Collection<InterestPerCommitFile> findInterestByCommitFile(String url, String sha, String filePath) {
-		boolean shaExists = !(sha == null || sha.isBlank() || sha.isEmpty());
-		boolean filePathExists = !(filePath == null || filePath.isBlank() || filePath.isEmpty());
+		boolean shaExists = Utils.getInstance().parameterExists(sha);
+		boolean filePathExists = Utils.getInstance().parameterExists(filePath);
 		if (shaExists && filePathExists) {
 			return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), sha, filePath);
 		}
@@ -91,15 +92,24 @@ public class AnalysisService implements IAnalysisService {
 	
 	@Override
 	public Collection<InterestChange> findInterestChangeByCommit(String url, String sha) {
-		if (metricsRepository.findDistinctRevisionCountByRevisionSha(sha) <= 3) {
-			throw new IllegalStateException("Please choose a revision sha that has revision count more than 3!");
+		boolean shaExists = Utils.getInstance().parameterExists(sha);
+		if (shaExists) {
+			if (metricsRepository.findDistinctRevisionCountByRevisionSha(sha) <= 3) {
+				throw new IllegalStateException("Please choose a revision sha that has revision count more than 3!");
+			}
+			return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
 		}
-		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
+		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url));
 	}
 	
 	@Override
 	public FileInterestChange findInterestChangeByCommitAndFile(String url, String sha, String filePath) {
 		return metricsRepository.findInterestChangeByCommitAndFile(new ProjectDTO(url), sha, filePath);
+	}
+	
+	@Override
+	public Collection<FileInterestChange> findInterestChange(String url) {
+		return metricsRepository.findInterestChange(new ProjectDTO(url));
 	}
 	
 	@Override
@@ -112,10 +122,13 @@ public class AnalysisService implements IAnalysisService {
 		return metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
 	}
 	
-	
 	@Override
 	public Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, String url, String sha) {
-		return metricsRepository.findHighInterestFiles(pageable, new ProjectDTO(url), sha);
+		boolean shaExists = Utils.getInstance().parameterExists(sha);
+		if (shaExists) {
+			return metricsRepository.findHighInterestFiles(pageable, new ProjectDTO(url), sha);
+		}
+		return metricsRepository.findHighInterestFiles(pageable, new ProjectDTO(url));
 	}
 	
 	public Slice<ProjectReusabilityMetrics> findProjectReusabilityMetrics(Pageable pageable, String url) {

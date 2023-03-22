@@ -33,6 +33,8 @@ public interface IAnalysisService {
 	
 	FileInterestChange findInterestChangeByCommitAndFile(String url, String sha, String filePath);
 	
+	Collection<FileInterestChange> findInterestChange(String url);
+	
 	Collection<NormalizedInterest> findNormalizedInterest(String url);
 	
 	Collection<NormalizedInterest> findNormalizedInterestByCommit(String url, String sha);

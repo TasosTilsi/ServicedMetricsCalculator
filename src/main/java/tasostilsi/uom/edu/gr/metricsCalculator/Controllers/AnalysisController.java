@@ -59,14 +59,20 @@ public class AnalysisController {
 	}
 	
 	@GetMapping(value = "/interestChange")
-	public ResponseEntity<Collection<InterestChange>> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha) {
+	public ResponseEntity<Collection<InterestChange>> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
 		Collection<InterestChange> response = analysisService.findInterestChangeByCommit(url, sha);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@GetMapping(value = "/fileInterestChange")
-	public ResponseEntity<FileInterestChange> getFileInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath) {
+	@GetMapping(value = "/fileInterestChangeByCommitAndFile")
+	public ResponseEntity<FileInterestChange> getFileInterestChangeByCommitAndFile(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = true) String filePath) {
 		FileInterestChange response = analysisService.findInterestChangeByCommitAndFile(url, sha, filePath);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/fileInterestChange")
+	public ResponseEntity<Collection<FileInterestChange>> getFileInterestChange(@RequestParam(required = true) String url) {
+		Collection<FileInterestChange> response = analysisService.findInterestChange(url);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
@@ -81,7 +87,7 @@ public class AnalysisController {
 	}
 	
 	@GetMapping(value = "/highInterestFiles")
-	ResponseEntity<Collection<HighInterestFile>> getHighInterestFiles(@RequestParam(required = true) String url, @RequestParam(required = true) String sha, @RequestParam(required = false) Integer limit) {
+	ResponseEntity<Collection<HighInterestFile>> getHighInterestFiles(@RequestParam(required = true) String url, @RequestParam(required = false) String sha, @RequestParam(required = false) Integer limit) {
 		Collection<HighInterestFile> response;
 		if (Objects.isNull(limit))
 			response = analysisService.findHighInterestFiles(null, url, sha).getContent();

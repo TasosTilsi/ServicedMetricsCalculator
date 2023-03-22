@@ -50,7 +50,7 @@ public class Project {
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
 //	@JsonIgnore
 	private Set<CalculatedJavaFile> javaFiles;
-	@Column(name = "locked", nullable = false)
+	@Column(name = "state", nullable = false)
 	private String state;
 	
 	public Project(String url, String clonePath) {

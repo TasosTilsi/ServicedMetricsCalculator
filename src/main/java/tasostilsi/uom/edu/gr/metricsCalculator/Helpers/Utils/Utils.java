@@ -206,4 +206,11 @@ public class Utils {
 		jf.getQualityMetrics().setSIZE2(Integer.parseInt(calcEntries[13]));
 	}
 	
+	public boolean parameterExists(Object parameter) {
+		if ((parameter instanceof String)) {
+			return !(((String) parameter).isBlank() || ((String) parameter).isEmpty());
+		}
+		return false;
+	}
+	
 }

@@ -100,6 +100,32 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count")
 	Collection<InterestChange> findInterestChangeByCommit(ProjectDTO project, @Param("sha") String sha);
 	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestChange(c.qualityMetrics.revision.sha, " +
+			"c.qualityMetrics.revision.count, " +
+			"SUM(c.interest.interestInEuros) - " +
+			"(SELECT SUM(c2.interest.interestInEuros) " +
+			"FROM CalculatedJavaFile c2 " +
+			"WHERE c2.project.url = :#{#project.url} " +
+			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
+			"SUM(c.interest.interestInHours) - " +
+			"(SELECT SUM(c2.interest.interestInHours) " +
+			"FROM CalculatedJavaFile c2 " +
+			"WHERE c2.project.url = :#{#project.url} " +
+			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
+			"(SUM(c.interest.interestInEuros) - " +
+			"(SELECT SUM(c2.interest.interestInEuros) " +
+			"FROM CalculatedJavaFile c2 " +
+			"WHERE c2.project.url = :#{#project.url} " +
+			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1))/NULLIF(" +
+			"(SELECT SUM(c3.interest.interestInEuros) " +
+			"FROM CalculatedJavaFile c3 " +
+			"WHERE c3.project.url = :#{#project.url} " +
+			"AND c3.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1),0)) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count")
+	Collection<InterestChange> findInterestChangeByCommit(ProjectDTO project);
+	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileInterestChange(c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
@@ -131,6 +157,36 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c.qualityMetrics.revision.sha = :sha " +
 			"AND c.path = :filePath")
 	FileInterestChange findInterestChangeByCommitAndFile(ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
+	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileInterestChange(c.qualityMetrics.revision.sha, " +
+			"c.qualityMetrics.revision.count, " +
+			"c.path, " +
+			"c.interest.interestInEuros - " +
+			"(SELECT c2.interest.interestInEuros " +
+			"FROM CalculatedJavaFile c2 " +
+			"WHERE c2.project.url = :#{#project.url} " +
+			"AND c.path = c2.path " +
+			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
+			"c.interest.interestInHours - " +
+			"(SELECT c3.interest.interestInHours " +
+			"FROM CalculatedJavaFile c3 " +
+			"WHERE c3.project.url = :#{#project.url} " +
+			"AND c.path = c3.path " +
+			"AND c3.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
+			"(c.interest.interestInEuros - " +
+			"(SELECT c4.interest.interestInEuros " +
+			"FROM CalculatedJavaFile c4 " +
+			"WHERE c4.project.url = :#{#project.url} " +
+			"AND c.path = c4.path " +
+			"AND c4.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1))/NULLIF((" +
+			"SELECT c5.interest.interestInEuros " +
+			"FROM CalculatedJavaFile c5 " +
+			"WHERE c5.project.url = :#{#project.url} " +
+			"AND c.path = c5.path " +
+			"AND c5.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1),0)) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} ")
+	Collection<FileInterestChange> findInterestChange(ProjectDTO project);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.NormalizedInterest(c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
@@ -174,6 +230,25 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"c.interest.interestInHours " +
 			"ORDER BY c.interest.interestInEuros DESC")
 	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, ProjectDTO project, @Param("sha") String sha);
+	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.HighInterestFile(c.qualityMetrics.revision.sha, " +
+			"c.qualityMetrics.revision.count, " +
+			"c.path, " +
+			"c.interest.interestInEuros, " +
+			"c.interest.interestInHours, " +
+			"c.interest.interestInEuros/" +
+			"(SELECT SUM(c2.interest.interestInEuros) " +
+			"FROM CalculatedJavaFile c2 " +
+			"WHERE c2.project.url = :#{#project.url})) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"GROUP BY c.qualityMetrics.revision.sha, " +
+			"c.qualityMetrics.revision.count, " +
+			"c.path, " +
+			"c.interest.interestInEuros, " +
+			"c.interest.interestInHours " +
+			"ORDER BY c.interest.interestInEuros DESC")
+	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, ProjectDTO project);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.ProjectReusabilityMetrics(c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
