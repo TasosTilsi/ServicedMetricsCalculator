@@ -92,14 +92,10 @@ public class AnalysisService implements IAnalysisService {
 	
 	@Override
 	public Collection<InterestChange> findInterestChangeByCommit(String url, String sha) {
-		boolean shaExists = Utils.getInstance().parameterExists(sha);
-		if (shaExists) {
-			if (metricsRepository.findDistinctRevisionCountByRevisionSha(sha) <= 3) {
-				throw new IllegalStateException("Please choose a revision sha that has revision count more than 3!");
-			}
-			return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
+		if (metricsRepository.findDistinctRevisionCountByRevisionSha(sha) <= 3) {
+			throw new IllegalStateException("Please choose a revision sha that has revision count more than 3!");
 		}
-		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url));
+		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
 	}
 	
 	@Override
