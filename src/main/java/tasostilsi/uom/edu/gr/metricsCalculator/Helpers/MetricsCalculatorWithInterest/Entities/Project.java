@@ -18,6 +18,7 @@ import lombok.Setter;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
 
 import javax.persistence.*;
 import java.io.File;
@@ -54,7 +55,7 @@ public class Project {
 	private String state;
 	
 	public Project(String url, String clonePath) {
-		this.url = url;
+		this.url = Utils.getInstance().preprocessURL(url);
 		this.owner = getRepositoryOwner();
 		this.repo = getRepositoryName();
 		this.clonePath = clonePath;
@@ -63,7 +64,7 @@ public class Project {
 	}
 	
 	public Project(String url) {
-		this.url = url;
+		this.url = Utils.getInstance().preprocessURL(url);
 		this.owner = getRepositoryOwner();
 		this.repo = getRepositoryName();
 		this.clonePath = File.separatorChar + "tmp" + File.separatorChar + getRepositoryOwner() + File.separatorChar + getRepositoryName();
@@ -72,7 +73,7 @@ public class Project {
 	}
 	
 	public Project(String url, String owner, String repo, String clonePath) {
-		this.url = url;
+		this.url = Utils.getInstance().preprocessURL(url);
 		this.owner = owner;
 		this.repo = repo;
 		this.clonePath = clonePath;
@@ -119,26 +120,15 @@ public class Project {
 	}
 	
 	private String getRepositoryOwner() {
-		String newURL = preprocessURL();
+		String newURL = Utils.getInstance().preprocessURL(this.getUrl());
 		String[] urlSplit = newURL.split("/");
 		return urlSplit[urlSplit.length - 2].replaceAll(".*@.*:", "");
 	}
 	
 	private String getRepositoryName() {
-		String newURL = preprocessURL();
+		String newURL = Utils.getInstance().preprocessURL(this.getUrl());
 		String[] urlSplit = newURL.split("/");
 		return urlSplit[urlSplit.length - 1];
-	}
-	
-	private String preprocessURL() {
-		String newURL = this.getUrl();
-		if (newURL.endsWith(".git/"))
-			newURL = newURL.replace(".git/", "");
-		if (newURL.endsWith(".git"))
-			newURL = newURL.replace(".git", "");
-		if (newURL.endsWith("/"))
-			newURL = newURL.substring(0, newURL.length() - 1);
-		return newURL;
 	}
 	
 	@Override

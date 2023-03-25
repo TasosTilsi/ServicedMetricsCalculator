@@ -10,7 +10,7 @@
  *  *****************************************************************************
  */
 
-package tasostilsi.uom.edu.gr.metricsCalculator;
+package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Configurations;
 
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;

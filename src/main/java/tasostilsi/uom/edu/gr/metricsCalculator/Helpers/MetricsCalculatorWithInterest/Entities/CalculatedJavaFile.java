@@ -43,7 +43,7 @@ public class CalculatedJavaFile {
 	private Project project;
 	@Embedded
 	private TDInterest interest;
-	@OneToMany(mappedBy = "javaFile", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "javaFile", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private Set<CalculatedClass> classes;
 	@OneToOne(cascade = CascadeType.ALL)

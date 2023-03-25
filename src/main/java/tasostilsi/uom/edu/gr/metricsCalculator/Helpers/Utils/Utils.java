@@ -213,4 +213,18 @@ public class Utils {
 		return false;
 	}
 	
+	public String preprocessURL(String url) {
+		String newURL = url;
+		if (newURL.endsWith(".git/")) {
+			newURL = newURL.replace(".git/", "");
+		}
+		if (newURL.endsWith(".git")) {
+			newURL = newURL.replace(".git", "");
+		}
+		if (newURL.endsWith("/")) {
+			newURL = newURL.substring(0, newURL.length() - 1);
+		}
+		return newURL;
+	}
+	
 }
