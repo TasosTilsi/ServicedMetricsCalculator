@@ -43,7 +43,7 @@ public class CalculatedClass {
 	@JoinColumn(name = "quality_metrics_id")
 	private QualityMetrics qualityMetrics;
 	
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "java_file_id")
 	@JsonIgnore
 	private CalculatedJavaFile javaFile;

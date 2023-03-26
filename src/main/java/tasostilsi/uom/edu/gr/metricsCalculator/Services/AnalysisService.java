@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.BackroundAnalysis;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
@@ -33,6 +34,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
+@Transactional
 @Service
 public class AnalysisService implements IAnalysisService {
 	
@@ -51,6 +53,7 @@ public class AnalysisService implements IAnalysisService {
 		this.metricsRepository = metricsRepository;
 	}
 	
+	@Transactional
 	@Override
 	public String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
 		String returnString = "The project with url: " + newAnalysisDTO.getGitUrl() + " analysis started";

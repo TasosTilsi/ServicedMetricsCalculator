@@ -253,7 +253,6 @@ public class MetricsCalculator {
 					} catch (Exception ignored) {
 					}
 				});
-		
 	}
 	
 	/**
@@ -277,7 +276,6 @@ public class MetricsCalculator {
 					} catch (Exception ignored) {
 					}
 				});
-		
 	}
 	
 	/**
