@@ -50,4 +50,6 @@ public interface IAnalysisService {
 	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, String url, String sha, String filePath);
 	
 	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url);
+	
+	Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, String url, String sha);
 }

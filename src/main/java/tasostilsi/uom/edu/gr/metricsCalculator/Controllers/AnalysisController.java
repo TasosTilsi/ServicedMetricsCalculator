@@ -145,4 +145,14 @@ public class AnalysisController {
 			response = analysisService.findAnalyzedCommits(PageRequest.of(0, limit), url).getContent();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@GetMapping(value = "/allFileMetricsAndInterest")
+	ResponseEntity<Collection<AllFileMetricsAndInterest>> findAllFileMetricsAndInterest(@RequestParam(required = true) String url, @RequestParam(required = false) String sha, @RequestParam(required = false) Integer limit) {
+		Collection<AllFileMetricsAndInterest> response;
+		if (Objects.isNull(limit))
+			response = analysisService.findAllFileMetricsAndInterest(null, url, sha).getContent();
+		else
+			response = analysisService.findAllFileMetricsAndInterest(PageRequest.of(0, limit), url, sha).getContent();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

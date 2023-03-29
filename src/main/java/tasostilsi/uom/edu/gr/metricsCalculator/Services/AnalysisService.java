@@ -153,4 +153,14 @@ public class AnalysisService implements IAnalysisService {
 	public Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url) {
 		return metricsRepository.findAnalyzedCommits(pageable, new ProjectDTO(url));
 	}
+	
+	@Override
+	public Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, String url, String sha) {
+		boolean shaExists = Utils.getInstance().parameterExists(sha);
+		if (shaExists) {
+			Long revisionCount = metricsRepository.findDistinctRevisionCountByRevisionSha(sha);
+			return metricsRepository.findAllFileMetricsAndInterest(pageable, new ProjectDTO(url), revisionCount);
+		}
+		return metricsRepository.findAllFileMetricsAndInterest(pageable, new ProjectDTO(url));
+	}
 }

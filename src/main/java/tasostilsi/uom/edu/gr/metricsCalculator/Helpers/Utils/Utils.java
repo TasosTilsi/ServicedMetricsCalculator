@@ -49,14 +49,17 @@ public class Utils {
 	 *
 	 * @param diffEntries the modified java files (new, modified, deleted)
 	 */
-	public Set<CalculatedJavaFile> removeDeletedFiles(Revision currentRevision, Set<DiffEntry> diffEntries) {
+	private void removeDeletedFiles(Set<DiffEntry> diffEntries, Project project) {
 		Set<CalculatedJavaFile> deletedFiles = ConcurrentHashMap.newKeySet();
 		diffEntries
-				.forEach(diffEntry -> {
-					deletedFiles.add(new CalculatedJavaFile(diffEntry.getOldFilePath(), currentRevision));
-					Globals.getJavaFiles().removeIf(javaFile -> javaFile.getPath().endsWith(diffEntry.getOldFilePath()));
-				});
-		return deletedFiles;
+				.forEach(diffEntry -> deletedFiles.addAll(
+						project
+								.getJavaFiles()
+								.stream()
+								.filter(file -> file.getPath().equals(diffEntry.getOldFilePath()))
+								.collect(Collectors.toList())));
+		Globals.getJavaFiles().removeAll(deletedFiles);
+		project.getJavaFiles().removeAll(deletedFiles);
 	}
 	
 	/**
@@ -65,7 +68,7 @@ public class Utils {
 	 * @param filePath the file path
 	 * @return the java file (JavaFile) whose path matches the given one
 	 */
-	public CalculatedJavaFile getAlreadyDefinedFile(String filePath) {
+	private CalculatedJavaFile getAlreadyDefinedFile(String filePath) {
 		for (CalculatedJavaFile jf : Globals.getJavaFiles())
 			if (jf.getPath().equals(filePath))
 				return jf;
@@ -80,12 +83,15 @@ public class Utils {
 	 * @param entity          the entity with the list containing the diff entries received.
 	 */
 	public Project setMetrics(Project project, Revision currentRevision, PrincipalResponseEntity entity) {
-		if (!entity.getDeleteDiffEntries().isEmpty())
-			project.getJavaFiles().removeAll(removeDeletedFiles(currentRevision, entity.getDeleteDiffEntries()));
-		if (!entity.getAddDiffEntries().isEmpty())
+		if (!entity.getDeleteDiffEntries().isEmpty()) {
+			removeDeletedFiles(entity.getDeleteDiffEntries(), project);
+		}
+		if (!entity.getAddDiffEntries().isEmpty()) {
 			project = setMetrics(project, currentRevision, entity.getAddDiffEntries().stream().parallel().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
-		if (!entity.getModifyDiffEntries().isEmpty())
+		}
+		if (!entity.getModifyDiffEntries().isEmpty()) {
 			project = setMetrics(project, currentRevision, entity.getModifyDiffEntries().stream().parallel().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
+		}
 		if (!entity.getRenameDiffEntries().isEmpty()) {
 			final Project finalProject = project;
 			entity.getRenameDiffEntries()

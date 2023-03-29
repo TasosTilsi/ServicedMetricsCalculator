@@ -297,4 +297,64 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, ProjectDTO project);
 	
+	@Query(value = "SELECT DISTINCT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.AllFileMetricsAndInterest(c.qualityMetrics.revision.count, " +
+			"c.path, " +
+			"c.interest.interestInEuros, " +
+			"c.interest.interestInHours, " +
+			"c.qualityMetrics.CBO, " +
+			"c.qualityMetrics.DAC, " +
+			"c.qualityMetrics.DIT, " +
+			"c.qualityMetrics.LCOM, " +
+			"c.qualityMetrics.MPC, " +
+			"c.qualityMetrics.NOCC, " +
+			"c.qualityMetrics.NOM, " +
+			"c.qualityMetrics.RFC, " +
+			"c.qualityMetrics.WMC, " +
+			"c.qualityMetrics.SIZE1, " +
+			"c.qualityMetrics.SIZE2, " +
+			"c.qualityMetrics.complexity, " +
+			"c.interest.avgInterestPerLOC, " +
+			"c.interest.interestInAvgLOC, " +
+			"c.interest.sumInterestPerLOC) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.count = (" +
+			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
+			"  FROM CalculatedJavaFile cf " +
+			"  WHERE cf.path = c.path " +
+			")" +
+			"ORDER BY c.interest.interestInEuros DESC")
+	Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, ProjectDTO project);
+	
+	@Query(value = "SELECT DISTINCT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.AllFileMetricsAndInterest(c.qualityMetrics.revision.count, " +
+			"c.path, " +
+			"c.interest.interestInEuros, " +
+			"c.interest.interestInHours, " +
+			"c.qualityMetrics.CBO, " +
+			"c.qualityMetrics.DAC, " +
+			"c.qualityMetrics.DIT, " +
+			"c.qualityMetrics.LCOM, " +
+			"c.qualityMetrics.MPC, " +
+			"c.qualityMetrics.NOCC, " +
+			"c.qualityMetrics.NOM, " +
+			"c.qualityMetrics.RFC, " +
+			"c.qualityMetrics.WMC, " +
+			"c.qualityMetrics.SIZE1, " +
+			"c.qualityMetrics.SIZE2, " +
+			"c.qualityMetrics.complexity, " +
+			"c.interest.avgInterestPerLOC, " +
+			"c.interest.interestInAvgLOC, " +
+			"c.interest.sumInterestPerLOC) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.count = (" +
+			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
+			"  FROM CalculatedJavaFile cf " +
+			"  WHERE cf.path = c.path " +
+			"  AND cf.qualityMetrics.revision.count <= :count " +
+			")" +
+			"AND c.qualityMetrics.revision.count <= :count " +
+			"ORDER BY c.interest.interestInEuros DESC")
+	Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, ProjectDTO project, @Param("count") Long count);
+	
 }
