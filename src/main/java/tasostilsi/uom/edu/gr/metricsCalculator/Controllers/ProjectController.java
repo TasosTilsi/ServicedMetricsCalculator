@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.Utils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.ProjectService;
 
 import java.util.List;
@@ -94,7 +95,7 @@ public class ProjectController {
 	)
 	public ResponseEntity<Project> getProjectByUrl(@RequestParam String url) {
 		LOGGER.info("HttpRequest: getProjectByUrl");
-		Project returned = service.getProjectByUrl(url);
+		Project returned = service.getProjectByUrl(Utils.getInstance().preprocessURL(url));
 		
 		if (returned == null) {
 			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
@@ -142,7 +143,7 @@ public class ProjectController {
 	)
 	public ResponseEntity<String> getProjectStateByUrl(@RequestParam String url) {
 		LOGGER.info("HttpRequest: getProjectByUrl");
-		String returned = service.getProjectStateByUrl(url);
+		String returned = service.getProjectStateByUrl(Utils.getInstance().preprocessURL(url));
 		
 		if (returned == null) {
 			LOGGER.error(PROJECT_ENTITY_NULL_MESSAGE);
@@ -157,9 +158,9 @@ public class ProjectController {
 	)
 	public ResponseEntity<String> deleteProjectByUrl(@RequestParam String url) {
 		LOGGER.info("HttpRequest: deleteProjectByUrl");
-		service.deleteProjectByUrl(url);
+		service.deleteProjectByUrl(Utils.getInstance().preprocessURL(url));
 		
-		return new ResponseEntity<>("Project with url " + url + " deleted", HttpStatus.OK);
+		return new ResponseEntity<>("Project with url " + Utils.getInstance().preprocessURL(url) + " deleted", HttpStatus.OK);
 	}
 	
 	@DeleteMapping(
