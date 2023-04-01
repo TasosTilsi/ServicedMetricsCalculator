@@ -70,6 +70,8 @@ public class BackroundAnalysis implements Runnable {
 					"Please review the git url you provided.\n" +
 					"If this repo is private please provide access token!");
 			FileSystemUtils.deleteRecursively(new File(project.getClonePath()));
+			project.setState(State.ABORTED.name());
+			project = projectRepository.save(project);
 			throw new RuntimeException("No commits to analyze, or something is wrong with git url!\n" +
 					"Please review the git url you provided.\n" +
 					"If this repo is private please provide access token!");

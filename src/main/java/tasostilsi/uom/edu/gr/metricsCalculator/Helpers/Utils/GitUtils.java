@@ -164,17 +164,10 @@ public class GitUtils {
 					return Git.cloneRepository()
 							.setURI(project.getUrl())
 							.setDirectory(new File(project.getClonePath()))
-							.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user.getUrernameOrAccessToken(), user.getPassword()))
-							.call();
-				} else {
-					return Git.cloneRepository()
-							.setURI(project.getUrl())
-							.setDirectory(new File(project.getClonePath()))
-							.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user.getUrernameOrAccessToken(), ""))
+							.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user.getUsername(), user.getPasswordOrAccessToken()))
 							.call();
 				}
 			}
-			
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 			e.printStackTrace();

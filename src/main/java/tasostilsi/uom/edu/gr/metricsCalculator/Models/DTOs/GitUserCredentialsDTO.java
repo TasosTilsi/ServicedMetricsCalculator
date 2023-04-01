@@ -23,11 +23,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GitUserCredentialsDTO {
 	
-	private String urernameOrAccessToken;
+	private String username;
 	
-	private String password;
+	private String passwordOrAccessToken;
 	
 	public boolean hasPassword() {
-		return !password.isEmpty() || !password.isBlank();
+		return !passwordOrAccessToken.isEmpty() || !passwordOrAccessToken.isBlank();
 	}
 }
