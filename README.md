@@ -24,7 +24,7 @@ If you want to build without running the tests:
 
 Run the Project
 -
-    docker compose -f ./docker-compose.yml build
+    docker-compose -f ./docker-compose.yml -p servicedmetricscalculator up --always-recreate-deps --force-recreate --build
     docker compose start
 
 
@@ -36,9 +36,6 @@ Run the Project
 * **Swagger**
 ```shell
 host:port/
-```
-```shell
-host:port/api/docs/ui
 ```
 * **Start Analysis**
 ```shell

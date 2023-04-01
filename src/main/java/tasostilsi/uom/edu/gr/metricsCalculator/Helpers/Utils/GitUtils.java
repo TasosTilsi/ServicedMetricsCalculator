@@ -160,13 +160,11 @@ public class GitUtils {
 						.setDirectory(new File(project.getClonePath()))
 						.call();
 			else {
-				if (user.hasPassword()) {
-					return Git.cloneRepository()
-							.setURI(project.getUrl())
-							.setDirectory(new File(project.getClonePath()))
-							.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user.getUsername(), user.getPasswordOrAccessToken()))
-							.call();
-				}
+				return Git.cloneRepository()
+						.setURI(project.getUrl())
+						.setDirectory(new File(project.getClonePath()))
+						.setCredentialsProvider(new UsernamePasswordCredentialsProvider(user.getUsername(), user.getPasswordOrAccessToken()))
+						.call();
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());

@@ -30,4 +30,12 @@ public class GitUserCredentialsDTO {
 	public boolean hasPassword() {
 		return !passwordOrAccessToken.isEmpty() || !passwordOrAccessToken.isBlank();
 	}
+	
+	public boolean hasUsername() {
+		return !username.isEmpty() || !username.isBlank();
+	}
+	
+	public boolean isBlank() {
+		return hasUsername() && hasPassword();
+	}
 }
