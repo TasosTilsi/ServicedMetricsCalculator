@@ -323,6 +323,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"  FROM CalculatedJavaFile cf " +
 			"  WHERE cf.path = c.path " +
 			")" +
+			"AND c.deleted = false " +
 			"ORDER BY c.interest.interestInEuros DESC")
 	Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, ProjectDTO project);
 	

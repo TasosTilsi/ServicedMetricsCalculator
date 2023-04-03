@@ -52,14 +52,17 @@ public class Utils {
 	private void removeDeletedFiles(Set<DiffEntry> diffEntries, Project project) {
 		Set<CalculatedJavaFile> deletedFiles = ConcurrentHashMap.newKeySet();
 		diffEntries
-				.forEach(diffEntry -> deletedFiles.addAll(
+				.stream().parallel().forEach(diffEntry -> deletedFiles.addAll(
 						project
 								.getJavaFiles()
-								.stream()
+								.stream().parallel()
 								.filter(file -> file.getPath().equals(diffEntry.getOldFilePath()))
 								.collect(Collectors.toList())));
 		Globals.getJavaFiles().removeAll(deletedFiles);
 		project.getJavaFiles().removeAll(deletedFiles);
+		deletedFiles.stream().parallel().forEach(file -> file.setDeleted(true));
+		Globals.getJavaFiles().addAll(deletedFiles);
+		project.getJavaFiles().addAll(deletedFiles);
 	}
 	
 	/**

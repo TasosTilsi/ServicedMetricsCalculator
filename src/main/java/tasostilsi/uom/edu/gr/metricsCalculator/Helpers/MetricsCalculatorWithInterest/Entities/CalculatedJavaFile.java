@@ -56,6 +56,9 @@ public class CalculatedJavaFile {
 	@Column(name = "path", nullable = false)
 	private String path;
 	
+	@Column(name = "deleted")
+	private boolean deleted;
+	
 	public CalculatedJavaFile(String path, Set<CalculatedClass> classes) {
 		this.path = path;
 		this.classes = classes;
@@ -215,5 +218,13 @@ public class CalculatedJavaFile {
 	
 	public void setProject(Project project) {
 		this.project = project;
+	}
+	
+	public boolean isDeleted() {
+		return deleted;
+	}
+	
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 }
