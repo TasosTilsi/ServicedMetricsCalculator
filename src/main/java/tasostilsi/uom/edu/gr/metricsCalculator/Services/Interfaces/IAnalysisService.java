@@ -52,4 +52,8 @@ public interface IAnalysisService {
 	Slice<AnalyzedCommit> findAnalyzedCommits(Pageable pageable, String url);
 	
 	Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, String url, String sha);
+	
+	Collection<CumulativeInterest> findInterestPerCommit(String url);
+	
+	Collection<CumulativeInterest> findInterestByCommit(String url, String sha);
 }

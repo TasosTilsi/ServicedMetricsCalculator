@@ -155,4 +155,14 @@ public class AnalysisController {
 			response = analysisService.findAllFileMetricsAndInterest(PageRequest.of(0, limit), url, sha).getContent();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@GetMapping(value = "/interest")
+	public ResponseEntity<Collection<CumulativeInterest>> getInterestPerCommit(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
+		Collection<CumulativeInterest> response;
+		if (Objects.isNull(sha))
+			response = analysisService.findInterestPerCommit(url);
+		else
+			response = analysisService.findInterestByCommit(url, sha);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

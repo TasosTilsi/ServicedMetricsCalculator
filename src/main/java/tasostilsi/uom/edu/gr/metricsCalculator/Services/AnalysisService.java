@@ -30,9 +30,10 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.QualityMetricsRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisService;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -74,13 +75,53 @@ public class AnalysisService implements IAnalysisService {
 	}
 	
 	@Override
-	public Collection<CumulativeInterest> findCumulativeInterestPerCommit(String url) {
+	public Collection<CumulativeInterest> findInterestPerCommit(String url) {
 		return metricsRepository.findCumulativeInterestPerCommit(new ProjectDTO(url));
 	}
 	
 	@Override
-	public Collection<CumulativeInterest> findCumulativeInterestByCommit(String url, String sha) {
+	public Collection<CumulativeInterest> findInterestByCommit(String url, String sha) {
 		return metricsRepository.findCumulativeInterestByCommit(new ProjectDTO(url), sha);
+	}
+	
+	@Override
+	public Collection<CumulativeInterest> findCumulativeInterestPerCommit(String url) {
+		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findCumulativeInterestPerCommit(new ProjectDTO(url));
+		AtomicReference<BigDecimal> cumulativeInterestEu = new AtomicReference<>(BigDecimal.ZERO);
+		AtomicReference<BigDecimal> cumulativeInterestHours = new AtomicReference<>(BigDecimal.ZERO);
+		cumulativeInterests.forEach(interest -> {
+			cumulativeInterestEu.set(cumulativeInterestEu.get().add(interest.getInterestEu()));
+			cumulativeInterestHours.set(cumulativeInterestHours.get().add(interest.getInterestHours()));
+			interest.setInterestEu(cumulativeInterestEu.get());
+			interest.setInterestHours(cumulativeInterestHours.get());
+		});
+		
+		return cumulativeInterests;
+	}
+	
+	@Override
+	public Collection<CumulativeInterest> findCumulativeInterestByCommit(String url, String sha) {
+		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findCumulativeInterestPerCommit(new ProjectDTO(url));
+		AtomicReference<BigDecimal> cumulativeInterestEu = new AtomicReference<>(BigDecimal.ZERO);
+		AtomicReference<BigDecimal> cumulativeInterestHours = new AtomicReference<>(BigDecimal.ZERO);
+		Collection<CumulativeInterest> returnValues = new ArrayList<>();
+		long revisionCount = metricsRepository.findDistinctRevisionCountByRevisionSha(sha);
+		cumulativeInterests.forEach(interest -> {
+			if (interest.getRevisionCount() <= revisionCount) {
+				cumulativeInterestEu.set(cumulativeInterestEu.get().add(interest.getInterestEu()));
+				cumulativeInterestHours.set(cumulativeInterestHours.get().add(interest.getInterestHours()));
+				interest.setInterestEu(cumulativeInterestEu.get());
+				interest.setInterestHours(cumulativeInterestHours.get());
+				returnValues.add(interest);
+			}
+		});
+		
+		return returnValues.stream().sorted(new Comparator<CumulativeInterest>() {
+			@Override
+			public int compare(CumulativeInterest o1, CumulativeInterest o2) {
+				return (int) (o1.getRevisionCount() - o2.getRevisionCount());
+			}
+		}).collect(Collectors.toList());
 	}
 	
 	@Override
