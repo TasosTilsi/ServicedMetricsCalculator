@@ -59,8 +59,13 @@ public class AnalysisController {
 	}
 	
 	@GetMapping(value = "/interestChange")
-	public ResponseEntity<Collection<InterestChange>> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = true) String sha) {
-		Collection<InterestChange> response = analysisService.findInterestChangeByCommit(url, sha);
+	public ResponseEntity<Collection<InterestChange>> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
+		Collection<InterestChange> response;
+		if (!Objects.isNull(sha)) {
+			response = analysisService.findInterestChangeByCommit(url, sha);
+		} else {
+			response = analysisService.findTotalInterestChange(url);
+		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	

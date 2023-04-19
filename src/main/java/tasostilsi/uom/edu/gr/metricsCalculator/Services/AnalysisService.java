@@ -204,4 +204,25 @@ public class AnalysisService implements IAnalysisService {
 		}
 		return metricsRepository.findAllFileMetricsAndInterest(pageable, new ProjectDTO(url));
 	}
+	
+	@Override
+	public Collection<InterestChange> findTotalInterestChange(String url) {
+		ProjectDTO project = new ProjectDTO(url);
+		Collection<InterestChange> returnedValue = new ArrayList<>();
+		Slice<AnalyzedCommit> analyzedCommits = metricsRepository.findAnalyzedCommits(null, project);
+		
+		for (AnalyzedCommit commit : analyzedCommits) {
+			if (commit.getRevisionCount() > 3) {
+				try {
+					InterestChange change = metricsRepository.findInterestChangeByCommit(project, commit.getSha()).stream().findAny().get();
+					if (change.getChangeEu() != null) {
+						returnedValue.add(change);
+					}
+				} catch (Exception ignored) {
+				}
+			}
+		}
+		
+		return returnedValue;
+	}
 }

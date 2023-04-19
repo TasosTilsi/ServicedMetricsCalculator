@@ -56,4 +56,6 @@ public interface IAnalysisService {
 	Collection<CumulativeInterest> findInterestPerCommit(String url);
 	
 	Collection<CumulativeInterest> findInterestByCommit(String url, String sha);
+	
+	Collection<InterestChange> findTotalInterestChange(String url);
 }
