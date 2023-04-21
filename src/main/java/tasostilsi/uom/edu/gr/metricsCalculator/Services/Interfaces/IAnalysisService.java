@@ -53,9 +53,11 @@ public interface IAnalysisService {
 	
 	Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, String url, String sha);
 	
-	Collection<CumulativeInterest> findInterestPerCommit(String url);
+	Collection<CumulativeInterest> findInterestForAllCommits(String url);
 	
 	Collection<CumulativeInterest> findInterestByCommit(String url, String sha);
 	
 	Collection<InterestChange> findTotalInterestChange(String url);
+	
+	float findInterestRanking(String url);
 }

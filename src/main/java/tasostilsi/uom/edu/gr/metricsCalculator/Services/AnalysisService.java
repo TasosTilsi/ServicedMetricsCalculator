@@ -75,18 +75,18 @@ public class AnalysisService implements IAnalysisService {
 	}
 	
 	@Override
-	public Collection<CumulativeInterest> findInterestPerCommit(String url) {
-		return metricsRepository.findCumulativeInterestPerCommit(new ProjectDTO(url));
+	public Collection<CumulativeInterest> findInterestForAllCommits(String url) {
+		return metricsRepository.findInterestForAllCommits(new ProjectDTO(url));
 	}
 	
 	@Override
 	public Collection<CumulativeInterest> findInterestByCommit(String url, String sha) {
-		return metricsRepository.findCumulativeInterestByCommit(new ProjectDTO(url), sha);
+		return metricsRepository.findInterestByCommit(new ProjectDTO(url), sha);
 	}
 	
 	@Override
 	public Collection<CumulativeInterest> findCumulativeInterestPerCommit(String url) {
-		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findCumulativeInterestPerCommit(new ProjectDTO(url));
+		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findInterestForAllCommits(new ProjectDTO(url));
 		AtomicReference<BigDecimal> cumulativeInterestEu = new AtomicReference<>(BigDecimal.ZERO);
 		AtomicReference<BigDecimal> cumulativeInterestHours = new AtomicReference<>(BigDecimal.ZERO);
 		cumulativeInterests.forEach(interest -> {
@@ -101,7 +101,7 @@ public class AnalysisService implements IAnalysisService {
 	
 	@Override
 	public Collection<CumulativeInterest> findCumulativeInterestByCommit(String url, String sha) {
-		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findCumulativeInterestPerCommit(new ProjectDTO(url));
+		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findInterestForAllCommits(new ProjectDTO(url));
 		AtomicReference<BigDecimal> cumulativeInterestEu = new AtomicReference<>(BigDecimal.ZERO);
 		AtomicReference<BigDecimal> cumulativeInterestHours = new AtomicReference<>(BigDecimal.ZERO);
 		Collection<CumulativeInterest> returnValues = new ArrayList<>();
@@ -214,7 +214,7 @@ public class AnalysisService implements IAnalysisService {
 		for (AnalyzedCommit commit : analyzedCommits) {
 			if (commit.getRevisionCount() > 3) {
 				try {
-					InterestChange change = metricsRepository.findInterestChangeByCommit(project, commit.getSha()).stream().findAny().get();
+					InterestChange change = metricsRepository.findInterestChangeByCommit(project, commit.getSha()).stream().findFirst().get();
 					if (change.getChangeEu() != null) {
 						returnedValue.add(change);
 					}
@@ -224,5 +224,29 @@ public class AnalysisService implements IAnalysisService {
 		}
 		
 		return returnedValue;
+	}
+	
+	@Override
+	public float findInterestRanking(String url) {
+		float returnValue = 0f;
+		
+		List<Project> projects = projectRepository.findAll();
+		
+		float totalInterestForAllProjects = 0f;
+		float totalInterestForCalculatedProject = 0f;
+		
+		for (Project project : projects) {
+			float dbInterest = metricsRepository.findAllFileMetricsAndInterest(null, new ProjectDTO(project.getUrl())).getContent().parallelStream().map(AllFileMetricsAndInterest::getInterestEu).reduce(BigDecimal.valueOf(0), BigDecimal::add).floatValue();
+			totalInterestForAllProjects += dbInterest;
+			System.out.println(project.getUrl() + " --> " + dbInterest);
+			if (project.getUrl().equals(url)) {
+				totalInterestForCalculatedProject = dbInterest;
+			}
+		}
+		if (totalInterestForAllProjects != 0) {
+			returnValue = (totalInterestForCalculatedProject / totalInterestForAllProjects) * 100;
+		}
+		
+		return returnValue;
 	}
 }

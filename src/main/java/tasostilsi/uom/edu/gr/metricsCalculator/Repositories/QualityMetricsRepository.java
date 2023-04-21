@@ -38,7 +38,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"WHERE c.project.url = :#{#project.url} " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count " +
 			"ORDER BY c.qualityMetrics.revision.count")
-	Collection<CumulativeInterest> findCumulativeInterestPerCommit(ProjectDTO project);
+	Collection<CumulativeInterest> findInterestForAllCommits(ProjectDTO project);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(c.qualityMetrics.revision.sha," +
 			"c.qualityMetrics.revision.count, " +
@@ -49,7 +49,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c.qualityMetrics.revision.sha = :sha " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count " +
 			"ORDER BY c.qualityMetrics.revision.count")
-	Collection<CumulativeInterest> findCumulativeInterestByCommit(ProjectDTO project, @Param("sha") String sha);
+	Collection<CumulativeInterest> findInterestByCommit(ProjectDTO project, @Param("sha") String sha);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(c.qualityMetrics.revision.sha, " +
 			"c.path," +

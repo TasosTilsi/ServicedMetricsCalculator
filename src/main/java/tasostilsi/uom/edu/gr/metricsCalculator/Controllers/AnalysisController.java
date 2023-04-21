@@ -165,9 +165,16 @@ public class AnalysisController {
 	public ResponseEntity<Collection<CumulativeInterest>> getInterestPerCommit(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
 		Collection<CumulativeInterest> response;
 		if (Objects.isNull(sha))
-			response = analysisService.findInterestPerCommit(url);
+			response = analysisService.findInterestForAllCommits(url);
 		else
 			response = analysisService.findInterestByCommit(url, sha);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/interest/ranking")
+	public ResponseEntity<Float> getInterestPerCommit(@RequestParam(required = true) String url) {
+		float response;
+		response = analysisService.findInterestRanking(url);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }
