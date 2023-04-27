@@ -70,7 +70,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"c.interest.interestInHours) " +
 			"FROM CalculatedJavaFile c " +
 			"WHERE c.project.url = :#{#project.url} " +
-			"ORDER BY c.qualityMetrics.revision.count")
+			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestChange(c.qualityMetrics.revision.sha, " +
@@ -170,7 +170,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"WHERE c.project.url = :#{#project.url} " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count " +
 			"HAVING SUM(c.qualityMetrics.SIZE1) <> 0 " +
-			"ORDER BY c.qualityMetrics.revision.count")
+			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Collection<NormalizedInterest> findNormalizedInterest(ProjectDTO project);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.NormalizedInterest(c.qualityMetrics.revision.sha, " +
@@ -237,7 +237,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c.qualityMetrics.LCOM >= 0 " +
 			"AND c.qualityMetrics.DIT >= 0 " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count " +
-			"ORDER BY c.qualityMetrics.revision.count")
+			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Slice<ProjectReusabilityMetrics> findProjectReusabilityMetrics(Pageable pageable, ProjectDTO project);
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(c.qualityMetrics.revision.sha, " +
