@@ -10,6 +10,7 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 public class NormalizedInterest {
@@ -51,7 +52,7 @@ public class NormalizedInterest {
     }
 
     public BigDecimal getNormalizedInterestEu() {
-        return normalizedInterestEu;
+        return normalizedInterestEu.setScale(4, RoundingMode.HALF_UP);
     }
 
     public void setNormalizedInterestEu(BigDecimal normalizedInterestEu) {
@@ -59,7 +60,7 @@ public class NormalizedInterest {
     }
 
     public BigDecimal getNormalizedInterestHours() {
-        return normalizedInterestHours;
+        return normalizedInterestHours.setScale(4, RoundingMode.HALF_UP);
     }
 
     public void setNormalizedInterestHours(BigDecimal normalizedInterestHours) {
