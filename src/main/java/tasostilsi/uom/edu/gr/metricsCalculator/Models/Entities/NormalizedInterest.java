@@ -9,39 +9,33 @@
  ******************************************************************************/
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 public class NormalizedInterest {
-    private String sha;
+	@JsonProperty("Revision")
     private Long revisionCount;
-    private BigDecimal normalizedInterestEu;
-    private BigDecimal normalizedInterestHours;
+	@JsonProperty("Normalized Interest (In €)")
+	private BigDecimal normalizedInterestEu;
+	@JsonProperty("Normalized Interest (In Hours)")
+	private BigDecimal normalizedInterestHours;
 
     public NormalizedInterest() { }
-
-    public NormalizedInterest(String sha, Long revisionCount, BigDecimal normalizedInterestEu, BigDecimal normalizedInterestHours) {
-        this.sha = sha;
-        this.revisionCount = revisionCount;
-        this.normalizedInterestEu = normalizedInterestEu;
-        this.normalizedInterestHours = normalizedInterestHours;
-    }
-    
-    public NormalizedInterest(String sha, Long revisionCount, Double normalizedInterestEu, Double normalizedInterestHours) {
-        this.sha = sha;
-        this.revisionCount = revisionCount;
-        this.normalizedInterestEu = BigDecimal.valueOf(normalizedInterestEu);
-        this.normalizedInterestHours = BigDecimal.valueOf(normalizedInterestHours);
-    }
-
-    public String getSha() {
-        return sha;
-    }
-
-    public void setSha(String sha) {
-        this.sha = sha;
-    }
+	
+	public NormalizedInterest(Long revisionCount, BigDecimal normalizedInterestEu, BigDecimal normalizedInterestHours) {
+		this.revisionCount = revisionCount;
+		this.normalizedInterestEu = normalizedInterestEu;
+		this.normalizedInterestHours = normalizedInterestHours;
+	}
+	
+	public NormalizedInterest(Long revisionCount, Double normalizedInterestEu, Double normalizedInterestHours) {
+		this.revisionCount = revisionCount;
+		this.normalizedInterestEu = BigDecimal.valueOf(normalizedInterestEu);
+		this.normalizedInterestHours = BigDecimal.valueOf(normalizedInterestHours);
+	}
 
     public Long getRevisionCount() {
         return revisionCount;
@@ -72,11 +66,11 @@ public class NormalizedInterest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NormalizedInterest that = (NormalizedInterest) o;
-        return Objects.equals(sha, that.sha) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(normalizedInterestEu, that.normalizedInterestEu) && Objects.equals(normalizedInterestHours, that.normalizedInterestHours);
+	    return Objects.equals(revisionCount, that.revisionCount) && Objects.equals(normalizedInterestEu, that.normalizedInterestEu) && Objects.equals(normalizedInterestHours, that.normalizedInterestHours);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sha, revisionCount, normalizedInterestEu, normalizedInterestHours);
+	    return Objects.hash(revisionCount, normalizedInterestEu, normalizedInterestHours);
     }
 }

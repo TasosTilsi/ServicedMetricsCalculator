@@ -9,46 +9,42 @@
  ******************************************************************************/
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 
 public class HighInterestFile {
-    private String sha;
+	@JsonProperty("Revision")
     private Long revisionCount;
-    private String filePath;
-    private BigDecimal interestEu;
-    private BigDecimal interestHours;
-    private BigDecimal interestPercentageOfProject;
+	@JsonProperty("File Path")
+	private String filePath;
+	@JsonProperty("Interest (In €)")
+	private BigDecimal interestEu;
+	@JsonProperty("Interest (In Hours)")
+	private BigDecimal interestHours;
+	@JsonProperty("Contribution to Project Interest")
+	private BigDecimal interestPercentageOfProject;
 
     public HighInterestFile() { }
-
-    public HighInterestFile(String sha, Long revisionCount, String filePath, BigDecimal interestEu, BigDecimal interestHours, BigDecimal interestPercentageOfProject) {
-        this.sha = sha;
-        this.revisionCount = revisionCount;
-        this.filePath = filePath;
-        this.interestEu = interestEu;
-        this.interestHours = interestHours;
-        this.interestPercentageOfProject = interestPercentageOfProject;
-    }
-    
-    public HighInterestFile(String sha, Long revisionCount, String filePath, Double interestEu, Double interestHours, Double interestPercentageOfProject) {
-        this.sha = sha;
-        this.revisionCount = revisionCount;
-        this.filePath = filePath;
-        this.interestEu = BigDecimal.valueOf(interestEu);
-        this.interestHours = BigDecimal.valueOf(interestHours);
-        this.interestPercentageOfProject = BigDecimal.valueOf(interestPercentageOfProject);
-    }
-
-    public String getSha() {
-        return sha;
-    }
-
-    public void setSha(String sha) {
-        this.sha = sha;
-    }
+	
+	public HighInterestFile(Long revisionCount, String filePath, BigDecimal interestEu, BigDecimal interestHours, BigDecimal interestPercentageOfProject) {
+		this.revisionCount = revisionCount;
+		this.filePath = filePath;
+		this.interestEu = interestEu;
+		this.interestHours = interestHours;
+		this.interestPercentageOfProject = interestPercentageOfProject;
+	}
+	
+	public HighInterestFile(Long revisionCount, String filePath, Double interestEu, Double interestHours, Double interestPercentageOfProject) {
+		this.revisionCount = revisionCount;
+		this.filePath = filePath;
+		this.interestEu = BigDecimal.valueOf(interestEu);
+		this.interestHours = BigDecimal.valueOf(interestHours);
+		this.interestPercentageOfProject = BigDecimal.valueOf(interestPercentageOfProject);
+	}
 
     public Long getRevisionCount() {
         return revisionCount;
@@ -95,11 +91,11 @@ public class HighInterestFile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         HighInterestFile that = (HighInterestFile) o;
-        return Objects.equals(sha, that.sha) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(filePath, that.filePath) && Objects.equals(interestEu, that.interestEu) && Objects.equals(interestHours, that.interestHours) && Objects.equals(interestPercentageOfProject, that.interestPercentageOfProject);
+	    return Objects.equals(revisionCount, that.revisionCount) && Objects.equals(filePath, that.filePath) && Objects.equals(interestEu, that.interestEu) && Objects.equals(interestHours, that.interestHours) && Objects.equals(interestPercentageOfProject, that.interestPercentageOfProject);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sha, revisionCount, filePath, interestEu, interestHours, interestPercentageOfProject);
+	    return Objects.hash(revisionCount, filePath, interestEu, interestHours, interestPercentageOfProject);
     }
 }

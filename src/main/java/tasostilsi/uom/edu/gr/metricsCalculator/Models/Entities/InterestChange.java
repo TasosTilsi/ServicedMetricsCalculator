@@ -9,35 +9,31 @@
  ******************************************************************************/
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 
 public class InterestChange {
-    private String sha;
+	@JsonProperty("Revision")
     private Long revisionCount;
-    private BigDecimal changeEu;
-    private BigDecimal changeHours;
-    private BigDecimal changePercentage;
+	@JsonProperty("Changed Interest (In €)")
+	private BigDecimal changeEu;
+	@JsonProperty("Changed Interest (In Hours)")
+	private BigDecimal changeHours;
+	@JsonProperty("Change Between Revisions (In %)")
+	private BigDecimal changePercentage;
 
     public InterestChange() { }
-
-    public InterestChange(String sha, Long revisionCount, BigDecimal changeEu, BigDecimal changeHours, BigDecimal changePercentage) {
-        this.sha = sha;
-        this.revisionCount = revisionCount;
-        this.changeEu = changeEu;
-        this.changeHours = changeHours;
-        this.changePercentage = changePercentage;
-    }
-
-    public String getSha() {
-        return sha;
-    }
-
-    public void setSha(String sha) {
-        this.sha = sha;
-    }
+	
+	public InterestChange(Long revisionCount, BigDecimal changeEu, BigDecimal changeHours, BigDecimal changePercentage) {
+		this.revisionCount = revisionCount;
+		this.changeEu = changeEu;
+		this.changeHours = changeHours;
+		this.changePercentage = changePercentage;
+	}
 
     public Long getRevisionCount() {
         return revisionCount;
@@ -76,11 +72,11 @@ public class InterestChange {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InterestChange that = (InterestChange) o;
-        return Objects.equals(sha, that.sha) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(changeEu, that.changeEu) && Objects.equals(changeHours, that.changeHours) && Objects.equals(changePercentage, that.changePercentage);
+	    return Objects.equals(revisionCount, that.revisionCount) && Objects.equals(changeEu, that.changeEu) && Objects.equals(changeHours, that.changeHours) && Objects.equals(changePercentage, that.changePercentage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sha, revisionCount, changeEu, changeHours, changePercentage);
+	    return Objects.hash(revisionCount, changeEu, changeHours, changePercentage);
     }
 }

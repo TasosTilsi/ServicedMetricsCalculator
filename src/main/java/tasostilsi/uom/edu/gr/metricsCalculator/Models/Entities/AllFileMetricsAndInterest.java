@@ -10,6 +10,7 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,25 +24,44 @@ import java.util.Objects;
 @Getter
 @Setter
 public class AllFileMetricsAndInterest {
+	@JsonProperty("Revision")
 	@JsonIgnore
 	private Long revisionCount;
+	@JsonProperty("File Path")
 	private String filePath;
+	@JsonProperty("Interest (In €)")
 	private BigDecimal interestEu;
+	@JsonProperty("Interest (In Hours)")
 	private BigDecimal interestHours;
+	@JsonProperty("CBO")
 	private Double cbo;
+	@JsonProperty("DAC")
 	private Integer dac;
+	@JsonProperty("DIT")
 	private Integer dit;
+	@JsonProperty("LCOM")
 	private Double lcom;
+	@JsonProperty("MPC")
 	private Double mpc;
+	@JsonProperty("NOCC")
 	private Integer nocc;
+	@JsonProperty("NOM")
 	private Double nom;
+	@JsonProperty("RFC")
 	private Double rfc;
+	@JsonProperty("WMC")
 	private Double wmc;
+	@JsonProperty("SIZE1")
 	private Integer size1;
+	@JsonProperty("SIZE2")
 	private Integer size2;
+	@JsonProperty("Complexity")
 	private Double complexity;
+	@JsonProperty("Average Interest Per Lines Of Code")
 	private BigDecimal avgInterestPerLoC;
+	@JsonProperty("Interest In Average Lines Of Code")
 	private BigDecimal interestInAvgLoC;
+	@JsonProperty("Sum Interest Per Lines Of Code")
 	private BigDecimal sumInterestPerLoC;
 	
 	@Override

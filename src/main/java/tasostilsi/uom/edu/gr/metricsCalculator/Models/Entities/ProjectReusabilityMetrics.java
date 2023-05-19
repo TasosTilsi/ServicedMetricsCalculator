@@ -9,38 +9,37 @@
  ******************************************************************************/
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class ProjectReusabilityMetrics {
-    private String sha;
+	@JsonProperty("Revision")
     private Long revisionCount;
-    private Double cbo;
-    private Double dit;
-    private Double wmc;
-    private Double rfc;
-    private Double lcom;
-    private Double nocc;
+	@JsonProperty("CBO")
+	private Double cbo;
+	@JsonProperty("DIT")
+	private Double dit;
+	@JsonProperty("WMC")
+	private Double wmc;
+	@JsonProperty("RFC")
+	private Double rfc;
+	@JsonProperty("LCOM")
+	private Double lcom;
+	@JsonProperty("NOCC")
+	private Double nocc;
 
     public ProjectReusabilityMetrics() { }
-
-    public ProjectReusabilityMetrics(String sha, Long revisionCount, Double cbo, Double dit, Double wmc, Double rfc, Double lcom, Double nocc) {
-        this.sha = sha;
-        this.revisionCount = revisionCount;
-        this.cbo = cbo;
-        this.dit = dit;
-        this.wmc = wmc;
-        this.rfc = rfc;
-        this.lcom = lcom;
-        this.nocc = nocc;
-    }
-
-    public String getSha() {
-        return sha;
-    }
-
-    public void setSha(String sha) {
-        this.sha = sha;
-    }
+	
+	public ProjectReusabilityMetrics(Long revisionCount, Double cbo, Double dit, Double wmc, Double rfc, Double lcom, Double nocc) {
+		this.revisionCount = revisionCount;
+		this.cbo = cbo;
+		this.dit = dit;
+		this.wmc = wmc;
+		this.rfc = rfc;
+		this.lcom = lcom;
+		this.nocc = nocc;
+	}
 
     public Long getRevisionCount() {
         return revisionCount;
@@ -103,11 +102,11 @@ public class ProjectReusabilityMetrics {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProjectReusabilityMetrics that = (ProjectReusabilityMetrics) o;
-        return Objects.equals(sha, that.sha) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(cbo, that.cbo) && Objects.equals(dit, that.dit) && Objects.equals(wmc, that.wmc) && Objects.equals(rfc, that.rfc) && Objects.equals(lcom, that.lcom) && Objects.equals(nocc, that.nocc);
+	    return Objects.equals(revisionCount, that.revisionCount) && Objects.equals(cbo, that.cbo) && Objects.equals(dit, that.dit) && Objects.equals(wmc, that.wmc) && Objects.equals(rfc, that.rfc) && Objects.equals(lcom, that.lcom) && Objects.equals(nocc, that.nocc);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sha, revisionCount, cbo, dit, wmc, rfc, lcom, nocc);
+	    return Objects.hash(revisionCount, cbo, dit, wmc, rfc, lcom, nocc);
     }
 }

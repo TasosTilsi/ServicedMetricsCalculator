@@ -9,34 +9,31 @@
  ******************************************************************************/
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class FileInterestChange {
-    private String sha;
+    @JsonProperty("Revision")
     private Long revisionCount;
+    @JsonProperty("File Path")
     private String filePath;
+    @JsonProperty("Changed Interest (In €)")
     private BigDecimal changeEu;
+    @JsonProperty("Changed Interest (In Hours)")
     private BigDecimal changeHours;
+    @JsonProperty("Change Between Revisions (In %)")
     private BigDecimal changePercentage;
 
     public FileInterestChange() { }
-
-    public FileInterestChange(String sha, Long revisionCount, String filePath, BigDecimal changeEu, BigDecimal changeHours, BigDecimal changePercentage) {
-        this.sha = sha;
+    
+    public FileInterestChange(Long revisionCount, String filePath, BigDecimal changeEu, BigDecimal changeHours, BigDecimal changePercentage) {
         this.revisionCount = revisionCount;
         this.filePath = filePath;
         this.changeEu = changeEu;
         this.changeHours = changeHours;
         this.changePercentage = changePercentage;
-    }
-
-    public String getSha() {
-        return sha;
-    }
-
-    public void setSha(String sha) {
-        this.sha = sha;
     }
 
     public Long getRevisionCount() {
@@ -84,11 +81,11 @@ public class FileInterestChange {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FileInterestChange that = (FileInterestChange) o;
-        return Objects.equals(sha, that.sha) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(filePath, that.filePath) && Objects.equals(changeEu, that.changeEu) && Objects.equals(changeHours, that.changeHours) && Objects.equals(changePercentage, that.changePercentage);
+        return Objects.equals(revisionCount, that.revisionCount) && Objects.equals(filePath, that.filePath) && Objects.equals(changeEu, that.changeEu) && Objects.equals(changeHours, that.changeHours) && Objects.equals(changePercentage, that.changePercentage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sha, revisionCount, filePath, changeEu, changeHours, changePercentage);
+        return Objects.hash(revisionCount, filePath, changeEu, changeHours, changePercentage);
     }
 }

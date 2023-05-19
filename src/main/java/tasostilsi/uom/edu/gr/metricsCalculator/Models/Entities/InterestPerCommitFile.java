@@ -9,35 +9,31 @@
  ******************************************************************************/
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 
 public class InterestPerCommitFile {
-    private String sha;
+	@JsonProperty("File Path")
     private String filePath;
-    private Long revisionCount;
-    private BigDecimal interestEu;
-    private BigDecimal interestHours;
+	@JsonProperty("Revision")
+	private Long revisionCount;
+	@JsonProperty("Interest (In €)")
+	private BigDecimal interestEu;
+	@JsonProperty("Interest (In Hours)")
+	private BigDecimal interestHours;
 
     public InterestPerCommitFile() { }
-
-    public InterestPerCommitFile(String sha, String filePath, Long revisionCount, BigDecimal interestEu, BigDecimal interestHours) {
-        this.sha = sha;
-        this.filePath = filePath;
-        this.revisionCount = revisionCount;
-        this.interestEu = interestEu;
-        this.interestHours = interestHours;
-    }
-
-    public String getSha() {
-        return sha;
-    }
-
-    public void setSha(String sha) {
-        this.sha = sha;
-    }
+	
+	public InterestPerCommitFile(String filePath, Long revisionCount, BigDecimal interestEu, BigDecimal interestHours) {
+		this.filePath = filePath;
+		this.revisionCount = revisionCount;
+		this.interestEu = interestEu;
+		this.interestHours = interestHours;
+	}
 
     public String getFilePath() {
         return filePath;
@@ -76,11 +72,11 @@ public class InterestPerCommitFile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InterestPerCommitFile that = (InterestPerCommitFile) o;
-        return Objects.equals(sha, that.sha) && Objects.equals(filePath, that.filePath) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(interestEu, that.interestEu) && Objects.equals(interestHours, that.interestHours);
+	    return Objects.equals(filePath, that.filePath) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(interestEu, that.interestEu) && Objects.equals(interestHours, that.interestHours);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sha, filePath, revisionCount, interestEu, interestHours);
+	    return Objects.hash(filePath, revisionCount, interestEu, interestHours);
     }
 }

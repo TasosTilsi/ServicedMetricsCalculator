@@ -9,44 +9,39 @@
  ******************************************************************************/
 package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 public class CumulativeInterest {
-	private String sha;
+	@JsonProperty("Revision")
 	private Long revisionCount;
+	@JsonProperty("Interest (In €)")
 	private BigDecimal interestEu;
+	@JsonProperty("Interest (In Hours)")
 	private BigDecimal interestHours;
-
-	public CumulativeInterest() { }
 	
-	public CumulativeInterest(String sha, Long revisionCount, BigDecimal interestEu, BigDecimal interestHours) {
-		this.sha = sha;
+	public CumulativeInterest() {
+	}
+	
+	public CumulativeInterest(Long revisionCount, BigDecimal interestEu, BigDecimal interestHours) {
 		this.revisionCount = revisionCount;
 		this.interestEu = interestEu;
 		this.interestHours = interestHours;
 	}
-
-	public CumulativeInterest(String sha, Long revisionCount, Double interestEu, Double interestHours) {
-		this.sha = sha;
+	
+	public CumulativeInterest(Long revisionCount, Double interestEu, Double interestHours) {
 		this.revisionCount = revisionCount;
 		this.interestEu = BigDecimal.valueOf(interestEu);
 		this.interestHours = BigDecimal.valueOf(interestHours);
 	}
-
-	public String getSha() {
-		return sha;
-	}
-
-	public void setSha(String sha) {
-		this.sha = sha;
-	}
-
+	
 	public Long getRevisionCount() {
 		return revisionCount;
 	}
-
+	
 	public void setRevisionCount(Long revisionCount) {
 		this.revisionCount = revisionCount;
 	}
@@ -72,11 +67,11 @@ public class CumulativeInterest {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		CumulativeInterest that = (CumulativeInterest) o;
-		return Objects.equals(sha, that.sha) && Objects.equals(revisionCount, that.revisionCount) && Objects.equals(interestEu, that.interestEu) && Objects.equals(interestHours, that.interestHours);
+		return Objects.equals(revisionCount, that.revisionCount) && Objects.equals(interestEu, that.interestEu) && Objects.equals(interestHours, that.interestHours);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(sha, revisionCount, interestEu, interestHours);
+		return Objects.hash(revisionCount, interestEu, interestHours);
 	}
 }

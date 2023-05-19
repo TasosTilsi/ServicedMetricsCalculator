@@ -30,7 +30,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 	@Query("select distinct c.qualityMetrics.revision.count from CalculatedJavaFile c where c.qualityMetrics.revision.sha = :sha ")
 	Long findDistinctRevisionCountByRevisionSha(String sha);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(c.qualityMetrics.revision.sha," +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(" +
 			"c.qualityMetrics.revision.count, " +
 			"ROUND(SUM(c.interest.interestInEuros),2), " +
 			"ROUND(SUM(c.interest.interestInHours),1))" +
@@ -40,7 +40,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.qualityMetrics.revision.count")
 	Collection<CumulativeInterest> findInterestForAllCommits(ProjectDTO project);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(c.qualityMetrics.revision.sha," +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.CumulativeInterest(" +
 			"c.qualityMetrics.revision.count, " +
 			"ROUND(SUM(c.interest.interestInEuros),2), " +
 			"ROUND(SUM(c.interest.interestInHours),1))" +
@@ -51,7 +51,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.qualityMetrics.revision.count")
 	Collection<CumulativeInterest> findInterestByCommit(ProjectDTO project, @Param("sha") String sha);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(" +
 			"c.path," +
 			"c.qualityMetrics.revision.count, " +
 			"c.interest.interestInEuros," +
@@ -63,7 +63,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.path")
 	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(" +
 			"c.path," +
 			"c.qualityMetrics.revision.count, " +
 			"c.interest.interestInEuros," +
@@ -73,7 +73,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestChange(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestChange(" +
 			"c.qualityMetrics.revision.count, " +
 			"SUM(c.interest.interestInEuros) - " +
 			"(SELECT SUM(c2.interest.interestInEuros) " +
@@ -100,7 +100,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count")
 	Collection<InterestChange> findInterestChangeByCommit(ProjectDTO project, @Param("sha") String sha);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileInterestChange(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileInterestChange(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
 			"c.interest.interestInEuros - " +
@@ -132,7 +132,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c.path = :filePath")
 	FileInterestChange findInterestChangeByCommitAndFile(ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileInterestChange(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileInterestChange(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
 			"c.interest.interestInEuros - " +
@@ -162,7 +162,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"WHERE c.project.url = :#{#project.url} ")
 	Collection<FileInterestChange> findInterestChange(ProjectDTO project);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.NormalizedInterest(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.NormalizedInterest(" +
 			"c.qualityMetrics.revision.count, " +
 			"SUM(c.interest.interestInEuros)/SUM(c.qualityMetrics.SIZE1), " +
 			"SUM(c.interest.interestInHours)/SUM(c.qualityMetrics.SIZE1)) " +
@@ -173,7 +173,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Collection<NormalizedInterest> findNormalizedInterest(ProjectDTO project);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.NormalizedInterest(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.NormalizedInterest(" +
 			"c.qualityMetrics.revision.count, " +
 			"SUM(c.interest.interestInEuros)/SUM(c.qualityMetrics.SIZE1), " +
 			"SUM(c.interest.interestInHours)/SUM(c.qualityMetrics.SIZE1)) " +
@@ -184,7 +184,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"HAVING SUM(c.qualityMetrics.SIZE1) <> 0")
 	Collection<NormalizedInterest> findNormalizedInterestByCommit(ProjectDTO project, @Param("sha") String sha);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.HighInterestFile(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.HighInterestFile(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
 			"c.interest.interestInEuros, " +
@@ -205,7 +205,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.interest.interestInEuros DESC")
 	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, ProjectDTO project, @Param("sha") String sha);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.HighInterestFile(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.HighInterestFile(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
 			"c.interest.interestInEuros, " +
@@ -224,7 +224,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.interest.interestInEuros DESC")
 	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, ProjectDTO project);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.ProjectReusabilityMetrics(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.ProjectReusabilityMetrics(" +
 			"c.qualityMetrics.revision.count, " +
 			"AVG(c.qualityMetrics.CBO), " +
 			"AVG(c.qualityMetrics.DIT), " +
@@ -240,7 +240,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Slice<ProjectReusabilityMetrics> findProjectReusabilityMetrics(Pageable pageable, ProjectDTO project);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
 			"c.qualityMetrics.CBO, " +
@@ -256,7 +256,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.path")
 	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
 			"c.qualityMetrics.CBO, " +
@@ -274,7 +274,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"ORDER BY c.path")
 	Slice<FileReusabilityMetrics> findFileReusabilityMetrics(Pageable pageable, ProjectDTO project, @Param("sha") String sha, @Param("filePath") String filePath);
 	
-	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(c.qualityMetrics.revision.sha, " +
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.FileReusabilityMetrics(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
 			"c.qualityMetrics.CBO, " +
