@@ -158,6 +158,11 @@ public class AnalysisService implements IAnalysisService {
 	}
 	
 	@Override
+	public Collection<NormalizedInterestPerFile> findNormalizedInterestPerFile(String url) {
+		return metricsRepository.findNormalizedInterestPerFile(new ProjectDTO(url));
+	}
+	
+	@Override
 	public Collection<NormalizedInterest> findNormalizedInterestByCommit(String url, String sha) {
 		return metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
 	}

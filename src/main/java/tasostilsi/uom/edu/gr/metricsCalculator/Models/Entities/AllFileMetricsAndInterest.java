@@ -24,7 +24,6 @@ import java.util.Objects;
 @Getter
 @Setter
 public class AllFileMetricsAndInterest {
-	@JsonProperty("Revision")
 	@JsonIgnore
 	private Long revisionCount;
 	@JsonProperty("File Path")

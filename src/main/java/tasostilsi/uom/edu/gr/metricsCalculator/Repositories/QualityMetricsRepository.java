@@ -70,6 +70,12 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"c.interest.interestInHours) " +
 			"FROM CalculatedJavaFile c " +
 			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.count = (" +
+			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
+			"  FROM CalculatedJavaFile cf " +
+			"  WHERE cf.path = c.path " +
+			")" +
+			"AND c.deleted = false " +
 			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project);
 	
@@ -184,6 +190,24 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"HAVING SUM(c.qualityMetrics.SIZE1) <> 0")
 	Collection<NormalizedInterest> findNormalizedInterestByCommit(ProjectDTO project, @Param("sha") String sha);
 	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.NormalizedInterestPerFile(" +
+			"c.path, " +
+			"c.qualityMetrics.revision.count, " +
+			"SUM(c.interest.interestInEuros)/SUM(c.qualityMetrics.SIZE1), " +
+			"SUM(c.interest.interestInHours)/SUM(c.qualityMetrics.SIZE1)) " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.count = (" +
+			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
+			"  FROM CalculatedJavaFile cf " +
+			"  WHERE cf.path = c.path " +
+			")" +
+			"AND c.deleted = false " +
+			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count,c.path " +
+			"HAVING SUM(c.qualityMetrics.SIZE1) <> 0 " +
+			"ORDER BY c.qualityMetrics.revision.count DESC")
+	Collection<NormalizedInterestPerFile> findNormalizedInterestPerFile(ProjectDTO project);
+	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.HighInterestFile(" +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +
@@ -216,6 +240,12 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"WHERE c2.project.url = :#{#project.url})) " +
 			"FROM CalculatedJavaFile c " +
 			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.count = (" +
+			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
+			"  FROM CalculatedJavaFile cf " +
+			"  WHERE cf.path = c.path " +
+			")" +
+			"AND c.deleted = false " +
 			"GROUP BY c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
 			"c.path, " +

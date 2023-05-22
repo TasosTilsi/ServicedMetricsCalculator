@@ -91,6 +91,12 @@ public class AnalysisController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
+	@GetMapping(value = "/normalizedInterestPerFile")
+	public ResponseEntity<Collection<NormalizedInterestPerFile>> getNormalizedInterestPerFile(@RequestParam(required = true) String url) {
+		Collection<NormalizedInterestPerFile> response = analysisService.findNormalizedInterestPerFile(url);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
 	@GetMapping(value = "/highInterestFiles")
 	ResponseEntity<Collection<HighInterestFile>> getHighInterestFiles(@RequestParam(required = true) String url, @RequestParam(required = false) String sha, @RequestParam(required = false) Integer limit) {
 		Collection<HighInterestFile> response;

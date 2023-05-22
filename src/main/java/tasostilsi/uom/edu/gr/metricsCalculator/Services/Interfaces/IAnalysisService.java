@@ -39,6 +39,8 @@ public interface IAnalysisService {
 	
 	Collection<NormalizedInterest> findNormalizedInterestByCommit(String url, String sha);
 	
+	Collection<NormalizedInterestPerFile> findNormalizedInterestPerFile(String url);
+	
 	Slice<HighInterestFile> findHighInterestFiles(Pageable pageable, String url, String sha);
 	
 	Slice<ProjectReusabilityMetrics> findProjectReusabilityMetrics(Pageable pageable, String url);
