@@ -111,6 +111,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = false" +
+			"  AND c.project.url = :#{#project.url} " +
 			") "
 			+ "OR c.qualityMetrics.revision.count = (" +
 			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
@@ -121,6 +122,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = true" +
+			"  AND cf.project.url = :#{#project.url} " +
 			") " +
 			"ORDER BY c.qualityMetrics.revision.count DESC")
 	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project);
@@ -259,6 +261,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = false" +
+			"  AND c.project.url = :#{#project.url} " +
 			") "
 			+ "OR c.qualityMetrics.revision.count = (" +
 			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
@@ -269,6 +272,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = true" +
+			"  AND cf.project.url = :#{#project.url} " +
 			") " +
 			"GROUP BY c.qualityMetrics.revision.sha, c.qualityMetrics.revision.count,c.path " +
 			"HAVING SUM(c.qualityMetrics.SIZE1) <> 0 " +
@@ -316,6 +320,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = false" +
+			"  AND c.project.url = :#{#project.url} " +
 			") "
 			+ "OR c.qualityMetrics.revision.count = (" +
 			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
@@ -326,6 +331,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = true" +
+			"  AND cf.project.url = :#{#project.url} " +
 			") " +
 			"GROUP BY c.qualityMetrics.revision.sha, " +
 			"c.qualityMetrics.revision.count, " +
@@ -438,6 +444,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = false" +
+			"  AND c.project.url = :#{#project.url} " +
 			") "
 			+ "OR c.qualityMetrics.revision.count = (" +
 			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
@@ -448,6 +455,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"       FROM CalculatedJavaFile f " +
 			") " +
 			"  AND cf.deleted = true" +
+			"  AND cf.project.url = :#{#project.url} " +
 			") " +
 			"ORDER BY c.interest.interestInEuros DESC")
 	Slice<AllFileMetricsAndInterest> findAllFileMetricsAndInterest(Pageable pageable, ProjectDTO project);
@@ -477,6 +485,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
 			"  FROM CalculatedJavaFile cf " +
 			"  WHERE cf.path = c.path " +
+			"  AND cf.project.url = :#{#project.url} " +
 			"  AND cf.qualityMetrics.revision.count <= :count " +
 			"  AND cf.deleted = false" +
 			") "
@@ -484,6 +493,7 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
 			"  FROM CalculatedJavaFile cf " +
 			"  WHERE cf.path = c.path " +
+			"  AND cf.project.url = :#{#project.url} " +
 			"  AND cf.qualityMetrics.revision.count = :count " +
 			"  AND cf.deleted = true" +
 			") " +
