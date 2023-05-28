@@ -136,10 +136,20 @@ public class AnalysisService implements IAnalysisService {
 	
 	@Override
 	public Collection<InterestChange> findInterestChangeByCommit(String url, String sha) {
-		if (metricsRepository.findDistinctRevisionCountByRevisionSha(sha) <= 3) {
-			throw new IllegalStateException("Please choose a revision sha that has revision count more than 3!");
+		Collection<InterestChange> returnCollection = new ArrayList<>();
+		Long commitCount = metricsRepository.findDistinctRevisionCountByRevisionSha(sha);
+		if (commitCount <= 3) {
+			LOGGER.warn("Commits under 3 counts, cannot be calculated, because there can not exist a divide with 0.\n" +
+					"Please choose a revision sha that has revision count more than 3!");
+			returnCollection.add(new InterestChange(commitCount, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+			return returnCollection;
 		}
-		return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
+		try {
+			return metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
+		} catch (Exception ignored) {
+			returnCollection.add(new InterestChange(commitCount, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+			return returnCollection;
+		}
 	}
 	
 	@Override
@@ -211,7 +221,7 @@ public class AnalysisService implements IAnalysisService {
 	}
 	
 	@Override
-	public Collection<InterestChange> findTotalInterestChange(String url) {
+	public Collection<InterestChange> findInterestChangeForAllCommits(String url) {
 		ProjectDTO project = new ProjectDTO(url);
 		Collection<InterestChange> returnedValue = new ArrayList<>();
 		Slice<AnalyzedCommit> analyzedCommits = metricsRepository.findAnalyzedCommits(null, project);
@@ -222,9 +232,14 @@ public class AnalysisService implements IAnalysisService {
 					InterestChange change = metricsRepository.findInterestChangeByCommit(project, commit.getSha()).stream().findFirst().get();
 					if (change.getChangeEu() != null) {
 						returnedValue.add(change);
+					} else {
+						returnedValue.add(new InterestChange(commit.getRevisionCount(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
 					}
 				} catch (Exception ignored) {
+					returnedValue.add(new InterestChange(commit.getRevisionCount(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
 				}
+			} else {
+				returnedValue.add(new InterestChange(commit.getRevisionCount(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
 			}
 		}
 		
@@ -253,5 +268,91 @@ public class AnalysisService implements IAnalysisService {
 		}
 		
 		return returnValue;
+	}
+	
+	@Override
+	public Collection<NormalizedAndInterestChanges> findNormalizedAndInterestChangesByCommit(String url, String sha) {
+		Collection<NormalizedAndInterestChanges> returnCollection = new ArrayList<>();
+		Long commitCount = metricsRepository.findDistinctRevisionCountByRevisionSha(sha);
+		if (commitCount <= 3) {
+			LOGGER.warn("Commits under 3 counts, cannot be calculated, because there can not exist a divide with 0.\n" +
+					"Please choose a revision sha that has revision count more than 3!");
+			Collection<NormalizedInterest> normalizedInterests = metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
+			returnCollection.add(new NormalizedAndInterestChanges(commitCount,
+					BigDecimal.ZERO,
+					BigDecimal.ZERO,
+					BigDecimal.ZERO,
+					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestEu).findFirst().get(),
+					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestHours).findFirst().get()));
+			return returnCollection;
+		}
+		try {
+			Collection<InterestChange> interestChanges = metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
+			Collection<NormalizedInterest> normalizedInterests = metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
+			returnCollection.add(new NormalizedAndInterestChanges(commitCount,
+					interestChanges.stream().map(InterestChange::getChangeEu).findFirst().get(),
+					interestChanges.stream().map(InterestChange::getChangeHours).findFirst().get(),
+					interestChanges.stream().map(InterestChange::getChangePercentage).findFirst().get(),
+					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestEu).findFirst().get(),
+					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestHours).findFirst().get()));
+			return returnCollection;
+		} catch (Exception ignored) {
+			Collection<NormalizedInterest> normalizedInterests = metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
+			returnCollection.add(new NormalizedAndInterestChanges(commitCount,
+					BigDecimal.ZERO,
+					BigDecimal.ZERO,
+					BigDecimal.ZERO,
+					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestEu).findFirst().get(),
+					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestHours).findFirst().get()));
+			return returnCollection;
+		}
+	}
+	
+	@Override
+	public Collection<NormalizedAndInterestChanges> findNormalizedAndInterestChangeForAllCommits(String url) {
+		ProjectDTO project = new ProjectDTO(url);
+		Collection<NormalizedAndInterestChanges> returnedValue = new ArrayList<>();
+		Slice<AnalyzedCommit> analyzedCommits = metricsRepository.findAnalyzedCommits(null, project);
+		
+		for (AnalyzedCommit commit : analyzedCommits) {
+			NormalizedInterest normalized = metricsRepository.findNormalizedInterestByCommit(project, commit.getSha()).stream().findFirst().get();
+			if (commit.getRevisionCount() > 3) {
+				try {
+					InterestChange change = metricsRepository.findInterestChangeByCommit(project, commit.getSha()).stream().findFirst().get();
+					
+					if (change.getChangeEu() != null) {
+						returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
+								change.getChangeEu(),
+								change.getChangeHours(),
+								change.getChangePercentage(),
+								normalized.getNormalizedInterestEu(),
+								normalized.getNormalizedInterestHours()));
+					} else {
+						returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
+								BigDecimal.ZERO,
+								BigDecimal.ZERO,
+								BigDecimal.ZERO,
+								normalized.getNormalizedInterestEu(),
+								normalized.getNormalizedInterestHours()));
+					}
+				} catch (Exception ignored) {
+					returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
+							BigDecimal.ZERO,
+							BigDecimal.ZERO,
+							BigDecimal.ZERO,
+							normalized.getNormalizedInterestEu(),
+							normalized.getNormalizedInterestHours()));
+				}
+			} else {
+				returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
+						BigDecimal.ZERO,
+						BigDecimal.ZERO,
+						BigDecimal.ZERO,
+						normalized.getNormalizedInterestEu(),
+						normalized.getNormalizedInterestHours()));
+			}
+		}
+		
+		return returnedValue;
 	}
 }

@@ -214,12 +214,6 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"AND c5.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1),0)) " +
 			"FROM CalculatedJavaFile c " +
 			"WHERE c.project.url = :#{#project.url} "
-			/*"AND c.qualityMetrics.revision.count = (" +
-			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
-			"  FROM CalculatedJavaFile cf " +
-			"  WHERE cf.path = c.path " +
-			")" +*/
-//			"AND c.deleted = false "
 	)
 	Collection<FileInterestChange> findInterestChange(ProjectDTO project);
 	

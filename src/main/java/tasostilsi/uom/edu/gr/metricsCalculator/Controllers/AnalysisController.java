@@ -59,12 +59,12 @@ public class AnalysisController {
 	}
 	
 	@GetMapping(value = "/interestChange")
-	public ResponseEntity<Collection<InterestChange>> getLastCommitInterestChange(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
+	public ResponseEntity<Collection<InterestChange>> getInterestChangeByCommit(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
 		Collection<InterestChange> response;
 		if (!Objects.isNull(sha)) {
 			response = analysisService.findInterestChangeByCommit(url, sha);
 		} else {
-			response = analysisService.findTotalInterestChange(url);
+			response = analysisService.findInterestChangeForAllCommits(url);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -181,6 +181,17 @@ public class AnalysisController {
 	public ResponseEntity<Float> getInterestPerCommit(@RequestParam(required = true) String url) {
 		float response;
 		response = analysisService.findInterestRanking(url);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/normalizedAndInterestChanges")
+	public ResponseEntity<Collection<NormalizedAndInterestChanges>> getNormalizedAndInterestChanges(@RequestParam(required = true) String url, @RequestParam(required = false) String sha) {
+		Collection<NormalizedAndInterestChanges> response;
+		if (!Objects.isNull(sha)) {
+			response = analysisService.findNormalizedAndInterestChangesByCommit(url, sha);
+		} else {
+			response = analysisService.findNormalizedAndInterestChangeForAllCommits(url);
+		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

@@ -59,7 +59,11 @@ public interface IAnalysisService {
 	
 	Collection<CumulativeInterest> findInterestByCommit(String url, String sha);
 	
-	Collection<InterestChange> findTotalInterestChange(String url);
+	Collection<InterestChange> findInterestChangeForAllCommits(String url);
+	
+	Collection<NormalizedAndInterestChanges> findNormalizedAndInterestChangesByCommit(String url, String sha);
+	
+	Collection<NormalizedAndInterestChanges> findNormalizedAndInterestChangeForAllCommits(String url);
 	
 	float findInterestRanking(String url);
 }
