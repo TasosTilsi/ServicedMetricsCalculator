@@ -106,6 +106,60 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
 			"  FROM CalculatedJavaFile cf " +
 			"  WHERE cf.path = c.path " +
+			"  AND cf.project.url = :#{#project.url} " +
+			"  AND cf.qualityMetrics.revision.count <= :count " +
+			"  AND cf.deleted = false" +
+			") "
+			+ "OR c.qualityMetrics.revision.count = (" +
+			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
+			"  FROM CalculatedJavaFile cf " +
+			"  WHERE cf.path = c.path " +
+			"  AND cf.project.url = :#{#project.url} " +
+			"  AND cf.qualityMetrics.revision.count = :count " +
+			"  AND cf.deleted = true" +
+			") " +
+			"ORDER BY c.qualityMetrics.revision.count DESC")
+	Collection<InterestPerCommitFile> findInterestPerCommitFile(ProjectDTO project, @Param("count") Long count);
+	
+	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestPerCommitFile(" +
+			"c.path," +
+			"c.qualityMetrics.revision.count, " +
+			"c.interest.interestInEuros," +
+			"c.interest.interestInHours, " +
+			"c.interest.interestInEuros/" +
+			"(SELECT SUM(c2.interest.interestInEuros) " +
+			"FROM CalculatedJavaFile c2 " +
+			"WHERE c2.project.url = :#{#project.url}), " +
+			"c.interest.interestInEuros - " +
+			"(SELECT c2.interest.interestInEuros " +
+			"FROM CalculatedJavaFile c2 " +
+			"WHERE c2.project.url = :#{#project.url} " +
+			"AND c.path = c2.path " +
+			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
+			"c.interest.interestInHours - " +
+			"(SELECT c3.interest.interestInHours " +
+			"FROM CalculatedJavaFile c3 " +
+			"WHERE c3.project.url = :#{#project.url} " +
+			"AND c.path = c3.path " +
+			"AND c3.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
+			"(c.interest.interestInEuros - " +
+			"(SELECT c4.interest.interestInEuros " +
+			"FROM CalculatedJavaFile c4 " +
+			"WHERE c4.project.url = :#{#project.url} " +
+			"AND c.path = c4.path " +
+			"AND c4.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1))/NULLIF((" +
+			"SELECT c5.interest.interestInEuros " +
+			"FROM CalculatedJavaFile c5 " +
+			"WHERE c5.project.url = :#{#project.url} " +
+			"AND c.path = c5.path " +
+			"AND c5.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1),0) " +
+			") " +
+			"FROM CalculatedJavaFile c " +
+			"WHERE c.project.url = :#{#project.url} " +
+			"AND c.qualityMetrics.revision.count = (" +
+			"  SELECT MAX(cf.qualityMetrics.revision.count) " +
+			"  FROM CalculatedJavaFile cf " +
+			"  WHERE cf.path = c.path " +
 			"  AND cf.qualityMetrics.revision.count <= (" +
 			"       SELECT DISTINCT MAX(f.qualityMetrics.revision.count) " +
 			"       FROM CalculatedJavaFile f " +

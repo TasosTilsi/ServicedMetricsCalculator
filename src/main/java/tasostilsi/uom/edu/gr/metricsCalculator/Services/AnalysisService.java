@@ -131,6 +131,10 @@ public class AnalysisService implements IAnalysisService {
 		if (shaExists && filePathExists) {
 			return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), sha, filePath);
 		}
+		if (shaExists) {
+			Long revisionCount = metricsRepository.findDistinctRevisionCountByRevisionSha(sha);
+			return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url), revisionCount);
+		}
 		return metricsRepository.findInterestPerCommitFile(new ProjectDTO(url));
 	}
 	
@@ -258,7 +262,7 @@ public class AnalysisService implements IAnalysisService {
 		for (Project project : projects) {
 			float dbInterest = metricsRepository.findAllFileMetricsAndInterest(null, new ProjectDTO(project.getUrl())).getContent().parallelStream().map(AllFileMetricsAndInterest::getInterestEu).reduce(BigDecimal.valueOf(0), BigDecimal::add).floatValue();
 			totalInterestForAllProjects += dbInterest;
-			System.out.println(project.getUrl() + " --> " + dbInterest);
+//			System.out.println(project.getUrl() + " --> " + dbInterest);
 			if (project.getUrl().equals(url)) {
 				totalInterestForCalculatedProject = dbInterest;
 			}
