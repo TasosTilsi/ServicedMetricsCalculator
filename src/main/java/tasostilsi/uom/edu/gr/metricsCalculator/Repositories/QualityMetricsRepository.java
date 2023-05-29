@@ -183,25 +183,31 @@ public interface QualityMetricsRepository extends JpaRepository<QualityMetrics, 
 	
 	@Query(value = "SELECT new tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities.InterestChange(" +
 			"c.qualityMetrics.revision.count, " +
-			"SUM(c.interest.interestInEuros) - " +
-			"(SELECT SUM(c2.interest.interestInEuros) " +
+			"COALESCE(SUM(c.interest.interestInEuros) - " +
+			"(SELECT COALESCE(SUM(c2.interest.interestInEuros), 0) " +
 			"FROM CalculatedJavaFile c2 " +
 			"WHERE c2.project.url = :#{#project.url} " +
-			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
-			"SUM(c.interest.interestInHours) - " +
-			"(SELECT SUM(c2.interest.interestInHours) " +
+			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), 0), " +
+			"COALESCE(SUM(c.interest.interestInHours) - " +
+			"(SELECT COALESCE(SUM(c2.interest.interestInHours), 0) " +
 			"FROM CalculatedJavaFile c2 " +
 			"WHERE c2.project.url = :#{#project.url} " +
-			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), " +
-			"(SUM(c.interest.interestInEuros) - " +
-			"(SELECT SUM(c2.interest.interestInEuros) " +
-			"FROM CalculatedJavaFile c2 " +
-			"WHERE c2.project.url = :#{#project.url} " +
-			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1))/" +
-			"(SELECT SUM(c3.interest.interestInEuros) " +
-			"FROM CalculatedJavaFile c3 " +
-			"WHERE c3.project.url = :#{#project.url} " +
-			"AND c3.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1)) " +
+			"AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), 0), " +
+			"CASE " +
+			"  WHEN (SELECT COALESCE(SUM(c3.interest.interestInEuros), 0) " +
+			"        FROM CalculatedJavaFile c3 " +
+			"        WHERE c3.project.url = :#{#project.url} " +
+			"        AND c3.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1) = 0 THEN NULL " +
+			"  ELSE COALESCE((SUM(c.interest.interestInEuros) - " +
+			"        (SELECT COALESCE(SUM(c2.interest.interestInEuros), 0) " +
+			"        FROM CalculatedJavaFile c2 " +
+			"        WHERE c2.project.url = :#{#project.url} " +
+			"        AND c2.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1)) / " +
+			"      (SELECT COALESCE(SUM(c3.interest.interestInEuros), 0) " +
+			"        FROM CalculatedJavaFile c3 " +
+			"        WHERE c3.project.url = :#{#project.url} " +
+			"        AND c3.qualityMetrics.revision.count = c.qualityMetrics.revision.count-1), 0) " +
+			"END) " +
 			"FROM CalculatedJavaFile c " +
 			"WHERE c.project.url = :#{#project.url} " +
 			"AND c.qualityMetrics.revision.sha = :sha " +

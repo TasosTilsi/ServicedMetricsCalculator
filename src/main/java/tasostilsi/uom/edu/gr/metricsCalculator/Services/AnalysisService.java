@@ -319,27 +319,28 @@ public class AnalysisService implements IAnalysisService {
 		Slice<AnalyzedCommit> analyzedCommits = metricsRepository.findAnalyzedCommits(null, project);
 		
 		for (AnalyzedCommit commit : analyzedCommits) {
-			NormalizedInterest normalized = metricsRepository.findNormalizedInterestByCommit(project, commit.getSha()).stream().findFirst().get();
+			NormalizedInterest normalized;
+			try {
+				normalized = metricsRepository.findNormalizedInterestByCommit(project, commit.getSha()).stream().findFirst().get();
+			} catch (Exception e) {
+				normalized = new NormalizedInterest(commit.getRevisionCount(), BigDecimal.ZERO, BigDecimal.ZERO);
+			}
 			if (commit.getRevisionCount() > 3) {
+				InterestChange change;
 				try {
-					InterestChange change = metricsRepository.findInterestChangeByCommit(project, commit.getSha()).stream().findFirst().get();
-					
-					if (change.getChangeEu() != null) {
-						returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
-								change.getChangeEu(),
-								change.getChangeHours(),
-								change.getChangePercentage(),
-								normalized.getNormalizedInterestEu(),
-								normalized.getNormalizedInterestHours()));
-					} else {
-						returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
-								BigDecimal.ZERO,
-								BigDecimal.ZERO,
-								BigDecimal.ZERO,
-								normalized.getNormalizedInterestEu(),
-								normalized.getNormalizedInterestHours()));
-					}
-				} catch (Exception ignored) {
+					change = metricsRepository.findInterestChangeByCommit(project, commit.getSha()).stream().findFirst().get();
+				} catch (Exception e) {
+					change = new InterestChange(commit.getRevisionCount(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+				}
+				
+				if (change.getChangeEu() != null) {
+					returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
+							change.getChangeEu(),
+							change.getChangeHours(),
+							change.getChangePercentage(),
+							normalized.getNormalizedInterestEu(),
+							normalized.getNormalizedInterestHours()));
+				} else {
 					returnedValue.add(new NormalizedAndInterestChanges(commit.getRevisionCount(),
 							BigDecimal.ZERO,
 							BigDecimal.ZERO,
