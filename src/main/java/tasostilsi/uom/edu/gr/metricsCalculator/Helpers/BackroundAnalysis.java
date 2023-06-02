@@ -14,7 +14,6 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Helpers;
 
 import ch.qos.logback.classic.Logger;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.LoggerFactory;
@@ -37,15 +36,14 @@ import java.util.*;
 
 
 @AllArgsConstructor
-@NoArgsConstructor
 public class BackroundAnalysis implements Runnable {
 	
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(BackroundAnalysis.class);
 	
-	private ProjectRepository projectRepository;
-	private JavaFilesRepository javaFilesRepository;
+	private final ProjectRepository projectRepository;
+	private final JavaFilesRepository javaFilesRepository;
 	
-	private NewAnalysisDTO newAnalysisDTO;
+	private final NewAnalysisDTO newAnalysisDTO;
 	private Project project;
 	
 	

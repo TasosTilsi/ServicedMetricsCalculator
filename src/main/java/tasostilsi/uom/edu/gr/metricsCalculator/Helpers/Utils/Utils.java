@@ -25,7 +25,6 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInte
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -50,17 +49,13 @@ public class Utils {
 	 * @param diffEntries the modified java files (new, modified, deleted)
 	 */
 	private void removeDeletedFiles(Set<DiffEntry> diffEntries, Project project) {
-		Set<CalculatedJavaFile> deletedFiles = ConcurrentHashMap.newKeySet();
-		diffEntries
-				.stream().parallel().forEach(diffEntry -> deletedFiles.addAll(
-						project
-								.getJavaFiles()
-								.stream().parallel()
-								.filter(file -> file.getPath().equals(diffEntry.getOldFilePath()))
-								.collect(Collectors.toList())));
+		Set<CalculatedJavaFile> deletedFiles = diffEntries.stream()
+				.flatMap(diffEntry -> project.getJavaFiles().stream()
+						.filter(file -> file.getPath().equals(diffEntry.getOldFilePath())))
+				.collect(Collectors.toSet());
 		Globals.getJavaFiles().removeAll(deletedFiles);
 		project.getJavaFiles().removeAll(deletedFiles);
-		deletedFiles.stream().parallel().forEach(file -> file.setDeleted(true));
+		deletedFiles.forEach(file -> file.setDeleted(true));
 		Globals.getJavaFiles().addAll(deletedFiles);
 		project.getJavaFiles().addAll(deletedFiles);
 	}
@@ -72,10 +67,10 @@ public class Utils {
 	 * @return the java file (JavaFile) whose path matches the given one
 	 */
 	private CalculatedJavaFile getAlreadyDefinedFile(String filePath) {
-		for (CalculatedJavaFile jf : Globals.getJavaFiles())
-			if (jf.getPath().equals(filePath))
-				return jf;
-		return null;
+		return Globals.getJavaFiles().stream()
+				.filter(jf -> jf.getPath().equals(filePath))
+				.findFirst()
+				.orElse(null);
 	}
 	
 	/**
@@ -85,15 +80,21 @@ public class Utils {
 	 * @param currentRevision the revision we are analysing
 	 * @param entity          the entity with the list containing the diff entries received.
 	 */
-	public Project setMetrics(Project project, Revision currentRevision, PrincipalResponseEntity entity) {
+	public Project setMetrics(Project project, Revision currentRevision, PrincipalResponseEntity entity) throws Exception {
 		if (!entity.getDeleteDiffEntries().isEmpty()) {
 			removeDeletedFiles(entity.getDeleteDiffEntries(), project);
 		}
-		if (!entity.getAddDiffEntries().isEmpty()) {
-			project = setMetrics(project, currentRevision, entity.getAddDiffEntries().stream().parallel().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
+		Set<String> addFilePaths = entity.getAddDiffEntries().stream()
+				.map(DiffEntry::getNewFilePath)
+				.collect(Collectors.toSet());
+		Set<String> modifyFilePaths = entity.getModifyDiffEntries().stream()
+				.map(DiffEntry::getNewFilePath)
+				.collect(Collectors.toSet());
+		if (!addFilePaths.isEmpty()) {
+			project = setMetrics(project, currentRevision, addFilePaths);
 		}
-		if (!entity.getModifyDiffEntries().isEmpty()) {
-			project = setMetrics(project, currentRevision, entity.getModifyDiffEntries().stream().parallel().map(DiffEntry::getNewFilePath).collect(Collectors.toSet()));
+		if (!modifyFilePaths.isEmpty()) {
+			project = setMetrics(project, currentRevision, modifyFilePaths);
 		}
 		if (!entity.getRenameDiffEntries().isEmpty()) {
 			final Project finalProject = project;
@@ -104,7 +105,7 @@ public class Utils {
 								javaFile.setPath(diffEntry.getNewFilePath());
 							}
 						}
-						finalProject.getJavaFiles().stream().parallel().filter(file -> file.getPath().equals(diffEntry.getOldFilePath())).forEach(file -> file.setPath(diffEntry.getNewFilePath()));
+						finalProject.getJavaFiles().stream().filter(file -> file.getPath().equals(diffEntry.getOldFilePath())).forEach(file -> file.setPath(diffEntry.getNewFilePath()));
 					});
 			project.setJavaFiles(finalProject.getJavaFiles());
 		}
@@ -117,7 +118,7 @@ public class Utils {
 	 *
 	 * @param project the project we are referring to
 	 */
-	public Project setMetrics(Project project, Revision currentRevision) {
+	public Project setMetrics(Project project, Revision currentRevision) throws Exception {
 		MetricsCalculator mc = new MetricsCalculator(project, currentRevision);
 		int resultCode = mc.start();
 		if (resultCode == -1)
@@ -129,10 +130,9 @@ public class Utils {
 			for (int i = 1; i < s.length; ++i) {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
-				
 				CalculatedJavaFile jf;
-				if (Globals.getJavaFiles().stream().parallel().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-					jf = project.getJavaFiles().stream().parallel().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 					registerMetrics(column, jf);
 					Globals.addJavaFile(jf);
 				} else {
@@ -155,7 +155,7 @@ public class Utils {
 	 * @param currentRevision the revision we are analysing
 	 * @param jfs             the list of java files
 	 */
-	public Project setMetrics(Project project, Revision currentRevision, Set<String> jfs) {
+	public Project setMetrics(Project project, Revision currentRevision, Set<String> jfs) throws Exception {
 		if (jfs.isEmpty())
 			throw new IllegalStateException("Java Files Set is empty!!!");
 		MetricsCalculator mc = new MetricsCalculator(project, currentRevision);
@@ -165,21 +165,18 @@ public class Utils {
 		project = mc.getProject();
 		String st = mc.printResults(jfs);
 		String[] s = st.split("\\r?\\n");
-		
 		Set<CalculatedJavaFile> toCalculate = new HashSet<>();
 		project.getJavaFiles().forEach(javaFile -> {
 			if (jfs.contains(javaFile.getPath()) && javaFile.getId() == null) {
 				toCalculate.add(javaFile);
 			}
 		});
-		
 		for (int i = 1; i < s.length; ++i) {
 			String[] column = s[i].split("\t");
 			String filePath = column[0];
-			
 			CalculatedJavaFile jf;
-			if (Globals.getJavaFiles().stream().parallel().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-				jf = project.getJavaFiles().stream().parallel().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+			if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 				registerMetrics(column, jf);
 				Globals.addJavaFile(jf);
 			} else {
@@ -223,17 +220,10 @@ public class Utils {
 	}
 	
 	public String preprocessURL(String url) {
-		String newURL = url;
-		if (newURL.endsWith(".git/")) {
-			newURL = newURL.replace(".git/", "");
+		if (url == null) {
+			return null;
 		}
-		if (newURL.endsWith(".git")) {
-			newURL = newURL.replace(".git", "");
-		}
-		if (newURL.endsWith("/")) {
-			newURL = newURL.substring(0, newURL.length() - 1);
-		}
-		return newURL;
+		return url.replaceAll("(\\.git/|\\.git|/$)", "");
 	}
 	
 }

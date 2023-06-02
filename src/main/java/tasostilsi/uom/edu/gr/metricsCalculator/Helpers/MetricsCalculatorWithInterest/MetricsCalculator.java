@@ -37,7 +37,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class MetricsCalculator {
@@ -140,48 +139,39 @@ public class MetricsCalculator {
 	 * @return size of the file set (int)
 	 */
 	private int createFileSet(List<SourceRoot> sourceRoots) {
-		try {
-			sourceRoots
-					.forEach(sourceRoot -> {
-						try {
-							sourceRoot.tryToParse()
+		sourceRoots.forEach(sourceRoot -> {
+			try {
+				sourceRoot.tryToParse()
+						.stream()
+						.filter(res -> res.getResult().isPresent())
+						.filter(cu -> cu.getResult().get().getStorage().isPresent())
+						.forEach(cu -> {
+							Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 									.stream()
-									.parallel()
-									.filter(res -> res.getResult().isPresent())
-									.filter(cu -> cu.getResult().get().getStorage().isPresent())
-									.forEach(cu -> {
-										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
-												.stream()
-												.parallel()
-												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
-												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
-												.map(CalculatedClass::new)
-												.collect(Collectors.toSet());
-										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
-												.stream()
-												.parallel()
-												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
-												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
-												.map(CalculatedClass::new)
-												.collect(Collectors.toSet());
-										classNames.addAll(enumNames);
-										try {
-											String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
-//											LOGGER.error("CHECK HERE " + path);
-											AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
-											jfile.set(new CalculatedJavaFile(path, revision, classNames));
-											jfile.get().setProject(project);
-											project.getJavaFiles().add(jfile.get());
-										} catch (Throwable ignored) {
-											LOGGER.error(ignored.getLocalizedMessage());
-										}
-									});
-						} catch (Exception ignored) {
-						}
-					});
-		} catch (Exception ignored) {
-			LOGGER.error(ignored.getLocalizedMessage());
-		}
+									.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
+									.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
+									.map(CalculatedClass::new)
+									.collect(Collectors.toSet());
+							Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
+									.stream()
+									.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
+									.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
+									.map(CalculatedClass::new)
+									.collect(Collectors.toSet());
+							classNames.addAll(enumNames);
+							try {
+								String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
+								CalculatedJavaFile jfile = new CalculatedJavaFile(path, revision, classNames);
+								jfile.setProject(project);
+								project.getJavaFiles().add(jfile);
+							} catch (Throwable e) {
+								LOGGER.error("Error processing file: " + e.getLocalizedMessage(), e);
+							}
+						});
+			} catch (Exception e) {
+				LOGGER.error("Error processing source root: " + e.getLocalizedMessage(), e);
+			}
+		});
 		return project.getJavaFiles().size();
 	}
 	
@@ -192,20 +182,17 @@ public class MetricsCalculator {
 						try {
 							sourceRoot.tryToParse()
 									.stream()
-									.parallel()
 									.filter(res -> res.getResult().isPresent())
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
 												.stream()
-												.parallel()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
 												.stream()
-												.parallel()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -214,22 +201,20 @@ public class MetricsCalculator {
 										try {
 											String path = cu.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1);
 											if (filesToAnalyze.contains(path)) {
-//											LOGGER.error("CHECK HERE " + path);
-												AtomicReference<CalculatedJavaFile> jfile = new AtomicReference<>();
-												jfile.set(new CalculatedJavaFile(path, revision, classNames));
-												jfile.get().setProject(project);
-												project.getJavaFiles().add(jfile.get());
+												CalculatedJavaFile jfile = new CalculatedJavaFile(path, revision, classNames);
+												jfile.setProject(project);
+												project.getJavaFiles().add(jfile);
 											}
 										} catch (Throwable ignored) {
-											LOGGER.error(ignored.getLocalizedMessage());
+											LOGGER.error("Error processing file: " + ignored.getLocalizedMessage(), ignored);
 										}
 									});
-						} catch (Exception ignored) {
-							LOGGER.error(ignored.getLocalizedMessage());
+						} catch (Exception e) {
+							LOGGER.error("Error processing source root: " + e.getLocalizedMessage(), e);
 						}
 					});
-		} catch (Exception ignored) {
-			LOGGER.error(ignored.getLocalizedMessage());
+		} catch (Exception e) {
+			LOGGER.error("Error processing source root: " + e.getLocalizedMessage(), e);
 		}
 		return project.getJavaFiles().size();
 	}
@@ -240,19 +225,22 @@ public class MetricsCalculator {
 	 * @param sourceRoots the list of source roots of project
 	 */
 	private void startCalculations(List<SourceRoot> sourceRoots) {
-		sourceRoots
-				.forEach(sourceRoot -> {
-					try {
-						sourceRoot.tryToParse()
-								.stream()
-								.parallel()
-								.filter(res -> res.getResult().isPresent())
-								.forEach(res -> {
-									analyzeCompilationUnit(res.getResult().get());
-								});
-					} catch (Exception ignored) {
-					}
-				});
+		sourceRoots.forEach(sourceRoot -> {
+			try {
+				sourceRoot.tryToParse()
+						.stream()
+						.filter(res -> res.getResult().isPresent())
+						.forEach(res -> {
+							try {
+								analyzeCompilationUnit(res.getResult().get());
+							} catch (Exception e) {
+								//throw new RuntimeException(e);
+							}
+						});
+			} catch (Exception e) {
+				LOGGER.error("Error processing source root: " + e.getLocalizedMessage(), e);
+			}
+		});
 	}
 	
 	/**
@@ -271,9 +259,14 @@ public class MetricsCalculator {
 								.filter(res -> res.getResult().get().getStorage().isPresent())
 								.filter(res -> new ArrayList<>(filesToAnalyze).contains(res.getResult().get().getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1)))
 								.forEach(res -> {
-									analyzeCompilationUnit(res.getResult().get());
+									try {
+										analyzeCompilationUnit(res.getResult().get());
+									} catch (Exception e) {
+//										throw new RuntimeException(e);
+									}
 								});
-					} catch (Exception ignored) {
+					} catch (Exception e) {
+						LOGGER.error("Error processing source root: " + e.getLocalizedMessage(), e);
 					}
 				});
 	}
@@ -283,7 +276,7 @@ public class MetricsCalculator {
 	 *
 	 * @param cu the compilation unit given
 	 */
-	private void analyzeCompilationUnit(CompilationUnit cu) {
+	private void analyzeCompilationUnit(CompilationUnit cu) throws Exception {
 		analyzeClassOrInterfaces(cu);
 		analyzeEnums(cu);
 	}
@@ -293,13 +286,11 @@ public class MetricsCalculator {
 	 *
 	 * @param cu the compilation unit given
 	 */
-	private void analyzeClassOrInterfaces(CompilationUnit cu) {
-		cu.findAll(ClassOrInterfaceDeclaration.class).stream().parallel().forEach(cl -> {
-			try {
-				cl.accept(new ClassVisitor(project.getJavaFiles(), cu.getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1), cl), null);
-			} catch (Exception ignored) {
-			}
-		});
+	private void analyzeClassOrInterfaces(CompilationUnit cu) throws Exception {
+		List<ClassOrInterfaceDeclaration> classes = cu.findAll(ClassOrInterfaceDeclaration.class);
+		for (ClassOrInterfaceDeclaration cl : classes) {
+			cl.accept(new ClassVisitor(project.getJavaFiles(), cu.getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1), cl), null);
+		}
 	}
 	
 	/**
@@ -307,38 +298,31 @@ public class MetricsCalculator {
 	 *
 	 * @param cu the compilation unit given
 	 */
-	private void analyzeEnums(CompilationUnit cu) {
-		cu.findAll(EnumDeclaration.class).stream().parallel().forEach(cl -> {
-			try {
-				cl.accept(new ClassVisitor(project.getJavaFiles(), cu.getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1), cl), null);
-			} catch (Exception ignored) {
-			}
-		});
+	private void analyzeEnums(CompilationUnit cu) throws Exception {
+		List<EnumDeclaration> enums = cu.findAll(EnumDeclaration.class);
+		for (EnumDeclaration en : enums) {
+			en.accept(new ClassVisitor(project.getJavaFiles(), cu.getStorage().get().getPath().toString().replace("\\", "/").replace(project.getClonePath(), "").substring(1), en), null);
+		}
 	}
 	
-	public String printResults() {
+	public String printResults() throws Exception {
 		StringBuilder output = new StringBuilder();
 		output.append("FilePath\tClassesNum\tWMC\tDIT\tComplexity\tLCOM\tMPC\tNOM\tRFC\tDAC\tNOCC\tCBO\tSize1\tSize2\tClassNames\n");
-		try {
-			project.getJavaFiles().forEach(javaFile -> output.append(javaFile.getPath()).append("\t").append(javaFile.getQualityMetrics()).append("\t").append(javaFile.getClassNames()).append("\n"));
-		} catch (Throwable t) {
-			t.printStackTrace();
+		for (CalculatedJavaFile javaFile : project.getJavaFiles()) {
+			output.append(javaFile.getPath()).append("\t").append(javaFile.getQualityMetrics()).append("\t").append(javaFile.getClassNames()).append("\n");
 		}
 		return output.toString();
 	}
 	
-	public String printResults(Set<String> filesToAnalyze) {
+	public String printResults(Set<String> filesToAnalyze) throws Exception {
 		StringBuilder output = new StringBuilder();
 		output.append("FilePath\tClassesNum\tWMC\tDIT\tComplexity\tLCOM\tMPC\tNOM\tRFC\tDAC\tNOCC\tCBO\tSize1\tSize2\tClassNames\n");
-		try {
-			for (String fileToAnalyze : filesToAnalyze) {
-				for (CalculatedJavaFile javaFile : project.getJavaFiles()) {
-					if (javaFile.getPath().equals(fileToAnalyze) && javaFile.getId() == null)
-						output.append(javaFile.getPath()).append("\t").append(javaFile.getQualityMetrics()).append("\t").append(javaFile.getClassNames()).append("\n");
+		for (String fileToAnalyze : filesToAnalyze) {
+			for (CalculatedJavaFile javaFile : project.getJavaFiles()) {
+				if (javaFile.getPath().equals(fileToAnalyze) && javaFile.getId() == null) {
+					output.append(javaFile.getPath()).append("\t").append(javaFile.getQualityMetrics()).append("\t").append(javaFile.getClassNames()).append("\n");
 				}
 			}
-		} catch (Throwable t) {
-			t.printStackTrace();
 		}
 		return output.toString();
 	}
