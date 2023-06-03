@@ -13,8 +13,11 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 
 import java.util.List;
@@ -42,5 +45,34 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 	
 	@Query("select p.state from Project p where p.url = ?1")
 	Optional<String> getProjectStateByUrl(String url);
+	
+	@Transactional
+	@Modifying
+	@Query("delete from Project p where p.id = ?1")
+	void deleteById(Long id);
+	
+	@Transactional
+	@Modifying
+	@Query("delete from Project p where p.url = ?1")
+	void deleteByUrl(String url);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "DELETE FROM classes cc WHERE cc.classes_id IN (SELECT cc.classes_id FROM classes cc " +
+			"JOIN java_files cjf ON cjf.id = cc.java_file_id " +
+			"JOIN project p ON p.id = cjf.project_id " +
+			"WHERE p.id = :projectId)", nativeQuery = true)
+	void deleteCalculatedClassesByProjectIdNative(@Param("projectId") Long projectId);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "DELETE FROM java_files cjf WHERE cjf.project_id = :projectId", nativeQuery = true)
+	void deleteCalculatedJavaFileByProjectIdNative(@Param("projectId") Long projectId);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "DELETE FROM metrics WHERE id NOT IN (SELECT quality_metrics_id FROM java_files) AND id NOT IN (SELECT quality_metrics_id FROM classes);", nativeQuery = true)
+	void deleteUnusedQualityMetrics();
+	
 	
 }

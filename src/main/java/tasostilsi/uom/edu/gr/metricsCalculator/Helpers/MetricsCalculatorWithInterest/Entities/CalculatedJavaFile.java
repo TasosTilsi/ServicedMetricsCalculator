@@ -227,4 +227,13 @@ public class CalculatedJavaFile {
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
 	}
+	
+	public boolean containsClass(String name) {
+		for (CalculatedClass clazz : classes) {
+			if (clazz.getQualifiedName().equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

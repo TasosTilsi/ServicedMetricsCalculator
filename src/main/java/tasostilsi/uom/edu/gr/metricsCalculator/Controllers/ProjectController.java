@@ -95,6 +95,7 @@ public class ProjectController {
 	)
 	public ResponseEntity<Project> getProjectByUrl(@RequestParam String url) {
 		LOGGER.info("HttpRequest: getProjectByUrl");
+		url = Utils.getInstance().sanitizeInput(url);
 		Project returned = service.getProjectByUrl(Utils.getInstance().preprocessURL(url));
 		
 		if (returned == null) {
@@ -143,6 +144,7 @@ public class ProjectController {
 	)
 	public ResponseEntity<String> getProjectStateByUrl(@RequestParam String url) {
 		LOGGER.info("HttpRequest: getProjectByUrl");
+		url = Utils.getInstance().sanitizeInput(url);
 		String returned = service.getProjectStateByUrl(Utils.getInstance().preprocessURL(url));
 		
 		if (returned == null) {
@@ -158,6 +160,7 @@ public class ProjectController {
 	)
 	public ResponseEntity<String> deleteProjectByUrl(@RequestParam String url) {
 		LOGGER.info("HttpRequest: deleteProjectByUrl");
+		url = Utils.getInstance().sanitizeInput(url);
 		service.deleteProjectByUrl(Utils.getInstance().preprocessURL(url));
 		
 		return new ResponseEntity<>("Project with url " + Utils.getInstance().preprocessURL(url) + " deleted", HttpStatus.OK);

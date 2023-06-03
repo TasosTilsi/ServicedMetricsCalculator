@@ -26,10 +26,8 @@ public final class Globals {
 	}
 	
 	public static void addJavaFile(CalculatedJavaFile jf) {
-		if (!getJavaFiles().add(jf)) {
-			getJavaFiles().remove(jf);
-			getJavaFiles().add(jf);
-		}
+		javaFiles.stream().filter(file -> file.getPath().equals(jf.getPath())).forEach(javaFiles::remove);
+		javaFiles.add(jf);
 	}
 	
 	public static Set<CalculatedJavaFile> getJavaFiles() {

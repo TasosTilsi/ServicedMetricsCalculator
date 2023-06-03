@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
+import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.JavaFilesRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Repositories.ProjectRepository;
 import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IProjectService;
 
@@ -28,10 +29,12 @@ public class ProjectService implements IProjectService {
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ProjectService.class);
 	
 	private final ProjectRepository projectRepository;
+	private final JavaFilesRepository javaFilesRepository;
 	
 	@Autowired
-	public ProjectService(ProjectRepository projectRepository) {
+	public ProjectService(ProjectRepository projectRepository, JavaFilesRepository javaFilesRepository) {
 		this.projectRepository = projectRepository;
+		this.javaFilesRepository = javaFilesRepository;
 	}
 	
 	
@@ -93,8 +96,10 @@ public class ProjectService implements IProjectService {
 	@Override
 	public void deleteProjectByUrl(String url) {
 		Project project = projectRepository.findByUrl(url).orElseThrow();
-		
-		projectRepository.delete(project);
+		projectRepository.deleteCalculatedClassesByProjectIdNative(project.getId());
+		projectRepository.deleteCalculatedJavaFileByProjectIdNative(project.getId());
+		projectRepository.deleteByUrl(url);
+		projectRepository.deleteUnusedQualityMetrics();
 //		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
 	
 	}
@@ -102,7 +107,10 @@ public class ProjectService implements IProjectService {
 	@Override
 	public void deleteProjectById(Long id) {
 		Project project = projectRepository.findById(id).orElseThrow();
-		projectRepository.delete(project);
+		projectRepository.deleteCalculatedClassesByProjectIdNative(project.getId());
+		projectRepository.deleteCalculatedJavaFileByProjectIdNative(project.getId());
+		projectRepository.deleteById(project.getId());
+		projectRepository.deleteUnusedQualityMetrics();
 //		LOGGER.info("Reply: " + JSONSerializer.serializeObject(project));
 	
 	}

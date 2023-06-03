@@ -53,10 +53,17 @@ public class Utils {
 				.flatMap(diffEntry -> project.getJavaFiles().stream()
 						.filter(file -> file.getPath().equals(diffEntry.getOldFilePath())))
 				.collect(Collectors.toSet());
-		Globals.getJavaFiles().removeAll(deletedFiles);
+		Set<CalculatedJavaFile> deletedGlobalFiles = diffEntries.stream()
+				.flatMap(diffEntry -> Globals.getJavaFiles().stream()
+						.filter(file -> file.getPath().equals(diffEntry.getOldFilePath())))
+				.collect(Collectors.toSet());
 		project.getJavaFiles().removeAll(deletedFiles);
 		deletedFiles.forEach(file -> file.setDeleted(true));
-		Globals.getJavaFiles().addAll(deletedFiles);
+		deletedGlobalFiles.forEach(file -> {
+			Globals.getJavaFiles().remove(file);
+			file.setDeleted(true);
+			Globals.addJavaFile(file);
+		});
 		project.getJavaFiles().addAll(deletedFiles);
 	}
 	
@@ -224,6 +231,10 @@ public class Utils {
 			return null;
 		}
 		return url.replaceAll("(\\.git/|\\.git|/$)", "");
+	}
+	
+	public String sanitizeInput(String input) {
+		return input.replaceAll("[^a-zA-Z0-9/:.]", "");
 	}
 	
 }

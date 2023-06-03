@@ -32,7 +32,8 @@ import tasostilsi.uom.edu.gr.metricsCalculator.Services.Interfaces.IAnalysisServ
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -54,24 +55,23 @@ public class AnalysisService implements IAnalysisService {
 		this.metricsRepository = metricsRepository;
 	}
 	
+	// Updated code using ExecutorService and Callable interface
 	@Transactional
 	@Override
 	public String startNewAnalysis(NewAnalysisDTO newAnalysisDTO) throws Exception {
-		String returnString = "The project with url: " + newAnalysisDTO.getGitUrl() + " analysis started";
-		
-		Optional<Project> existsInDb = projectRepository.findByUrl(newAnalysisDTO.getGitUrl());
-		
-		Project project = existsInDb.orElseGet(() -> new Project(newAnalysisDTO.getGitUrl()));
-		
-		if (!Objects.equals(project.getState(), State.RUNNING.name())) {
-			
-			new Thread(new BackroundAnalysis(projectRepository, javaFilesRepository, newAnalysisDTO, project)).start();
-			
-		} else {
-			return "Project " + newAnalysisDTO.getGitUrl() + " is analyzing currently!";
+		if (newAnalysisDTO == null || newAnalysisDTO.getGitUrl() == null || newAnalysisDTO.getGitUrl().isEmpty()) {
+			throw new IllegalArgumentException("Invalid input");
 		}
-		
-		return returnString;
+		String sanitizedUrl = Utils.getInstance().sanitizeInput(newAnalysisDTO.getGitUrl());
+		Project project = projectRepository.findByUrl(sanitizedUrl).orElseGet(() -> new Project(sanitizedUrl));
+		if (Objects.equals(project.getState(), State.RUNNING.name())) {
+			return "Project " + sanitizedUrl + " is analyzing currently!";
+		}
+		BackroundAnalysis backgroundAnalysis = new BackroundAnalysis(projectRepository, javaFilesRepository, newAnalysisDTO, project);
+		ExecutorService executorService = Executors.newCachedThreadPool();
+		executorService.submit(backgroundAnalysis);
+		executorService.shutdown();
+		return "The project with url: " + sanitizedUrl + " analysis started";
 	}
 	
 	@Override
@@ -84,7 +84,7 @@ public class AnalysisService implements IAnalysisService {
 		return metricsRepository.findInterestByCommit(new ProjectDTO(url), sha);
 	}
 	
-	@Override
+	/*@Override
 	public Collection<CumulativeInterest> findCumulativeInterestPerCommit(String url) {
 		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findInterestForAllCommits(new ProjectDTO(url));
 		AtomicReference<BigDecimal> cumulativeInterestEu = new AtomicReference<>(BigDecimal.ZERO);
@@ -97,31 +97,46 @@ public class AnalysisService implements IAnalysisService {
 		});
 		
 		return cumulativeInterests;
+	}*/
+	
+	@Override
+	public Collection<CumulativeInterest> findCumulativeInterestPerCommit(String url) throws IllegalArgumentException {
+		if (url == null || url.isEmpty()) {
+			throw new IllegalArgumentException("URL cannot be null or empty");
+		}
+		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findInterestForAllCommits(new ProjectDTO(url));
+		if (cumulativeInterests == null || cumulativeInterests.isEmpty()) {
+			return Collections.emptyList();
+		}
+		BigDecimal cumulativeInterestEu = BigDecimal.valueOf(0);
+		BigDecimal cumulativeInterestHours = BigDecimal.valueOf(0);
+		Collection<CumulativeInterest> updatedInterests = new ArrayList<>();
+		for (CumulativeInterest interest : cumulativeInterests) {
+			cumulativeInterestEu = cumulativeInterestEu.add(interest.getInterestEu());
+			cumulativeInterestHours = cumulativeInterestHours.add(interest.getInterestHours());
+			updatedInterests.add(new CumulativeInterest(interest.getRevisionCount(), cumulativeInterestEu, cumulativeInterestHours));
+		}
+		return updatedInterests;
 	}
 	
 	@Override
 	public Collection<CumulativeInterest> findCumulativeInterestByCommit(String url, String sha) {
-		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findInterestForAllCommits(new ProjectDTO(url));
-		AtomicReference<BigDecimal> cumulativeInterestEu = new AtomicReference<>(BigDecimal.ZERO);
-		AtomicReference<BigDecimal> cumulativeInterestHours = new AtomicReference<>(BigDecimal.ZERO);
+		ProjectDTO projectDTO = new ProjectDTO(url);
+		Collection<CumulativeInterest> cumulativeInterests = metricsRepository.findInterestForAllCommits(projectDTO);
+		BigDecimal cumulativeInterestEu = BigDecimal.ZERO;
+		BigDecimal cumulativeInterestHours = BigDecimal.ZERO;
 		Collection<CumulativeInterest> returnValues = new ArrayList<>();
 		long revisionCount = metricsRepository.findDistinctRevisionCountByRevisionSha(sha);
-		cumulativeInterests.forEach(interest -> {
+		for (CumulativeInterest interest : cumulativeInterests) {
 			if (interest.getRevisionCount() <= revisionCount) {
-				cumulativeInterestEu.set(cumulativeInterestEu.get().add(interest.getInterestEu()));
-				cumulativeInterestHours.set(cumulativeInterestHours.get().add(interest.getInterestHours()));
-				interest.setInterestEu(cumulativeInterestEu.get());
-				interest.setInterestHours(cumulativeInterestHours.get());
+				cumulativeInterestEu = cumulativeInterestEu.add(interest.getInterestEu());
+				cumulativeInterestHours = cumulativeInterestHours.add(interest.getInterestHours());
+				interest.setInterestEu(cumulativeInterestEu);
+				interest.setInterestHours(cumulativeInterestHours);
 				returnValues.add(interest);
 			}
-		});
-		
-		return returnValues.stream().sorted(new Comparator<CumulativeInterest>() {
-			@Override
-			public int compare(CumulativeInterest o1, CumulativeInterest o2) {
-				return (int) (o1.getRevisionCount() - o2.getRevisionCount());
-			}
-		}).collect(Collectors.toList());
+		}
+		return returnValues.stream().sorted(Comparator.comparingLong(CumulativeInterest::getRevisionCount)).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -286,30 +301,33 @@ public class AnalysisService implements IAnalysisService {
 					BigDecimal.ZERO,
 					BigDecimal.ZERO,
 					BigDecimal.ZERO,
-					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestEu).findFirst().get(),
-					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestHours).findFirst().get()));
+					normalizedInterests.iterator().next().getNormalizedInterestEu(),
+					normalizedInterests.iterator().next().getNormalizedInterestHours()));
 			return returnCollection;
 		}
+		Collection<InterestChange> interestChanges;
+		Collection<NormalizedInterest> normalizedInterests;
 		try {
-			Collection<InterestChange> interestChanges = metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
-			Collection<NormalizedInterest> normalizedInterests = metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
-			returnCollection.add(new NormalizedAndInterestChanges(commitCount,
-					interestChanges.stream().map(InterestChange::getChangeEu).findFirst().get(),
-					interestChanges.stream().map(InterestChange::getChangeHours).findFirst().get(),
-					interestChanges.stream().map(InterestChange::getChangePercentage).findFirst().get(),
-					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestEu).findFirst().get(),
-					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestHours).findFirst().get()));
-			return returnCollection;
-		} catch (Exception ignored) {
-			Collection<NormalizedInterest> normalizedInterests = metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
+			interestChanges = metricsRepository.findInterestChangeByCommit(new ProjectDTO(url), sha);
+			normalizedInterests = metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
+		} catch (Exception e) {
+			LOGGER.error("An error occurred while retrieving interest changes and normalized interests for commit with sha " + sha, e);
+			normalizedInterests = metricsRepository.findNormalizedInterestByCommit(new ProjectDTO(url), sha);
 			returnCollection.add(new NormalizedAndInterestChanges(commitCount,
 					BigDecimal.ZERO,
 					BigDecimal.ZERO,
 					BigDecimal.ZERO,
-					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestEu).findFirst().get(),
-					normalizedInterests.stream().map(NormalizedInterest::getNormalizedInterestHours).findFirst().get()));
+					normalizedInterests.iterator().next().getNormalizedInterestEu(),
+					normalizedInterests.iterator().next().getNormalizedInterestHours()));
 			return returnCollection;
 		}
+		returnCollection.add(new NormalizedAndInterestChanges(commitCount,
+				interestChanges.iterator().next().getChangeEu(),
+				interestChanges.iterator().next().getChangeHours(),
+				interestChanges.iterator().next().getChangePercentage(),
+				normalizedInterests.iterator().next().getNormalizedInterestEu(),
+				normalizedInterests.iterator().next().getNormalizedInterestHours()));
+		return returnCollection;
 	}
 	
 	@Override
