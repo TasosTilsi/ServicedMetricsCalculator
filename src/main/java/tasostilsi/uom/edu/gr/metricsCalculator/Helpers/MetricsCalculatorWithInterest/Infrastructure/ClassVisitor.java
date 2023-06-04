@@ -20,6 +20,7 @@ import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,6 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 				
 				investigateExtendedTypes();
 				visitAllClassMethods();
-				
 				calculateClassMetrics(currentClassObject);
 			}
 		}
@@ -81,25 +81,24 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	
 	@Override
 	public void visit(ClassOrInterfaceDeclaration javaClass, Void arg) {
-		if (javaFiles.stream().anyMatch(javaFile -> javaFile.getPath().equals(filePath))) {
-			CalculatedJavaFile jf = javaFiles
-					.stream()
-					.filter(javaFile -> javaFile.getPath().equals(filePath)).filter(javaFile -> javaFile.getId() == null).findFirst().get();
-			
-			if (jf == null) {
-				jf = javaFiles
-						.stream()
-						.filter(javaFile -> javaFile.getPath().equals(filePath)).findFirst().get();
+		CalculatedJavaFile jf = null;
+		for (CalculatedJavaFile file : javaFiles) {
+			if (file.getPath().equals(filePath)) {
+				jf = file;
+				if (file.getId() == null) {
+					break;
+				}
 			}
-			
-			if (javaClass.getFullyQualifiedName().isPresent()) {
-				CalculatedClass currentClassObject = jf.getClasses().stream().filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get())).findFirst().get();
-				
+		}
+		if (jf != null && javaClass.getFullyQualifiedName().isPresent()) {
+			CalculatedClass currentClassObject = jf.getClasses().stream()
+					.filter(cl -> cl.getQualifiedName().equals(javaClass.getFullyQualifiedName().get()))
+					.findFirst()
+					.orElse(null);
+			if (currentClassObject != null) {
 				investigateExtendedTypes();
 				visitAllClassMethods();
-				
 				calculateClassMetrics(currentClassObject);
-				
 			}
 		}
 	}
@@ -197,9 +196,11 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 * @return switch count
 	 */
 	private int countSwitch(MethodDeclaration method) {
-		final int[] count = {0};
-		method.findAll(SwitchStmt.class).stream().forEach(switchStmt -> count[0] += switchStmt.getEntries().size());
-		return count[0];
+		int count = 0;
+		for (SwitchStmt switchStmt : method.findAll(SwitchStmt.class)) {
+			count += switchStmt.getEntries().size();
+		}
+		return count;
 	}
 	
 	/**
@@ -312,17 +313,22 @@ public class ClassVisitor extends VoidVisitorAdapter<Void> {
 	 * Register extended types for the class we are referring to
 	 */
 	private void investigateExtendedTypes() {
-		for (ClassOrInterfaceType extendedType : ((ClassOrInterfaceDeclaration) javaClass).getExtendedTypes()) {
-			String extendedTypeQualifiedName;
+		if (!(javaClass instanceof ClassOrInterfaceDeclaration)) {
+			return;
+		}
+		ClassOrInterfaceDeclaration classDeclaration = (ClassOrInterfaceDeclaration) javaClass;
+		for (ClassOrInterfaceType extendedType : classDeclaration.getExtendedTypes()) {
 			try {
-				extendedTypeQualifiedName = extendedType.resolve().asReferenceType().getQualifiedName();
-			} catch (Throwable ignored) {
-				return;
+				String extendedTypeQualifiedName = extendedType.resolve().asReferenceType().getQualifiedName();
+				registerCoupling(extendedTypeQualifiedName);
+				CalculatedClass extendedClassObject = findClassByQualifiedName(extendedTypeQualifiedName);
+				if (extendedClassObject != null) {
+					QualityMetrics metrics = extendedClassObject.getQualityMetrics();
+					metrics.setNOCC(metrics.getNOCC() + 1);
+				}
+			} catch (ClassCastException | UnsolvedSymbolException ignored) {
+				continue;
 			}
-			registerCoupling(extendedTypeQualifiedName);
-			CalculatedClass extendedClassObject = findClassByQualifiedName(extendedTypeQualifiedName);
-			if (extendedClassObject != null)
-				extendedClassObject.getQualityMetrics().setNOCC(extendedClassObject.getQualityMetrics().getNOCC() + 1);
 		}
 	}
 	

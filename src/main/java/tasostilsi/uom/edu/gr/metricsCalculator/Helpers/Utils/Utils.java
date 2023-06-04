@@ -49,12 +49,12 @@ public class Utils {
 	 * @param diffEntries the modified java files (new, modified, deleted)
 	 */
 	private void removeDeletedFiles(Set<DiffEntry> diffEntries, Project project) {
-		Set<CalculatedJavaFile> deletedFiles = diffEntries.stream()
-				.flatMap(diffEntry -> project.getJavaFiles().stream()
+		Set<CalculatedJavaFile> deletedFiles = diffEntries.parallelStream()
+				.flatMap(diffEntry -> project.getJavaFiles().parallelStream()
 						.filter(file -> file.getPath().equals(diffEntry.getOldFilePath())))
 				.collect(Collectors.toSet());
-		Set<CalculatedJavaFile> deletedGlobalFiles = diffEntries.stream()
-				.flatMap(diffEntry -> GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().stream()
+		Set<CalculatedJavaFile> deletedGlobalFiles = diffEntries.parallelStream()
+				.flatMap(diffEntry -> GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().parallelStream()
 						.filter(file -> file.getPath().equals(diffEntry.getOldFilePath())))
 				.collect(Collectors.toSet());
 		project.getJavaFiles().removeAll(deletedFiles);
@@ -138,8 +138,8 @@ public class Utils {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
 				CalculatedJavaFile jf;
-				if (GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+				if (GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().parallelStream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+					jf = project.getJavaFiles().parallelStream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 					registerMetrics(column, jf);
 					GlobalsManager.getProjectGlobals(project.getUrl()).addJavaFile(jf);
 				} else {
@@ -182,8 +182,8 @@ public class Utils {
 			String[] column = s[i].split("\t");
 			String filePath = column[0];
 			CalculatedJavaFile jf;
-			if (GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
-				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
+			if (GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().parallelStream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+				jf = project.getJavaFiles().parallelStream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 				registerMetrics(column, jf);
 				GlobalsManager.getProjectGlobals(project.getUrl()).addJavaFile(jf);
 			} else {
