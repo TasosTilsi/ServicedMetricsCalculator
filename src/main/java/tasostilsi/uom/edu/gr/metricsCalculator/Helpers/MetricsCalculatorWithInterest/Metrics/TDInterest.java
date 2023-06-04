@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.GlobalsManager;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -144,7 +144,7 @@ public class TDInterest {
 	 */
 	private AbstractQueue<Similarity> calculateSimilarities() {
 		AbstractQueue<Similarity> similarityOfFiles = new PriorityQueue<>(Collections.reverseOrder());
-		Globals.getJavaFiles()
+		GlobalsManager.getProjectGlobals(javaFile.getProject().getUrl()).getJavaFiles()
 				.stream()
 				.filter(jf -> !Objects.equals(javaFile, jf))
 				.forEach(jf -> similarityOfFiles.add(new Similarity(javaFile, jf, calculateSimilarityIndex(jf))));

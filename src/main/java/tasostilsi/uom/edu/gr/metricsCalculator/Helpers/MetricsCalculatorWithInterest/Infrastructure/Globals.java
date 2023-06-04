@@ -13,24 +13,43 @@
 package tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure;
 
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public final class Globals {
+	private final Set<CalculatedJavaFile> javaFiles;
 	
-	private static final Set<CalculatedJavaFile> javaFiles;
-	
-	static {
+	Globals() {
 		javaFiles = ConcurrentHashMap.newKeySet();
 	}
 	
-	public static void addJavaFile(CalculatedJavaFile jf) {
-		javaFiles.stream().filter(file -> file.getPath().equals(jf.getPath())).forEach(javaFiles::remove);
-		javaFiles.add(jf);
+	public synchronized void addJavaFile(CalculatedJavaFile jf) {
+		if (javaFiles.stream().anyMatch(file -> file.getPath().equalsIgnoreCase(jf.getPath()))) {
+			removeFile(jf);
+			javaFiles.add(jf);
+		} else {
+			javaFiles.add(jf);
+		}
 	}
 	
-	public static Set<CalculatedJavaFile> getJavaFiles() {
+	public Set<CalculatedJavaFile> getJavaFiles() {
 		return javaFiles;
 	}
+	
+	public synchronized void removeFiles(Set<CalculatedJavaFile> paths) {
+		Set<String> pathSet = paths.stream().map(CalculatedJavaFile::getPath).collect(Collectors.toSet());
+		javaFiles.removeIf(file -> pathSet.contains(file.getPath()));
+	}
+	
+	public synchronized void removeFile(CalculatedJavaFile jf) {
+		javaFiles.removeIf(file -> jf.getPath().equalsIgnoreCase(file.getPath()));
+	}
+	
+	public synchronized void removeFiles(Project project) {
+		javaFiles.removeIf(file -> file.getProject().getUrl().equalsIgnoreCase(project.getUrl()));
+	}
+	
 }

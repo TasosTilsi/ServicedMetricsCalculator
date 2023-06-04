@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.FileSystemUtils;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Enums.State;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.GlobalsManager;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.Utils.GitUtils;
@@ -96,7 +96,7 @@ public class BackroundAnalysis implements Runnable {
 			}
 		} else {
 			Long projectId = projectRepository.getIdByUrl(project.getUrl()).orElseThrow();
-			Globals.getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow());
+			GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().addAll(javaFilesRepository.getAllByProjectId(projectId).orElseThrow());
 			commitIds = new ArrayList<>(diffCommitIds);
 			start = currentRevision.getCount().intValue();
 		}
@@ -111,6 +111,7 @@ public class BackroundAnalysis implements Runnable {
 		project.setState(State.COMPLETED.name());
 		project = projectRepository.save(project);
 		LOGGER.info("Finished analysing " + currentRevision.getCount() + " revisions for " + project.getUrl() + ".");
+		GlobalsManager.removeProjectGlobals(project.getUrl());
 		project = null;
 	}
 	

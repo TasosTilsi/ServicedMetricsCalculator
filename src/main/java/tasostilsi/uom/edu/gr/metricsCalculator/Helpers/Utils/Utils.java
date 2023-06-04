@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.CalculatedJavaFile;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Entities.Project;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.DiffEntry;
-import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Globals;
+import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.GlobalsManager;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.PrincipalResponseEntity;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.Infrastructure.Revision;
 import tasostilsi.uom.edu.gr.metricsCalculator.Helpers.MetricsCalculatorWithInterest.MetricsCalculator;
@@ -54,15 +54,15 @@ public class Utils {
 						.filter(file -> file.getPath().equals(diffEntry.getOldFilePath())))
 				.collect(Collectors.toSet());
 		Set<CalculatedJavaFile> deletedGlobalFiles = diffEntries.stream()
-				.flatMap(diffEntry -> Globals.getJavaFiles().stream()
+				.flatMap(diffEntry -> GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().stream()
 						.filter(file -> file.getPath().equals(diffEntry.getOldFilePath())))
 				.collect(Collectors.toSet());
 		project.getJavaFiles().removeAll(deletedFiles);
 		deletedFiles.forEach(file -> file.setDeleted(true));
 		deletedGlobalFiles.forEach(file -> {
-			Globals.getJavaFiles().remove(file);
+			GlobalsManager.getProjectGlobals(project.getUrl()).removeFile(file);
 			file.setDeleted(true);
-			Globals.addJavaFile(file);
+			GlobalsManager.getProjectGlobals(project.getUrl()).addJavaFile(file);
 		});
 		project.getJavaFiles().addAll(deletedFiles);
 	}
@@ -73,8 +73,8 @@ public class Utils {
 	 * @param filePath the file path
 	 * @return the java file (JavaFile) whose path matches the given one
 	 */
-	private CalculatedJavaFile getAlreadyDefinedFile(String filePath) {
-		return Globals.getJavaFiles().stream()
+	private CalculatedJavaFile getAlreadyDefinedFile(String filePath, String url) {
+		return GlobalsManager.getProjectGlobals(url).getJavaFiles().stream()
 				.filter(jf -> jf.getPath().equals(filePath))
 				.findFirst()
 				.orElse(null);
@@ -107,7 +107,7 @@ public class Utils {
 			final Project finalProject = project;
 			entity.getRenameDiffEntries()
 					.forEach(diffEntry -> {
-						for (CalculatedJavaFile javaFile : Globals.getJavaFiles()) {
+						for (CalculatedJavaFile javaFile : GlobalsManager.getProjectGlobals(finalProject.getUrl()).getJavaFiles()) {
 							if (javaFile.getPath().equals(diffEntry.getOldFilePath())) {
 								javaFile.setPath(diffEntry.getNewFilePath());
 							}
@@ -138,12 +138,12 @@ public class Utils {
 				String[] column = s[i].split("\t");
 				String filePath = column[0];
 				CalculatedJavaFile jf;
-				if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+				if (GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
 					jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 					registerMetrics(column, jf);
-					Globals.addJavaFile(jf);
+					GlobalsManager.getProjectGlobals(project.getUrl()).addJavaFile(jf);
 				} else {
-					jf = getAlreadyDefinedFile(filePath);
+					jf = getAlreadyDefinedFile(filePath, project.getUrl());
 					if (Objects.nonNull(jf)) {
 						registerMetrics(column, jf);
 					}
@@ -182,12 +182,12 @@ public class Utils {
 			String[] column = s[i].split("\t");
 			String filePath = column[0];
 			CalculatedJavaFile jf;
-			if (Globals.getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
+			if (GlobalsManager.getProjectGlobals(project.getUrl()).getJavaFiles().stream().noneMatch(javaFile -> javaFile.getPath().equals(filePath.replace("\\", "/")))) {
 				jf = project.getJavaFiles().stream().filter(file -> file.getPath().equals(filePath)).collect(Collectors.toList()).get(0);
 				registerMetrics(column, jf);
-				Globals.addJavaFile(jf);
+				GlobalsManager.getProjectGlobals(project.getUrl()).addJavaFile(jf);
 			} else {
-				jf = getAlreadyDefinedFile(filePath);
+				jf = getAlreadyDefinedFile(filePath, project.getUrl());
 				if (Objects.nonNull(jf)) {
 					registerMetrics(column, jf);
 				}
