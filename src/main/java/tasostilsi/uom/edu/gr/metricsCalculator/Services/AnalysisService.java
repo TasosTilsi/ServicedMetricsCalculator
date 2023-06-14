@@ -62,16 +62,16 @@ public class AnalysisService implements IAnalysisService {
 		if (newAnalysisDTO == null || newAnalysisDTO.getGitUrl() == null || newAnalysisDTO.getGitUrl().isEmpty()) {
 			throw new IllegalArgumentException("Invalid input");
 		}
-		String sanitizedUrl = Utils.getInstance().sanitizeInput(newAnalysisDTO.getGitUrl());
-		Project project = projectRepository.findByUrl(sanitizedUrl).orElseGet(() -> new Project(sanitizedUrl));
+		String url = newAnalysisDTO.getGitUrl();
+		Project project = projectRepository.findByUrl(url).orElseGet(() -> new Project(url));
 		if (Objects.equals(project.getState(), State.RUNNING.name())) {
-			return "Project " + sanitizedUrl + " is analyzing currently!";
+			return "Project " + url + " is analyzing currently!";
 		}
 		BackroundAnalysis backgroundAnalysis = new BackroundAnalysis(projectRepository, javaFilesRepository, newAnalysisDTO, project);
 		ExecutorService executorService = Executors.newCachedThreadPool();
 		executorService.submit(backgroundAnalysis);
 		executorService.shutdown();
-		return "The project with url: " + sanitizedUrl + " analysis started";
+		return "The project with url: " + url + " analysis started";
 	}
 	
 	@Override
