@@ -11,6 +11,7 @@ package tasostilsi.uom.edu.gr.metricsCalculator.Models.Entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
@@ -25,6 +26,8 @@ public class InterestPerCommitFile {
 	private BigDecimal interestEu;
 	@JsonProperty("Interest (In Hours)")
 	private BigDecimal interestHours;
+	
+	@Nullable
 	@JsonProperty("Contribution to Project Interest")
 	private BigDecimal interestPercentageOfProject;
 	@JsonProperty("Changed Interest (In €)")

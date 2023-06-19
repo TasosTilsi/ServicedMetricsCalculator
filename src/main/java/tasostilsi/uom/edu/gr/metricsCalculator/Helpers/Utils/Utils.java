@@ -74,7 +74,7 @@ public class Utils {
 	 * @return the java file (JavaFile) whose path matches the given one
 	 */
 	private CalculatedJavaFile getAlreadyDefinedFile(String filePath, String url) {
-		return GlobalsManager.getProjectGlobals(url).getJavaFiles().stream()
+		return GlobalsManager.getProjectGlobals(url).getJavaFiles().parallelStream()
 				.filter(jf -> jf.getPath().equals(filePath))
 				.findFirst()
 				.orElse(null);
@@ -91,10 +91,10 @@ public class Utils {
 		if (!entity.getDeleteDiffEntries().isEmpty()) {
 			removeDeletedFiles(entity.getDeleteDiffEntries(), project);
 		}
-		Set<String> addFilePaths = entity.getAddDiffEntries().stream()
+		Set<String> addFilePaths = entity.getAddDiffEntries().parallelStream()
 				.map(DiffEntry::getNewFilePath)
 				.collect(Collectors.toSet());
-		Set<String> modifyFilePaths = entity.getModifyDiffEntries().stream()
+		Set<String> modifyFilePaths = entity.getModifyDiffEntries().parallelStream()
 				.map(DiffEntry::getNewFilePath)
 				.collect(Collectors.toSet());
 		if (!addFilePaths.isEmpty()) {
@@ -112,7 +112,7 @@ public class Utils {
 								javaFile.setPath(diffEntry.getNewFilePath());
 							}
 						}
-						finalProject.getJavaFiles().stream().filter(file -> file.getPath().equals(diffEntry.getOldFilePath())).forEach(file -> file.setPath(diffEntry.getNewFilePath()));
+						finalProject.getJavaFiles().parallelStream().filter(file -> file.getPath().equals(diffEntry.getOldFilePath())).forEach(file -> file.setPath(diffEntry.getNewFilePath()));
 					});
 			project.setJavaFiles(finalProject.getJavaFiles());
 		}

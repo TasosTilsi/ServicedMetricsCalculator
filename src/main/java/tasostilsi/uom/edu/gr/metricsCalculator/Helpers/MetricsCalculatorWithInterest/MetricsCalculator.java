@@ -147,13 +147,13 @@ public class MetricsCalculator {
 						.filter(cu -> cu.getResult().get().getStorage().isPresent())
 						.forEach(cu -> {
 							Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
-									.stream()
+									.parallelStream()
 									.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 									.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 									.map(CalculatedClass::new)
 									.collect(Collectors.toSet());
 							Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
-									.stream()
+									.parallelStream()
 									.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 									.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 									.map(CalculatedClass::new)
@@ -186,13 +186,13 @@ public class MetricsCalculator {
 									.filter(cu -> cu.getResult().get().getStorage().isPresent())
 									.forEach(cu -> {
 										Set<CalculatedClass> classNames = cu.getResult().get().findAll(ClassOrInterfaceDeclaration.class)
-												.stream()
+												.parallelStream()
 												.filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().isPresent())
 												.map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
 												.collect(Collectors.toSet());
 										Set<CalculatedClass> enumNames = cu.getResult().get().findAll(EnumDeclaration.class)
-												.stream()
+												.parallelStream()
 												.filter(enumDeclaration -> enumDeclaration.getFullyQualifiedName().isPresent())
 												.map(enumDeclaration -> enumDeclaration.getFullyQualifiedName().get())
 												.map(CalculatedClass::new)
@@ -228,7 +228,7 @@ public class MetricsCalculator {
 		sourceRoots.forEach(sourceRoot -> {
 			try {
 				sourceRoot.tryToParse()
-						.stream()
+						.parallelStream()
 						.filter(res -> res.getResult().isPresent())
 						.forEach(res -> {
 							try {

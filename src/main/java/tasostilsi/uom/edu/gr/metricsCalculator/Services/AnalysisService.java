@@ -275,14 +275,14 @@ public class AnalysisService implements IAnalysisService {
 		float totalInterestForCalculatedProject = 0f;
 		
 		for (Project project : projects) {
-			float dbInterest = metricsRepository.findAllFileMetricsAndInterest(null, new ProjectDTO(project.getUrl())).getContent().parallelStream().map(AllFileMetricsAndInterest::getInterestEu).reduce(BigDecimal.valueOf(0), BigDecimal::add).floatValue();
+			float dbInterest = metricsRepository.findInterestForAllCommits(new ProjectDTO(project.getUrl())).parallelStream().map(CumulativeInterest::getInterestEu).reduce(BigDecimal.valueOf(0), BigDecimal::add).floatValue();
 			totalInterestForAllProjects += dbInterest;
 //			System.out.println(project.getUrl() + " --> " + dbInterest);
 			if (project.getUrl().equals(url)) {
 				totalInterestForCalculatedProject = dbInterest;
 			}
 		}
-		if (totalInterestForAllProjects != 0) {
+		if (totalInterestForAllProjects != (float) 0) {
 			returnValue = (totalInterestForCalculatedProject / totalInterestForAllProjects) * 100;
 		}
 		
